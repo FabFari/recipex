@@ -36,6 +36,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
@@ -43,6 +44,7 @@ import com.google.api.services.calendar.model.Events;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
@@ -59,7 +61,9 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
 
     private static final String PREF_ACCOUNT_NAME = "accountName";
-    private static final String[] SCOPES = { CalendarScopes.CALENDAR_READONLY };
+
+    //IMPORTANTISSIMO!
+    private static final String[] SCOPES = { CalendarScopes.CALENDAR };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -327,15 +331,31 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             // List the next 10 events from the primary calendar.
             DateTime now = new DateTime(System.currentTimeMillis());
             List<String> eventStrings = new ArrayList<String>();
+
             Events events = mService.events().list("primary")
                     .setMaxResults(10)
                     .setTimeMin(now)
                     .setOrderBy("startTime")
                     .setSingleEvents(true)
                     .execute();
+
             List<Event> items = events.getItems();
 
+            //**** modifiche mie *****
+            List recurrenceList = new ArrayList<String>();
+            recurrenceList.add("RRULE:FREQ=DAYLY;INTERVAL=1");
+            Event eventoModificato=items.get(0).setRecurrence(recurrenceList);
+            Event recurring=mService.events().insert("primary", eventoModificato).execute();
+
             for (Event event : items) {
+
+                //modifico evento
+                //List recurrenceList = new ArrayList<String>();
+                //recurrenceList.add("RRULE:FREQ=DAYLY;INTERVAL=1");
+                //event.setRecurrence(recurrenceList);
+
+                System.out.println(event.getRecurrence());
+
                 DateTime start = event.getStart().getDateTime();
                 if (start == null) {
                     // All-day events don't have start times, so just use
