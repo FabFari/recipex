@@ -13,7 +13,8 @@
     tools:showIn="@layout/activity_main">
 
     <TextView
+        android:id="@+id/testo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:text="Click the Call Google Calendar API button to test the API." />
 </RelativeLayout>
