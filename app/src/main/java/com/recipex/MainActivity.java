@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -322,11 +323,13 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 //****modifiche mie
 
                 //APRI CALENDAR
-
-                Intent intent = getPackageManager().getLaunchIntentForPackage("com.google.android.calendar");
+                Uri webpage = Uri.parse("https://calendar.google.com/calendar");
+                Intent webIntent = new Intent(Intent.ACTION_VIEW, webpage);
+                startActivity(webIntent);
+                /*Intent intent = getPackageManager().getLaunchIntentForPackage("com.google.android.calendar");
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.addCategory(Intent.CATEGORY_LAUNCHER);
-                startActivity(intent);
+                startActivity(intent);*/
 
                 //PUBBLICA CALENDARIO CON ALTRI UTENTI (io)
 
@@ -413,12 +416,16 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
             for (Event evento : items) {
 
-                //modifico evento
-                //List recurrenceList = new ArrayList<String>();
-                //recurrenceList.add("RRULE:FREQ=DAYLY;INTERVAL=1");
-                //event.setRecurrence(recurrenceList);
+                //MODIIFCA EVENTO
 
-                System.out.println(evento.getRecurrence());
+                //modifica recurrence non funziona
+                /*List recurrenceList = new ArrayList<String>();
+                recurrenceList.add("RRULE:FREQ=DAYLY;COUNT=3");
+                evento=evento.setRecurrence(recurrenceList);
+                evento = mService.events().update("primary", evento.getId(), evento).execute();
+                evento=evento.setDescription("misurazione presa!!");
+                evento = mService.events().update("primary", evento.getId(), evento).execute();
+                System.out.println(evento.getDescription());*/
 
                 DateTime start = evento.getStart().getDateTime();
                 if (start == null) {
