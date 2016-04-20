@@ -38,7 +38,11 @@ import com.google.api.client.util.DateTime;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
+import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventAttendee;
+import com.google.api.services.calendar.model.EventDateTime;
+import com.google.api.services.calendar.model.EventReminder;
 import com.google.api.services.calendar.model.Events;
 
 import java.io.IOException;
@@ -314,6 +318,29 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         @Override
         protected List<String> doInBackground(Void... params) {
             try {
+
+                //****modifiche mie
+
+                //APRI CALENDAR
+
+                Intent intent = getPackageManager().getLaunchIntentForPackage("com.google.android.calendar");
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                startActivity(intent);
+
+                //PUBBLICA CALENDARIO CON ALTRI UTENTI (io)
+
+
+                // Create access rule with associated scope
+                /*AclRule rule = new AclRule();
+                AclRule.Scope scope = new AclRule.Scope();
+                scope.setType("user").setValue("saraveterini@gmail.com");
+                rule.setScope(scope).setRole("writer");
+
+                // Insert new access rule
+                AclRule createdRule = mService.acl().insert("primary", rule).execute();
+                System.out.println(createdRule.getId());*/
+
                 return getDataFromApi();
             } catch (Exception e) {
                 mLastError = e;
@@ -339,31 +366,68 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                     .setSingleEvents(true)
                     .execute();
 
-            List<Event> items = events.getItems();
-
             //**** modifiche mie *****
-            List recurrenceList = new ArrayList<String>();
-            recurrenceList.add("RRULE:FREQ=DAYLY;INTERVAL=1");
+
+            //AGGIUNTA NUOVO EVENTO RICORRENTE
+
+            /*List recurrenceList = new ArrayList<String>();
+            recurrenceList.add("RRULE:FREQ=DAYLY; COUNT=2");
             Event eventoModificato=items.get(0).setRecurrence(recurrenceList);
             Event recurring=mService.events().insert("primary", eventoModificato).execute();
+            System.out.println("arrivo");*/
+            /*Event event = new Event()
+                    .setSummary("BIANCONIGLIO")
+                    .setLocation("Diag");
 
-            for (Event event : items) {
+            //Data 19 aprile 2016, ora 20.00, fuso orario Roma (+2 da Parigi)
+            DateTime startDateTime = new DateTime("2016-04-19T20:00:00+02:00");
+            EventDateTime startEvento = new EventDateTime()
+                    .setDateTime(startDateTime)
+                    .setTimeZone("Europe/Rome");
+            event.setStart(startEvento);
+
+            DateTime endDateTime = new DateTime("2016-04-19T21:00:00+02:00");
+            EventDateTime end1 = new EventDateTime()
+                    .setDateTime(endDateTime)
+                    .setTimeZone("Europe/Rome");
+            event.setEnd(end1);
+
+            String[] recurrence = new String[] {"RRULE:FREQ=DAILY;COUNT=2"};
+            event.setRecurrence(Arrays.asList(recurrence));
+
+
+            EventReminder[] reminderOverrides = new EventReminder[] {
+                    new EventReminder().setMethod("email").setMinutes(24 * 60),
+                    new EventReminder().setMethod("popup").setMinutes(10),
+            };
+            Event.Reminders reminders = new Event.Reminders()
+                    .setUseDefault(false)
+                    .setOverrides(Arrays.asList(reminderOverrides));
+            event.setReminders(reminders);
+
+            String calendarId = "primary";
+            event = mService.events().insert(calendarId, event).execute();
+            System.out.printf("Event created: %s\n", event.getHtmlLink());*/
+
+            List<Event> items = events.getItems();
+
+            for (Event evento : items) {
 
                 //modifico evento
                 //List recurrenceList = new ArrayList<String>();
                 //recurrenceList.add("RRULE:FREQ=DAYLY;INTERVAL=1");
                 //event.setRecurrence(recurrenceList);
 
-                System.out.println(event.getRecurrence());
+                System.out.println(evento.getRecurrence());
 
-                DateTime start = event.getStart().getDateTime();
+                DateTime start = evento.getStart().getDateTime();
                 if (start == null) {
                     // All-day events don't have start times, so just use
                     // the start date.
-                    start = event.getStart().getDate();
+                    start = evento.getStart().getDate();
                 }
                 eventStrings.add(
-                        String.format("%s (%s)", event.getSummary(), start));
+                        String.format("%s (%s)", evento.getSummary(), start));
             }
             return eventStrings;
         }
