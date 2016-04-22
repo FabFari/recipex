@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -323,9 +324,19 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 //****modifiche mie
 
                 //APRI CALENDAR
-                Uri webpage = Uri.parse("https://calendar.google.com/calendar");
-                Intent webIntent = new Intent(Intent.ACTION_VIEW, webpage);
-                startActivity(webIntent);
+                PackageManager pm = getPackageManager();
+                try {
+                    pm.getPackageInfo("com.google.android.calendar", PackageManager.GET_ACTIVITIES);
+                    Intent intent = getPackageManager().getLaunchIntentForPackage("com.google.android.calendar");
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                    startActivity(intent);
+                }
+                catch (PackageManager.NameNotFoundException e) {
+                    Uri webpage = Uri.parse("https://calendar.google.com/calendar");
+                    Intent webIntent = new Intent(Intent.ACTION_VIEW, webpage);
+                    startActivity(webIntent);
+                }
                 /*Intent intent = getPackageManager().getLaunchIntentForPackage("com.google.android.calendar");
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.addCategory(Intent.CATEGORY_LAUNCHER);
