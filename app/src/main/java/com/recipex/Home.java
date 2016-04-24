@@ -1,6 +1,7 @@
 package com.recipex;
 
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
@@ -14,6 +15,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 public class Home extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -50,7 +53,19 @@ public class Home extends AppCompatActivity
 
         mFragmentManager = getSupportFragmentManager();
         mFragmentTransaction = mFragmentManager.beginTransaction();
-        mFragmentTransaction.replace(R.id.containerView,new TabFragment()).commit();
+        mFragmentTransaction.replace(R.id.containerView, new TabFragment()).commit();
+
+        String nome = new StringBuilder(getIntent().getStringExtra("nome")).append(" ").append(getIntent().getStringExtra("cognome")).toString();
+
+        String email = new StringBuilder(getIntent().getStringExtra("email")).toString();
+
+        System.out.println("entrata "+nome+" "+email);
+        View header=mNavigationView.getHeaderView(0);
+        TextView nameuser = (TextView)header.findViewById(R.id.nome);
+        TextView emailuser = (TextView)header.findViewById(R.id.email);
+        nameuser.setText(nome);
+        emailuser.setText(email);
+
     }
 
     @Override
