@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/home"
+            android:icon="@drawable/home"
+            android:title="Home" />
+        <item
+            android:id="@+id/nav_infermieri"
+            android:icon="@drawable/nurse_icon"
+            android:title="I tuoi infermieri domiciliari" />
+        <item
+            android:id="@+id/nav_familiari"
+            android:icon="@drawable/friend"
+            android:title="I tuoi familiari" />
+        <item
+            android:id="@+id/nav_terapie"
+            android:icon="@drawable/therapy"
+            android:title="Le tue terapie" />
+        <item
+            android:id="@+id/nav_aiuto"
+            android:icon="@drawable/ambulance"
+            android:title="Chiedi aiuto" />
+        <item
+            android:id="@+id/nav_logout"
+            android:icon="@drawable/logout"
+            android:title="Log Out"/>
+    </group>
+
+    <!--<item android:title="Communicate">
+        <menu>
+            <item
+                android:id="@+id/nav_share"
+                android:icon="@drawable/ic_menu_share"
+                android:title="Share" />
+            <item
+                android:id="@+id/nav_send"
+                android:icon="@drawable/ic_menu_send"
+                android:title="Send" />
+        </menu>
+    </item>-->
+
+</menu>
