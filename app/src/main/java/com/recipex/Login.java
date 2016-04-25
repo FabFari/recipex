@@ -223,6 +223,7 @@ public class Login extends AppCompatActivity implements OnClickListener, Connect
 
                 this.startActivity(myIntent);
                 Toast.makeText(getApplicationContext(), "Login in debug mode", Toast.LENGTH_LONG).show();
+                this.finish();
             }
         } catch (Exception e) {
             e.printStackTrace();
