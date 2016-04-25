@@ -1,5 +1,7 @@
 package com.recipex;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapShader;
@@ -26,6 +28,7 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
@@ -40,6 +43,8 @@ public class Home extends AppCompatActivity
     FragmentTransaction mFragmentTransaction;
     NavigationView mNavigationView;
     DrawerLayout mDrawerLayout;
+
+    SharedPreferences pref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +90,8 @@ public class Home extends AppCompatActivity
         nameuser.setText(nome);
         emailuser.setText(email);
         Picasso.with(Home.this).load(photo).transform(new CircleTransform()).into(photouser);
+
+        pref = getApplicationContext().getSharedPreferences("MyPref",MODE_PRIVATE);
 
     }
 
@@ -137,11 +144,17 @@ public class Home extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_logout) {
+            //Login.signOutFromGplus();
+            pref.edit().remove("email_artista").commit();
+            pref.edit().putBoolean("token", true).commit();
+
+            Intent i = new Intent(Home.this, Login.class);
+            this.startActivity(i);
+            Toast.makeText(getApplicationContext(), "Logout eseguito!", Toast.LENGTH_LONG).show();
+            this.finish();
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 

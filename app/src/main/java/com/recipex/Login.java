@@ -222,7 +222,7 @@ public class Login extends AppCompatActivity implements OnClickListener, Connect
                 myIntent.putExtra("foto",personPhotoUrl);
 
                 this.startActivity(myIntent);
-                Toast.makeText(getApplicationContext(), "Errore nel Login", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Login in debug mode", Toast.LENGTH_LONG).show();
             }
         } catch (Exception e) {
             e.printStackTrace();
