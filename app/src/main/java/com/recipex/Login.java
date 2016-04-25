@@ -81,6 +81,7 @@ public class Login extends AppCompatActivity implements OnClickListener, Connect
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this).addApi(Plus.API)
+                .addScope(Plus.SCOPE_PLUS_LOGIN)
                 .addScope(Plus.SCOPE_PLUS_PROFILE).build();
         /*mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this /* FragmentActivity ,
@@ -210,7 +211,7 @@ public class Login extends AppCompatActivity implements OnClickListener, Connect
                 String nome = "nome";
                 String cognome = "cognome";
                 String email = "ciao@ciao.it";
-                String personPhotoUrl = "http://www.francescocucari.it/artist.jpg";
+                String personPhotoUrl = "http://www.dis.uniroma1.it/sites/default/files/pictures/picture-1521-1424796678.jpg";
 
                 System.out.println("SONO QUI");
 
