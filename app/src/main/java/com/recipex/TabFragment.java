@@ -91,7 +91,7 @@ public class TabFragment extends Fragment {
 
             switch (position){
                 case 0 :
-                    return "Pazienti";
+                    return "Assistiti";
                 case 1 :
                     return "Misurazioni";
                 case 2 :

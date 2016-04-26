@@ -2,20 +2,25 @@ package com.recipex;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -25,6 +30,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -36,6 +42,10 @@ import com.squareup.picasso.Transformation;
 import java.io.InputStream;
 import java.net.URL;
 
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
+import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
+
 public class Home extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -44,16 +54,23 @@ public class Home extends AppCompatActivity
     NavigationView mNavigationView;
     DrawerLayout mDrawerLayout;
 
+    Toolbar toolbar;
+    FloatingActionButton fab;
+
     SharedPreferences pref;
+
+    //to use showcaseview
+    private static final String SHOWCASE_ID_MAIN = "Showcase_single_use_main";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -155,6 +172,13 @@ public class Home extends AppCompatActivity
             this.finish();
             return true;
         }
+        else if(id == R.id.action_tutorial){
+
+            MaterialShowcaseView.resetAll(this);
+            Toast.makeText(this, "All Showcases reset", Toast.LENGTH_SHORT).show();
+            presentShowcaseView(350);
+
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -190,6 +214,88 @@ public class Home extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    private void presentShowcaseView(int withDelay){
+//        new MaterialShowcaseView.Builder(this)
+//                .setTarget(mSlidingTabLayoutTabs)
+//                .setTitleText("Hello")
+//                .setDismissText("Ho Capito")
+//                .setContentText("Queste solo ne zezioni thell'applicazione! \n Geeftory è la sezione in cui puoi trovare le sotrie degli oggetti \n Geeft è dove puoi vedere gli oggeti presenti su geeft e prenotare quello a cui sei interessato!")
+//                .setDelay(withDelay) // optional but starting animations immediately in onCreate can make them choppy
+//                .singleUse(SHOWCASE_ID_MAIN) // provide a unique ID used to ensure it is only shown once
+//                .show();
+
+
+
+        ShowcaseConfig config = new ShowcaseConfig();
+        config.setDelay(withDelay); // half second between each showcase view
+
+        MaterialShowcaseSequence sequence = new MaterialShowcaseSequence(this, SHOWCASE_ID_MAIN);
+
+//        sequence.setOnItemShownListener(new MaterialShowcaseSequence.OnSequenceItemShownListener() {
+//            @Override
+//            public void onShow(MaterialShowcaseView itemView, int position) {
+//                Toast.makeText(itemView.getContext(), "Item #" + position, Toast.LENGTH_SHORT).show();
+//            }
+//        });
+
+        sequence.setConfig(config);
+
+        sequence.addSequenceItem(
+                new MaterialShowcaseView.Builder(this)
+                        .setTarget(toolbar)
+                        .setDismissText("OK")
+                        .setMaskColour(fetchPrimaryDarkColor())
+                        .setDismissTextColor(fetchAccentColor())
+                        .setContentText("Bella")
+                        .build()
+        );
+
+        sequence.addSequenceItem(
+                new MaterialShowcaseView.Builder(this)
+                        .setTarget(fab)
+                        .setDismissText("HO CAPITO")
+                        .setMaskColour(fetchPrimaryDarkColor())
+                        .setDismissTextColor(fetchAccentColor())
+                        .setContentText("Come va?")
+                        .withRectangleShape()
+                        .build()
+        );
+        sequence.addSequenceItem(
+                new MaterialShowcaseView.Builder(this)
+                        .setTarget((TabLayout)findViewById(R.id.tabs))
+                        .setDismissText("HO CAPITO")
+                        .setMaskColour(fetchPrimaryDarkColor())
+                        .setDismissTextColor(fetchAccentColor())
+                        .setContentText("Guarda")
+                        .withRectangleShape()
+                        .build()
+        );
+
+        sequence.start();
+
+    }
+    private int fetchAccentColor() {
+        TypedValue typedValue = new TypedValue();
+
+        TypedArray a = this.obtainStyledAttributes(typedValue.data, new int[] { R.attr.colorAccent });
+        int color = a.getColor(0, 0);
+
+        a.recycle();
+
+        return color;
+    }
+    private int fetchPrimaryDarkColor() {
+        TypedValue typedValue = new TypedValue();
+
+        TypedArray a = this.obtainStyledAttributes(typedValue.data, new int[] { R.attr.colorPrimaryDark });
+        int color = a.getColor(0, 0);
+
+        a.recycle();
+
+        return color;
+    }
+
 }
 class CircleTransform implements Transformation {
     @Override

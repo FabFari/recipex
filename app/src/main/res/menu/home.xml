@@ -6,4 +6,9 @@
         android:orderInCategory="100"
         android:title="Log Out"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_tutorial"
+        android:orderInCategory="100"
+        android:title="Tutorial"
+        app:showAsAction="never" />
 </menu>

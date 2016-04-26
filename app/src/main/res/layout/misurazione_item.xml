@@ -33,6 +33,7 @@
                 <TextView
                     android:id="@+id/titolo"
                     android:text="Misurazione"
+                    android:textColor="@color/colorPrimaryDark"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
@@ -44,6 +45,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Data"
+                    android:textColor="@color/colorPrimary"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
 
                 <TextView
@@ -52,6 +54,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:text="Ora"
+                    android:textColor="@color/colorPrimary"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
                 <TextView
                     android:id="@+id/dato1"
@@ -59,6 +62,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:text="Dato1"
+                    android:textColor="@color/colorPrimary"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
                 <TextView
                     android:id="@+id/dato2"
@@ -66,6 +70,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:text="Dato2"
+                    android:textColor="@color/colorPrimary"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
 
 
@@ -85,7 +90,7 @@
             <ImageView
                 xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:id="@+id/ic_feedback"
-                android:src="@android:drawable/sym_def_app_icon"
+                android:src="@drawable/nofeedback"
                 android:layout_alignParentRight="true"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
@@ -93,7 +98,7 @@
                 android:layout_marginTop="5dp" />
             <ImageView
                 xmlns:app="http://schemas.android.com/apk/res-auto"
-                android:src="@android:drawable/sym_def_app_icon"
+                android:src="@drawable/edit"
                 android:id="@+id/ic_fill"
                 android:layout_alignParentRight="true"
                 android:layout_width="50dp"
