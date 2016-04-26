@@ -242,7 +242,7 @@ public class Home extends AppCompatActivity
                         .setDismissText("OK")
                         .setMaskColour(fetchPrimaryDarkColor())
                         .setDismissTextColor(fetchAccentColor())
-                        .setContentText("Bella")
+                        .setContentText("Scorrendo da sinistra a destra, troverai informazioni su di te")
                         .build()
         );
 
@@ -252,7 +252,7 @@ public class Home extends AppCompatActivity
                         .setDismissText("HO CAPITO")
                         .setMaskColour(fetchPrimaryDarkColor())
                         .setDismissTextColor(fetchAccentColor())
-                        .setContentText("Come va?")
+                        .setContentText("Cliccando qui puoi aggiungere un tuo assistito, una tua misurazione o un tuo bisogno")
                         .withRectangleShape()
                         .build()
         );
@@ -262,7 +262,7 @@ public class Home extends AppCompatActivity
                         .setDismissText("HO CAPITO")
                         .setMaskColour(fetchPrimaryDarkColor())
                         .setDismissTextColor(fetchAccentColor())
-                        .setContentText("Guarda")
+                        .setContentText("Qui puoi vedere i tuoi assistiti, le tue misurazioni e i tuoi bisogni")
                         .withRectangleShape()
                         .build()
         );
