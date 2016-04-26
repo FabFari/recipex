@@ -1,4 +1,4 @@
-package com.recipex;
+package com.recipex.fragments;
 
 /**
  * Created by Sara on 24/04/2016.
@@ -9,6 +9,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.recipex.R;
 
 
 public class PazientiFragment extends Fragment {

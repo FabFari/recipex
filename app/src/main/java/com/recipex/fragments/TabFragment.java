@@ -1,4 +1,4 @@
-package com.recipex;
+package com.recipex.fragments;
 
 /**
  * Created by Sara on 24/04/2016.
@@ -13,6 +13,8 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.recipex.R;
 
 public class TabFragment extends Fragment {
 
