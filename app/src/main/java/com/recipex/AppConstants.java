@@ -8,12 +8,36 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+
+import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+
+import android.app.Activity;
+import android.app.Dialog;
+import android.content.Context;
+
 import javax.annotation.Nullable;
 
 
 public class AppConstants {
+    /**
+     * Your WEB CLIENT ID from the API Access screen of the Developer Console for your project. This
+     * is NOT the Android client id from that screen.
+     *
+     * @see <a href="https://developers.google.com/console">https://developers.google.com/console</a>
+     */
     public static final String WEB_CLIENT_ID = "1077668244667-v42n91q6av4tlub6rh3dffbdqa0pncj0.apps.googleusercontent.com";
+
+    /**
+     * The audience is defined by the web client id, not the Android client id.
+     */
     public static final String AUDIENCE = "server:client_id:" + WEB_CLIENT_ID;
+
+    // Costanti App
+    public static final String DEFAULT_ACCOUNT = "PREF_ACCOUNT_NAME";
+    public static final String PREFS_NAME = "com.recipex.RecipeXPrefs";
 
     // Codici server
     public static final String CREATED = "201 Created";
@@ -21,6 +45,26 @@ public class AppConstants {
     public static final String PRECONDITION_FAILED = "412 Precondition Failed";
     public static final String BAD_REQUEST = "400 Bad Request";
     public static final String NOT_FOUND = "404 Not Found";
+
+    // Tipi di Misurazione
+    public static final String PRESSIONE = "BP";
+    public static final String FREQ_CARDIACA = "HR";
+    public static final String FREQ_RESPIRAZIONE = "RR";
+    public static final String SPO2 = "SpO2";
+    public static final String GLUCOSIO = "HGT";
+    public static final String TEMP_CORPOREA = "TMP";
+    public static final String DOLORE = "PAIN";
+    public static final String COLESTEROLO = "CHL";
+
+    // Tipi di Richiesta
+    public static final String FAMILIARE = "RELATIVE";
+    public static final String CAREGIVER = "CAREGIVER";
+    public static final String MEDICO_BASE = "PC_PHYSICIAN";
+    public static final String INF_DOMICILIARE = "V_NURSE";
+
+    // Tipo di Ruolo nella Richiesta
+    public static final String ASSISTITO = "PATIENT";
+    public static final String ASSISTENTE = "CAREGIVER";
 
     /**
      * Class instance of the JSON factory.
@@ -37,13 +81,55 @@ public class AppConstants {
      * Retrieve a RecipexServerApi api service handle to access the API.
      */
 
-    public static RecipexServerApi getApiServiceHandle(@Nullable GoogleAccountCredential credential) {
+    public static RecipexServerApi getApiServiceHandle(@Nullable GoogleAccountCredential credentials) {
         // Use a builder to help formulate the API request.
         RecipexServerApi.Builder recipexServerApi = new RecipexServerApi.Builder(AppConstants.HTTP_TRANSPORT,
                                                                            AppConstants.JSON_FACTORY,
-                                                                           credential);
+                                                                           credentials);
 
         recipexServerApi.setRootUrl("https://recipex-1281.appspot.com/_ah/api");
         return recipexServerApi.build();
     }
+
+    /**
+     * Count Google accounts on the device.
+     */
+    public static int countGoogleAccounts(Context context) {
+        AccountManager am = AccountManager.get(context);
+        Account[] accounts = am.getAccountsByType(GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE);
+        if (accounts == null || accounts.length < 1) {
+            return 0;
+        } else {
+            return accounts.length;
+        }
+    }
+
+    /**
+     * Check that Google Play services APK is installed and up to date.
+     */
+    public static boolean checkGooglePlayServicesAvailable(Activity activity) {
+        final int connectionStatusCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity);
+        if (GooglePlayServicesUtil.isUserRecoverableError(connectionStatusCode)) {
+            showGooglePlayServicesAvailabilityErrorDialog(activity, connectionStatusCode);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Called if the device does not have Google Play Services installed.
+     */
+    public static void showGooglePlayServicesAvailabilityErrorDialog(final Activity activity,
+                                                                     final int connectionStatusCode) {
+        final int REQUEST_GOOGLE_PLAY_SERVICES = 0;
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Dialog dialog = GooglePlayServicesUtil.getErrorDialog(
+                        connectionStatusCode, activity, REQUEST_GOOGLE_PLAY_SERVICES);
+                dialog.show();
+            }
+        });
+    }
+
 }
