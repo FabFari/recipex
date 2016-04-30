@@ -206,7 +206,6 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
                         new Register(getApplicationContext(), email, nome, cognome, personPhotoUrl, "", birth, "", "", "",
                                 new ArrayList<String>(), "", (long)0, "", new ArrayList<String>(), "", this).execute();
 
-                    //Il risultato della chiamata CheckLogin lo trovo in done(boolean,string)
                 } else { /* E' stato cliccato il bottone per la registrazione */
                     Intent myIntent = new Intent(Login.this, Registration.class);
                     myIntent.putExtra("nome", nome);
@@ -249,7 +248,6 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
                         new Register(getApplicationContext(), email, nome, cognome, personPhotoUrl, "", birth, "", "", "",
                                 new ArrayList<String>(), "", (long)0, "", new ArrayList<String>(), "", this).execute();
 
-                    //Il risultato della chiamata CheckLogin lo trovo in done(boolean,string)
                 } else { /* E' stato cliccato il bottone per la registrazione */
                     Intent myIntent = new Intent(Login.this, Registration.class);
                     myIntent.putExtra("nome", nome);

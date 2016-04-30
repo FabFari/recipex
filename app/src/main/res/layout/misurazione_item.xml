@@ -109,7 +109,7 @@
                 android:layout_marginTop="5dp" />
             <ImageView
                 xmlns:app="http://schemas.android.com/apk/res-auto"
-                android:src="@drawable/edit"
+                android:src="drawable/ic_edit"
                 android:id="@+id/ic_fill"
                 android:layout_alignParentRight="true"
                 android:layout_width="50dp"
