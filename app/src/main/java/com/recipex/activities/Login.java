@@ -3,11 +3,18 @@ package com.recipex.activities;
 /**
  * Created by Sara on 24/04/2016.
  */
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,9 +30,13 @@ import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListe
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 import com.recipex.R;
+import com.recipex.asynctasks.Register;
+import com.recipex.TaskCallbackLogin;
+
+import java.util.ArrayList;
 
 
-public class Login extends AppCompatActivity implements OnClickListener, ConnectionCallbacks, OnConnectionFailedListener {
+public class Login extends AppCompatActivity implements TaskCallbackLogin, OnClickListener, ConnectionCallbacks, OnConnectionFailedListener {
 
     private static final int RC_SIGN_IN = 0;
     private static final String TAG = "LoginActivity";
@@ -37,6 +48,10 @@ public class Login extends AppCompatActivity implements OnClickListener, Connect
     private Button btnSignIn;
     private Button btnSignOut, btnRevokeAccess, btnContinua;
     private TextView accedi;
+
+    String nome;
+    String cognome;
+    String email;
 
     SharedPreferences pref;
     boolean token=false;
@@ -57,11 +72,12 @@ public class Login extends AppCompatActivity implements OnClickListener, Connect
         SharedPreferences.Editor editor = pref.edit();
 
 
-        /*String x = pref.getString("email",null);
+        String x = pref.getString("email",null);
+
         if(x!=null) {
             System.out.println("Email "+x);
             avviaHome();
-        }*/
+        }
 
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -81,6 +97,7 @@ public class Login extends AppCompatActivity implements OnClickListener, Connect
     private void avviaHome(){
         Intent myIntent = new Intent(Login.this, Home.class);
         this.startActivity(myIntent);
+        this.finish();
     }
 
     protected void onStart() {
@@ -170,47 +187,81 @@ public class Login extends AppCompatActivity implements OnClickListener, Connect
             if (Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null) {
                 Person currentPerson = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
                 String personPhotoUrl = currentPerson.getImage().getUrl();
-                String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
+                email = Plus.AccountApi.getAccountName(mGoogleApiClient);
 
-                String cognome = currentPerson.getName().getFamilyName();
-                String nome = currentPerson.getName().getGivenName();
+                cognome = currentPerson.getName().getFamilyName();
+                nome = currentPerson.getName().getGivenName();
+
+                String birth=currentPerson.getBirthday();
 
                 personPhotoUrl = personPhotoUrl.substring(0, personPhotoUrl.length() - 6);
 
-                /*if(tokenLogin){ E' stato cliccato il bottone per effettuare il Login
-                    tokenLogin=false;
-                    Devo verificare che la mail con cui l'utente ha effettuato l'accesso è presente nel nostro DB come artista
-                    if(checkNetwork()) new CheckLogin(getApplicationContext(),email,this).execute();
+                if (tokenLogin) { //E' stato cliccato il bottone per effettuare il Login
+                    tokenLogin = false;
+                    //Devo verificare che la mail con cui l'utente ha effettuato l'accesso è presente nel nostro DB come artista
+                    if (checkNetwork())
+                        /*metto come vuoti i campi già registrati, non li posso recuperare dalla classe Person.
+                        Register registra se l'email non è presente nel db, altrimenti restituisce true e fa il login
+                         */
+                        new Register(getApplicationContext(), email, nome, cognome, personPhotoUrl, "", birth, "", "", "",
+                                new ArrayList<String>(), "", (long)0, "", new ArrayList<String>(), "", this).execute();
 
-                    Il risultato della chiamata CheckLogin lo trovo in done(boolean,string) */
-                //}else { /* E' stato cliccalto il bottone per la registrazione */
-                    Intent myIntent = new Intent(Login.this, Home.class);
+                    //Il risultato della chiamata CheckLogin lo trovo in done(boolean,string)
+                } else { /* E' stato cliccato il bottone per la registrazione */
+                    Intent myIntent = new Intent(Login.this, Registration.class);
                     myIntent.putExtra("nome", nome);
                     myIntent.putExtra("cognome", cognome);
                     myIntent.putExtra("email", email);
                     myIntent.putExtra("foto", personPhotoUrl);
+                    System.out.println("BIRTH "+birth);
+                    myIntent.putExtra("data", birth);
                     this.startActivity(myIntent);
                     this.finish();
-                //}
-            } else {
-                // SOLO PER DEBUG
-                String nome = "nome";
-                String cognome = "cognome";
-                String email = "ciao@ciao.it";
-                String personPhotoUrl = "http://www.dis.uniroma1.it/sites/default/files/pictures/picture-1521-1424796678.jpg";
+                }
+            }else{
+                    // SOLO PER DEBUG
+                    nome = "Sara";
+                    cognome = "Veterini";
+                    email = "saraveterini@gmail.com";
+                    String personPhotoUrl = "http://www.dis.uniroma1.it/sites/default/files/pictures/picture-1521-1424796678.jpg";
 
-                System.out.println("SONO QUI");
+                    String birth="1994-01-12";
+                    System.out.println("SONO QUI");
 
-                Intent myIntent = new Intent(Login.this, Home.class);
-                myIntent.putExtra("nome",nome);
-                myIntent.putExtra("cognome",cognome);
-                myIntent.putExtra("email",email);
-                myIntent.putExtra("foto",personPhotoUrl);
+                    /*Intent myIntent = new Intent(Login.this, Home.class);
+                    myIntent.putExtra("nome", nome);
+                    myIntent.putExtra("cognome", cognome);
+                    myIntent.putExtra("email", email);
+                    myIntent.putExtra("foto", personPhotoUrl);
 
-                this.startActivity(myIntent);
-                Toast.makeText(getApplicationContext(), "Login in debug mode", Toast.LENGTH_LONG).show();
-                this.finish();
+                    this.startActivity(myIntent);
+                    Toast.makeText(getApplicationContext(), "Login in debug mode", Toast.LENGTH_LONG).show();
+                    this.finish();*/
+
+                /********MODIFICA*****/
+                if (tokenLogin) { //E' stato cliccato il bottone per effettuare il Login
+                    tokenLogin = false;
+                    //Devo verificare che la mail con cui l'utente ha effettuato l'accesso è presente nel nostro DB come artista
+                    if (checkNetwork())
+                        /*metto come vuoti i campi già registrati, non li posso recuperare dalla classe Person.
+                        Register registra se l'email non è presente nel db, altrimenti restituisce true e fa il login
+                         */
+                        new Register(getApplicationContext(), email, nome, cognome, personPhotoUrl, "", birth, "", "", "",
+                                new ArrayList<String>(), "", (long)0, "", new ArrayList<String>(), "", this).execute();
+
+                    //Il risultato della chiamata CheckLogin lo trovo in done(boolean,string)
+                } else { /* E' stato cliccato il bottone per la registrazione */
+                    Intent myIntent = new Intent(Login.this, Registration.class);
+                    myIntent.putExtra("nome", nome);
+                    myIntent.putExtra("cognome", cognome);
+                    myIntent.putExtra("email", email);
+                    myIntent.putExtra("foto", personPhotoUrl);
+                    myIntent.putExtra("data", birth);
+                    this.startActivity(myIntent);
+                    this.finish();
+                }
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -258,4 +309,47 @@ public class Login extends AppCompatActivity implements OnClickListener, Connect
         return;
     }
 
+    @Override
+    public void done(boolean x, String email) {
+        //if(x){ //Utente può accedere
+            Toast.makeText(getApplicationContext(), "Login eseguito con successo!", Toast.LENGTH_LONG).show();
+            System.out.println("DONE LOGIN");
+            Log.d("LOGIN","done login");
+            pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString("email", email);
+
+            editor.commit();
+
+            Intent myIntent = new Intent(Login.this, Home.class);
+            this.startActivity(myIntent);
+            this.finish();
+        /*}else{ //Login fallito perchè email non è registrata
+            disconnetti();
+            Toast.makeText(getApplicationContext(), "Login fallito! Devi registrarti!", Toast.LENGTH_LONG).show();
+        }*/
+    }
+
+    public boolean checkNetwork() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        boolean isOnline = (netInfo != null && netInfo.isConnectedOrConnecting());
+        if(isOnline) {
+            return true;
+        }else{
+            new AlertDialog.Builder(this)
+                    .setTitle("Ops..qualcosa è andato storto!")
+                    .setMessage("Sembra che tu non sia collegato ad internet! ")
+                    .setPositiveButton("Impostazioni", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // continue with delete
+                            Intent callGPSSettingIntent = new Intent(Settings.ACTION_SETTINGS);
+                            startActivityForResult(callGPSSettingIntent,0);
+                        }
+                    }).show();
+            return false;
+        }
+    }
 }
+
+
