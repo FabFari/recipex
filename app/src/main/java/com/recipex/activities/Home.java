@@ -87,12 +87,20 @@ public class Home extends AppCompatActivity
         mFragmentTransaction = mFragmentManager.beginTransaction();
         mFragmentTransaction.replace(R.id.containerView, new TabFragment()).commit();
 
-        String nome = new StringBuilder(getIntent().getStringExtra("nome")).append(" ").append(getIntent().getStringExtra("cognome")).toString();
+        /*String nome = new StringBuilder(getIntent().getStringExtra("nome")).append(" ").append(getIntent().getStringExtra("cognome")).toString();
 
         String email = new StringBuilder(getIntent().getStringExtra("email")).toString();
 
         String photo = new StringBuilder(getIntent().getStringExtra("foto")).toString();
-        System.out.println(photo);
+        System.out.println(photo);*/
+        pref = getApplicationContext().getSharedPreferences("MyPref",MODE_PRIVATE);
+
+        String nome=pref.getString("nome", "");
+        String cognome=pref.getString("cognome", "");
+        String email=pref.getString("email","");
+        String photo=pref.getString("foto","");
+
+        nome=new StringBuilder(nome).append(" ").append(cognome).toString();
 
         System.out.println("entrata "+nome+" "+email);
         View header=mNavigationView.getHeaderView(0);
@@ -103,7 +111,6 @@ public class Home extends AppCompatActivity
         emailuser.setText(email);
         Picasso.with(Home.this).load(photo).transform(new CircleTransform()).into(photouser);
 
-        pref = getApplicationContext().getSharedPreferences("MyPref",MODE_PRIVATE);
 
     }
 
@@ -242,7 +249,7 @@ public class Home extends AppCompatActivity
                         .setDismissText("OK")
                         .setMaskColour(fetchPrimaryDarkColor())
                         .setDismissTextColor(fetchAccentColor())
-                        .setContentText("Bella")
+                        .setContentText("Scorrendo da sinistra a destra, troverai informazioni su di te")
                         .build()
         );
 
@@ -252,7 +259,7 @@ public class Home extends AppCompatActivity
                         .setDismissText("HO CAPITO")
                         .setMaskColour(fetchPrimaryDarkColor())
                         .setDismissTextColor(fetchAccentColor())
-                        .setContentText("Come va?")
+                        .setContentText("Cliccando qui puoi aggiungere un tuo assistito, una tua misurazione o un tuo bisogno")
                         .withRectangleShape()
                         .build()
         );
@@ -262,7 +269,7 @@ public class Home extends AppCompatActivity
                         .setDismissText("HO CAPITO")
                         .setMaskColour(fetchPrimaryDarkColor())
                         .setDismissTextColor(fetchAccentColor())
-                        .setContentText("Guarda")
+                        .setContentText("Qui puoi vedere i tuoi assistiti, le tue misurazioni e i tuoi bisogni")
                         .withRectangleShape()
                         .build()
         );

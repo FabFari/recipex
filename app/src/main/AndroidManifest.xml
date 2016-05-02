@@ -47,6 +47,10 @@
             android:label="@string/title_activity_profile"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
+        <activity
+            android:name=".activities.Registration"
+            android:label="RecipeX">
+        </activity>
     </application>
 
 </manifest>
