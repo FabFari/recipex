@@ -14,7 +14,7 @@ import com.recipex.utilities.AlertDialogManager;
 import java.io.IOException;
 
 public class GetUserAT extends AsyncTask<Void, Void, MainUserInfoMessage> {
-    public static String TAG = "GETUSERAT";
+    public static String TAG = "GET_USER_AT";
     RecipexServerApi apiHandler;
     Activity activity;
     GetUserTC taskCallback;

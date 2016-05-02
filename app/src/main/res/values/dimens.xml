@@ -14,5 +14,6 @@
     <dimen name="spacing_high">40dp</dimen>
     <dimen name="spacing_normal">16dp</dimen>
     <dimen name="spacing_low">12dp</dimen>
+    <dimen name="spacing_super_low">8dp</dimen>
     <dimen name="padding_top_cardview_user">48dp</dimen>
 </resources>

@@ -2,7 +2,7 @@
 <android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nested_scroll_view_profile"
+    android:id="@+id/profile.nested_scroll_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginTop="?attr/actionBarSize"
@@ -11,7 +11,7 @@
     tools:showIn="@layout/activity_profile">
 
     <LinearLayout
-        android:id="@+id/linear_nested_scrollview"
+        android:id="@+id/profile.linear_nested_scrollview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -29,7 +29,8 @@
             card_view:cardCornerRadius="4dp"
             card_view:cardElevation="2dp"
             card_view:cardUseCompatPadding="true"
-            android:layout_marginBottom="@dimen/spacing_low">
+            android:layout_marginBottom="@dimen/spacing_low"
+            android:visibility="invisible">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -49,23 +50,25 @@
                     android:textColor="@color/colorPrimaryDark"/>
             </LinearLayout>
 
-            <LinearLayout
+            <!--
+
+            <ImageView
+                android:id="@+id/usr_contact"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_gravity="top|end">
+                android:src="@drawable/ic_contact"
+                android:layout_gravity="top|end"
+                android:visibility="invisible"/>
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_contact"
-                    android:paddingRight="-8sp"/>
+            <ImageView
+                android:id="@+id/us"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_edit"
+                android:layout_gravity="top|end"
+                android:visibility="invisible"/>
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_edit"/>
-            </LinearLayout>
+            -->
 
             <LinearLayout
                 android:id="@+id/usr_card"
@@ -82,13 +85,14 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     <TextView
+                        android:id="@+id/profile.usr_name_lbl"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimaryDark"
                         android:text="Nome: "
                         android:textStyle="bold"/>
                     <TextView
-                        android:id="@+id/usr_name"
+                        android:id="@+id/profile.usr_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimary"
@@ -100,13 +104,14 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     <TextView
+                        android:id="@+id/profile.usr_surname_lbl"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimaryDark"
                         android:text="Cognome: "
                         android:textStyle="bold"/>
                     <TextView
-                        android:id="@+id/usr_surname"
+                        android:id="@+id/profile.usr_surname"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimary"
@@ -118,13 +123,14 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     <TextView
+                        android:id="@+id/profile.usr_mail_lbl"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimaryDark"
                         android:text="E-mail: "
                         android:textStyle="bold"/>
                     <TextView
-                        android:id="@+id/usr_mail"
+                        android:id="@+id/profile.usr_mail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimary"
@@ -136,13 +142,14 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     <TextView
+                        android:id="@+id/profile.usr_birth_lbl"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimaryDark"
                         android:text="Data di nascita: "
                         android:textStyle="bold"/>
                     <TextView
-                        android:id="@+id/usr_birth"
+                        android:id="@+id/profile.usr_birth"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimary"
@@ -154,13 +161,14 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     <TextView
+                        android:id="@+id/profile.usr_sex_lbl"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimaryDark"
                         android:text="Sesso: "
                         android:textStyle="bold"/>
                     <TextView
-                        android:id="@+id/usr_sex"
+                        android:id="@+id/profile.usr_sex"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimary"
@@ -172,17 +180,20 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     <TextView
+                        android:id="@+id/profile.usr_city_lbl"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimaryDark"
                         android:text="Città: "
-                        android:textStyle="bold"/>
+                        android:textStyle="bold"
+                        android:visibility="invisible"/>
                     <TextView
-                        android:id="@+id/usr_city"
+                        android:id="@+id/profile.usr_city"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimary"
-                        android:text="Roma"/>
+                        android:text="Roma"
+                        android:visibility="invisible"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -190,17 +201,20 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     <TextView
+                        android:id="@+id/profile.usr_address_lbl"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimaryDark"
                         android:text="Indirizzo: "
-                        android:textStyle="bold"/>
+                        android:textStyle="bold"
+                        android:visibility="invisible"/>
                     <TextView
-                        android:id="@+id/usr_address"
+                        android:id="@+id/profile.usr_address"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimary"
-                        android:text="Via Attilio Hortis 65"/>
+                        android:text="Via Attilio Hortis 65"
+                        android:visibility="invisible"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -208,17 +222,20 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     <TextView
+                        android:id="@+id/profile.usr_pers_num_lbl"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimaryDark"
                         android:text="Numero di telefono: "
-                        android:textStyle="bold"/>
+                        android:textStyle="bold"
+                        android:visibility="invisible"/>
                     <TextView
-                        android:id="@+id/usr_pers_nums"
+                        android:id="@+id/profile.usr_pers_num"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimary"
-                        android:text="1234567890"/>
+                        android:text="1234567890"
+                        android:visibility="invisible"/>
                 </LinearLayout>
 
             </LinearLayout>
@@ -233,7 +250,8 @@
             android:layout_height="wrap_content"
             card_view:cardCornerRadius="4dp"
             card_view:cardElevation="2dp"
-            card_view:cardUseCompatPadding="true">
+            card_view:cardUseCompatPadding="true"
+            android:visibility="invisible">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -256,23 +274,23 @@
 
             </LinearLayout>
 
-            <LinearLayout
+            <!--
+
+            <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_gravity="top|end">
+                android:src="@drawable/ic_contact"
+                android:layout_gravity="top|end"
+                android:visibility="invisible"/>
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_contact"
-                    android:paddingRight="-8sp"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_edit"
+                android:layout_gravity="top|end"
+                android:visibility="invisible"/>
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_edit"/>
-            </LinearLayout>
+            -->
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -288,13 +306,14 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     <TextView
+                        android:id="@+id/profile.crgv_field_lbl"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimaryDark"
                         android:text="Specializzazione: "
                         android:textStyle="bold"/>
                     <TextView
-                        android:id="@+id/crgv_field"
+                        android:id="@+id/profile.crgv_field"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimary"
@@ -306,17 +325,20 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     <TextView
+                        android:id="@+id/profile.crgv_exp_lbl"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimaryDark"
                         android:text="Anni di esperienza: "
-                        android:textStyle="bold"/>
+                        android:textStyle="bold"
+                        android:visibility="invisible"/>
                     <TextView
-                        android:id="@+id/crgv_exp"
+                        android:id="@+id/profile.crgv_exp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimary"
-                        android:text="Tra i 0 e i 5"/>
+                        android:text="Tra i 0 e i 5"
+                        android:visibility="invisible"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -324,17 +346,20 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     <TextView
+                        android:id="@+id/profile.crgv_place_lbl"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimaryDark"
                         android:text="Luogo di lavoro: "
-                        android:textStyle="bold"/>
+                        android:textStyle="bold"
+                        android:visibility="invisible"/>
                     <TextView
-                        android:id="@+id/crgv_place"
+                        android:id="@+id/profile.crgv_place"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimary"
-                        android:text="Policlinico Umberto I"/>
+                        android:text="Policlinico Umberto I"
+                        android:visibility="invisible"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -342,17 +367,20 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     <TextView
+                        android:id="@+id/profile.crgv_avlb_lbl"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimaryDark"
-                        android:text="Campo: "
-                        android:textStyle="bold"/>
+                        android:text="Disponibilità: "
+                        android:textStyle="bold"
+                        android:visibility="invisible"/>
                     <TextView
-                        android:id="@+id/crgv_avlb"
+                        android:id="@+id/profile.crgv_avlb"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimary"
-                        android:text="Lun-Ven, 9:00-13:00, 15:00-18:00"/>
+                        android:text="Lun-Ven, 9:00-13:00, 15:00-18:00"
+                        android:visibility="invisible"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -360,38 +388,43 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     <TextView
-                        android:id="@+id/crgv_bsns_label"
+                        android:id="@+id/profile.crgv_bsns_num_lbl"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimaryDark"
                         android:text="Numero di telefono: "
-                        android:textStyle="bold"/>
+                        android:textStyle="bold"
+                        android:visibility="invisible"/>
                     <TextView
-                        android:id="@+id/crgv_bsns_nums"
+                        android:id="@+id/profile.crgv_bsns_num"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorPrimary"
-                        android:text="1234567890"/>
+                        android:text="1234567890"
+                        android:visibility="invisible"/>
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/crgv_bio_label"
+                    android:id="@+id/profile.crgv_bio_lbl"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textColor="@color/colorPrimaryDark"
                     android:text="Bio: "
-                    android:textStyle="bold"/>
+                    android:textStyle="bold"
+                    android:visibility="invisible"/>
 
                 <android.support.v7.widget.CardView
                     xmlns:card_view="http://schemas.android.com/apk/res-auto"
-                    android:id="@+id/card_view_crgv_bio"
+                    android:id="@+id/profile.card_view_crgv_bio"
                     android:layout_gravity="center_horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     card_view:cardCornerRadius="4dp"
                     card_view:cardElevation="2dp"
-                    card_view:cardUseCompatPadding="true">
+                    card_view:cardUseCompatPadding="true"
+                    android:visibility="invisible">
                     <TextView
+                        android:id="@+id/profile.crgv_bio"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:paddingTop="@dimen/spacing_low"
