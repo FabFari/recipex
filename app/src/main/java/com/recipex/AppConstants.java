@@ -35,7 +35,13 @@ public class AppConstants {
      */
     public static final String AUDIENCE = "server:client_id:" + WEB_CLIENT_ID;
 
+<<<<<<< HEAD
+    // Costanti App
+    public static final String DEFAULT_ACCOUNT = "PREF_ACCOUNT_NAME";
+    public static final String PREFS_NAME = "com.recipex.RecipeXPrefs";
+=======
     public static final String PREFS_NAME= "RecipeXPref";
+>>>>>>> master
 
     // Codici server
     public static final String CREATED = "201 Created";
@@ -79,12 +85,11 @@ public class AppConstants {
      * Retrieve a RecipexServerApi api service handle to access the API.
      */
 
-    public static RecipexServerApi getApiServiceHandle(@Nullable GoogleAccountCredential credential) {
+    public static RecipexServerApi getApiServiceHandle(@Nullable GoogleAccountCredential credentials) {
         // Use a builder to help formulate the API request.
         RecipexServerApi.Builder recipexServerApi = new RecipexServerApi.Builder(AppConstants.HTTP_TRANSPORT,
                                                                            AppConstants.JSON_FACTORY,
-                                                                           credential);
-
+                                                                           credentials);
 
         recipexServerApi.setRootUrl("https://recipex-1281.appspot.com/_ah/api");
         return recipexServerApi.build();

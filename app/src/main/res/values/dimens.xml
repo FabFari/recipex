@@ -6,4 +6,14 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="nav_header_vertical_spacing">16dp</dimen>
     <dimen name="nav_header_height">160dp</dimen>
+    <dimen name="app_bar_height">180dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
+    <dimen name="image_width">120dp</dimen>
+    <dimen name="image_final_width">32dp</dimen>
+    <dimen name="profile_pic_margin">24dp</dimen>
+    <dimen name="spacing_high">40dp</dimen>
+    <dimen name="spacing_normal">16dp</dimen>
+    <dimen name="spacing_low">12dp</dimen>
+    <dimen name="spacing_super_low">8dp</dimen>
+    <dimen name="padding_top_cardview_user">48dp</dimen>
 </resources>
