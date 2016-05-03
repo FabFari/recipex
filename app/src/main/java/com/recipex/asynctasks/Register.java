@@ -105,11 +105,14 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
             //CAMPI OBBLIGATORI
             reg.setEmail(email);
             reg.setBirth(birth);
+            Log.d("DATA ", birth);
             reg.setName(nome);
             reg.setSurname(cognome);
+            reg.setSex(sesso);
+            Log.d("SESSO ", sesso);
+            reg.setPic(photo);
 
             //CAMPI FACOLTATIVI USER: potrebbero essere vuoti
-            reg.setSex(sesso);
             reg.setAddress(indirizzo);
             //reg.setPersonalNum(numeri.get(0));
             reg.setCity(città);
@@ -125,9 +128,11 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
                 reg.setYearsExp(anniEsperienza);
                 reg.setBio(bio);
                 editor.putBoolean("utenteSemplice", false);
+                editor.commit();
             }
             else{
                 editor.putBoolean("utenteSemplice", false);
+                editor.commit();
             }
 
             System.out.println("CAMPO SPEC 2 "+campoSpecializzazione);
@@ -135,13 +140,16 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
             RecipexServerApi.User.RegisterUser post = apiServiceHandle.user().registerUser(reg);
 
             MainDefaultResponseMessage response = post.execute();
+
+            System.out.println("RESPONSE " + response.getMessage());
+            Log.d("RESPONSE ", response.getMessage());
+
             if(response.getMessage().equals("User already existent.")){
                 return reg;
             }else{
-                Log.d("RESPONSE ", response.getMessage());
-
                 return null;
             }
+
         } catch (IOException e) {
             Looper.prepare();
             Log.d("REGISTRAZIONE TASK ", "EXCEPTIONC "+e.getCause());
@@ -159,12 +167,15 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
         if (greeting!=null) {
             Log.d("DEBUG","User è registrato");
             if(greeting.getField()==null){
-
+                Log.d("FIELD ", "field null");
                 editor.putBoolean("utenteSemplice", true);
+                editor.commit();
+                Log.d("UTENTESEMPLICE REGISTER", " "+pref.getBoolean("utenteSemplice", false));
                 mCallback.done(true, greeting.get("email").toString());
             }
             else{
                 editor.putBoolean("utenteSemplice", false);
+                editor.commit();
                 mCallback.done(true, greeting.get("email").toString());
             }
 

@@ -195,6 +195,7 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
 
                 String birth=currentPerson.getBirthday();
 
+
                 personPhotoUrl = personPhotoUrl.substring(0, personPhotoUrl.length() - 6);
 
                 if (tokenLogin) { //E' stato cliccato il bottone per effettuare il Login
@@ -204,7 +205,7 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
                         /*metto come vuoti i campi già registrati, non li posso recuperare dalla classe Person.
                         Register registra se l'email non è presente nel db, altrimenti restituisce true e fa il login
                          */
-                        new Register(getApplicationContext(), email, nome, cognome, personPhotoUrl, "", birth, "", "", "",
+                        new Register(getApplicationContext(), email, nome, cognome, personPhotoUrl, "", "1994-01-12", "F", "", "",
                                 new ArrayList<String>(), "", (long)0, "", new ArrayList<String>(), "", this).execute();
 
                 } else { /* E' stato cliccato il bottone per la registrazione */
@@ -320,6 +321,9 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
         editor.putString("nome", nome);
         editor.putString("cognome", cognome);
         editor.putString("foto", personPhotoUrl);
+
+        boolean utenteSemplice=pref.getBoolean("utenteSemplice", false);
+        Log.d("UTENTESEMPLICE DONE", " "+utenteSemplice);
 
         editor.commit();
 
