@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context="com.recipex.activities.AddMeasurement">
+
+    <LinearLayout
+        android:id="@+id/measurement.linearlayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <ImageView
+                    android:id="@+id/measurement.icon"
+                    android:layout_width="60sp"
+                    android:layout_height="60sp"
+                    android:src="@drawable/ic_pressure_dark" />
+
+                <TextView
+                    android:id="@+id/measurement.title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="24sp"
+                    android:text="Pressione arteriosa"
+                    android:layout_gravity="center_vertical"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="2dp"
+                android:background="@color/colorPrimary" />
+
+            <TextView
+                android:id="@+id/measurement.number_picker_text1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:paddingTop="@dimen/spacing_super_low"
+                android:text="Sistolica: "
+                android:textSize="20sp"
+                android:textColor="@color/colorPrimaryDark" />
+
+            <RelativeLayout
+                android:id="@+id/measurement.relative1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_super_low"
+                android:layout_marginBottom="@dimen/spacing_super_low">
+
+                <com.vi.swipenumberpicker.SwipeNumberPicker
+                    android:id="@+id/measurement.number_picker_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    app:snp_numberColor="@android:color/white"
+                    app:snp_arrowColor="@android:color/white"
+                    app:snp_backgroundColor="@color/colorAccent"
+                    app:snp_max="250"
+                    app:snp_min="0"
+                    app:snp_value="120"
+                    android:visibility="visible"/>
+
+                <TextView
+                    android:id="@+id/measurement.number_picker_res1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:textSize="24sp"
+                    android:text="120"
+                    android:layout_alignParentRight="true"
+                    android:visibility="visible"/>
+
+                <me.angrybyte.numberpicker.view.ActualNumberPicker
+                    android:id="@+id/measurement.spo2_number_picker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:layout_centerHorizontal="true"
+                    android:background="@color/colorAccent"
+                    app:bar_color="@android:color/white"
+                    app:bars_count="16"
+                    app:bar_width="1dp"
+                    app:controls_color="@android:color/white"
+                    app:fast_controls_color="@android:color/darker_gray"
+                    app:highlight_color="@color/colorAccent"
+                    app:max_value="1000"
+                    app:min_value="0"
+                    app:selection_color="@color/colorAccent"
+                    app:show_bars="true"
+                    app:show_controls="true"
+                    app:show_fast_controls="true"
+                    app:show_highlight="true"
+                    app:text_color="@color/colorAccent"
+                    app:text_size="16sp"
+                    app:value="98"
+                    android:visibility="invisible"/>
+
+                <me.angrybyte.numberpicker.view.ActualNumberPicker
+                    android:id="@+id/measurement.hgt_number_picker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:layout_centerHorizontal="true"
+                    android:background="@color/colorAccent"
+                    app:bar_color="@android:color/white"
+                    app:bars_count="16"
+                    app:bar_width="1dp"
+                    app:controls_color="@android:color/white"
+                    app:fast_controls_color="@android:color/darker_gray"
+                    app:highlight_color="@color/colorAccent"
+                    app:max_value="6000"
+                    app:min_value="0"
+                    app:selection_color="@color/colorAccent"
+                    app:show_bars="true"
+                    app:show_controls="true"
+                    app:show_fast_controls="true"
+                    app:show_highlight="true"
+                    app:text_color="@color/colorAccent"
+                    app:text_size="16sp"
+                    android:visibility="invisible"/>
+
+                <me.angrybyte.numberpicker.view.ActualNumberPicker
+                    android:id="@+id/measurement.temp_number_picker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:layout_centerHorizontal="true"
+                    android:background="@color/colorAccent"
+                    app:bar_color="@android:color/white"
+                    app:bars_count="10"
+                    app:bar_width="1dp"
+                    app:controls_color="@android:color/white"
+                    app:fast_controls_color="@android:color/darker_gray"
+                    app:highlight_color="@color/colorAccent"
+                    app:max_value="4500"
+                    app:min_value="3000"
+                    app:selection_color="@color/colorAccent"
+                    app:show_bars="true"
+                    app:show_controls="true"
+                    app:show_fast_controls="true"
+                    app:show_highlight="true"
+                    app:text_color="@color/colorAccent"
+                    app:text_size="16sp"
+                    android:visibility="invisible"/>
+
+                <me.angrybyte.numberpicker.view.ActualNumberPicker
+                    android:id="@+id/measurement.chl_number_picker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:layout_centerHorizontal="true"
+                    android:background="@color/colorAccent"
+                    app:bar_color="@android:color/white"
+                    app:bars_count="16"
+                    app:bar_width="1dp"
+                    app:controls_color="@android:color/white"
+                    app:fast_controls_color="@android:color/darker_gray"
+                    app:highlight_color="@color/colorAccent"
+                    app:max_value="8000"
+                    app:min_value="0"
+                    app:selection_color="@color/colorAccent"
+                    app:show_bars="true"
+                    app:show_controls="true"
+                    app:show_fast_controls="true"
+                    app:show_highlight="true"
+                    app:text_color="@color/colorAccent"
+                    app:text_size="16sp"
+                    android:visibility="invisible"/>
+
+                <TextView
+                    android:id="@+id/measurement.number_float_picker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_centerHorizontal="true"
+                    android:clickable="false"
+                    android:linksClickable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:textSize="15sp"
+                    android:textColor="@android:color/white"
+                    android:text="98%"
+                    android:visibility="invisible"/>
+
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/measurement.number_picker_text2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="Diastolica: "
+                android:textSize="20sp"
+                android:textColor="@color/colorPrimaryDark"
+                android:visibility="invisible"/>
+            <RelativeLayout
+                android:id="@+id/measurement.relative2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_low"
+                android:layout_marginBottom="@dimen/spacing_low"
+                android:visibility="invisible">
+
+                <com.vi.swipenumberpicker.SwipeNumberPicker
+                    android:id="@+id/measurement.number_picker_2"
+                    android:layout_marginTop="@dimen/spacing_super_low"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    app:snp_numberColor="@android:color/white"
+                    app:snp_arrowColor="@android:color/white"
+                    app:snp_backgroundColor="@color/colorAccent"
+                    app:snp_max="250"
+                    app:snp_min="0"
+                    app:snp_value="80" />
+
+                <TextView
+                    android:id="@+id/measurement.number_picker_res2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:textSize="24sp"
+                    android:text="80"
+                    android:layout_alignParentRight="true" />
+
+            </RelativeLayout>
+
+        <TextView
+            android:id="@+id/measurement.note_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimaryDark"
+            android:layout_marginBottom="@dimen/spacing_low"
+            android:textSize="20sp"
+            android:text="Note:" />
+
+        <android.support.v7.widget.CardView
+            xmlns:card_view="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/measurement.card_view_note"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            card_view:cardCornerRadius="4dp"
+            card_view:cardElevation="2dp"
+            card_view:cardUseCompatPadding="true" >
+            <android.support.v4.widget.NestedScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <EditText
+                    android:id="@+id/profile.crgv_bio"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="120dp"
+                    android:inputType="textMultiLine"
+                    android:paddingTop="@dimen/spacing_low"
+                    android:paddingBottom="@dimen/spacing_low"
+                    android:paddingRight="@dimen/spacing_low"
+                    android:paddingLeft="@dimen/spacing_low" />
+            </android.support.v4.widget.NestedScrollView>
+        </android.support.v7.widget.CardView>
+
+    </LinearLayout>
+
+    <com.github.rahatarmanahmed.cpv.CircularProgressView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/measurement.progress_view"
+        android:layout_centerInParent="true"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:cpv_animAutostart="true"
+        app:cpv_indeterminate="true" />
+    
+</RelativeLayout>

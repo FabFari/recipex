@@ -35,13 +35,9 @@ public class AppConstants {
      */
     public static final String AUDIENCE = "server:client_id:" + WEB_CLIENT_ID;
 
-<<<<<<< HEAD
     // Costanti App
     public static final String DEFAULT_ACCOUNT = "PREF_ACCOUNT_NAME";
     public static final String PREFS_NAME = "com.recipex.RecipeXPrefs";
-=======
-    public static final String PREFS_NAME= "RecipeXPref";
->>>>>>> master
 
     // Codici server
     public static final String CREATED = "201 Created";
@@ -69,6 +65,12 @@ public class AppConstants {
     // Tipo di Ruolo nella Richiesta
     public static final String ASSISTITO = "PATIENT";
     public static final String ASSISTENTE = "CAREGIVER";
+
+    // Tipo di Prescrizione
+    public static final String PILLOLA = "PILL";
+    public static final String BUSTINE = "SACHET";
+    public static final String FIALA = "VIAL";
+    public static final String ALTRO = "OTHER";
 
     /**
      * Class instance of the JSON factory.

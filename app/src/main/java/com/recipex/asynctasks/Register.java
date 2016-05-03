@@ -110,11 +110,11 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
             //CAMPI FACOLTATIVI USER: potrebbero essere vuoti
             reg.setSex(sesso);
             reg.setAddress(indirizzo);
-            reg.setPersonalNums(numeri);
+            //reg.setPersonalNum(numeri);
             reg.setCity(città);
 
             if(anniEsperienza!=0) {
-                reg.setBusinessNums(numeriBusiness);
+                //reg.setBusinessNum(numeriBusiness);
                 reg.setAvailable(disponibilità);
                 reg.setPlace(postoLavoro);
                 reg.setField(campoSpecializzazione);
