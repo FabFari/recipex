@@ -52,10 +52,11 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
     String nome;
     String cognome;
     String email;
+    String personPhotoUrl;
 
     SharedPreferences pref;
     boolean token=false;
-    private boolean tokenLogin = false;
+    private boolean tokenLogin = true;
 
 
     @Override
@@ -74,10 +75,10 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
 
         String x = pref.getString("email",null);
 
-        if(x!=null) {
+        /*if(x!=null) {
             System.out.println("Email "+x);
             avviaHome();
-        }
+        }*/
 
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -186,7 +187,7 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
         try {
             if (Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null) {
                 Person currentPerson = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-                String personPhotoUrl = currentPerson.getImage().getUrl();
+                personPhotoUrl = currentPerson.getImage().getUrl();
                 email = Plus.AccountApi.getAccountName(mGoogleApiClient);
 
                 cognome = currentPerson.getName().getFamilyName();
@@ -310,18 +311,21 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
     @Override
     public void done(boolean x, String email) {
         //if(x){ //Utente può accedere
-            Toast.makeText(getApplicationContext(), "Login eseguito con successo!", Toast.LENGTH_LONG).show();
-            System.out.println("DONE LOGIN");
-            Log.d("LOGIN","done login");
-            pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
-            SharedPreferences.Editor editor = pref.edit();
-            editor.putString("email", email);
+        Toast.makeText(getApplicationContext(), "Login eseguito con successo!", Toast.LENGTH_LONG).show();
+        System.out.println("DONE LOGIN");
+        Log.d("LOGIN","done login");
+        pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("email", email);
+        editor.putString("nome", nome);
+        editor.putString("cognome", cognome);
+        editor.putString("foto", personPhotoUrl);
 
-            editor.commit();
+        editor.commit();
 
-            Intent myIntent = new Intent(Login.this, Home.class);
-            this.startActivity(myIntent);
-            this.finish();
+        Intent myIntent = new Intent(Login.this, Home.class);
+        this.startActivity(myIntent);
+        this.finish();
         /*}else{ //Login fallito perchè email non è registrata
             disconnetti();
             Toast.makeText(getApplicationContext(), "Login fallito! Devi registrarti!", Toast.LENGTH_LONG).show();

@@ -43,6 +43,8 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
 
     SharedPreferences settings;
 
+    SharedPreferences pref;
+
     public Register(Context context) {
         mContext = context;
     }
@@ -102,7 +104,6 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
 
             //CAMPI OBBLIGATORI
             reg.setEmail(email);
-            Log.d("Data ", birth);
             reg.setBirth(birth);
             reg.setName(nome);
             reg.setSurname(cognome);
@@ -110,16 +111,23 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
             //CAMPI FACOLTATIVI USER: potrebbero essere vuoti
             reg.setSex(sesso);
             reg.setAddress(indirizzo);
-            reg.setPersonalNums(numeri);
+            //reg.setPersonalNum(numeri.get(0));
             reg.setCity(città);
 
+            pref=mContext.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+
             if(anniEsperienza!=0) {
-                reg.setBusinessNums(numeriBusiness);
+                reg.setBusinessNum(numeriBusiness.get(0));
                 reg.setAvailable(disponibilità);
                 reg.setPlace(postoLavoro);
                 reg.setField(campoSpecializzazione);
                 reg.setYearsExp(anniEsperienza);
                 reg.setBio(bio);
+                editor.putBoolean("utenteSemplice", false);
+            }
+            else{
+                editor.putBoolean("utenteSemplice", false);
             }
 
             System.out.println("CAMPO SPEC 2 "+campoSpecializzazione);
@@ -128,11 +136,11 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
 
             MainDefaultResponseMessage response = post.execute();
             if(response.getMessage().equals("User already existent.")){
+                return reg;
+            }else{
+                Log.d("RESPONSE ", response.getMessage());
 
                 return null;
-            }else{
-                Log.d("ERROR ", response.getCode()+ " "+response.getMessage());
-                return reg;
             }
         } catch (IOException e) {
             Looper.prepare();
@@ -145,12 +153,23 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
 
 
     protected void onPostExecute(MainRegisterUserMessage greeting) {
-        if (greeting!=null) {
-            Log.d("DEBUG","User NON era REGISTRATO!");
+        SharedPreferences pref=mContext.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
 
-            mCallback.done(true, greeting.get("email").toString());
-        }else{
+        if (greeting!=null) {
             Log.d("DEBUG","User è registrato");
+            if(greeting.getField()==null){
+
+                editor.putBoolean("utenteSemplice", true);
+                mCallback.done(true, greeting.get("email").toString());
+            }
+            else{
+                editor.putBoolean("utenteSemplice", false);
+                mCallback.done(true, greeting.get("email").toString());
+            }
+
+        }else{
+            Log.d("DEBUG","User NON era REGISTRATO!");
             System.out.println(email);
             mCallback.done(false, email.toString());
         }
