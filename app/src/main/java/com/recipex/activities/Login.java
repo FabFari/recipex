@@ -56,7 +56,7 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
 
     SharedPreferences pref;
     boolean token=false;
-    private boolean tokenLogin = true;
+    private boolean tokenLogin = false;
 
 
     @Override
@@ -73,12 +73,13 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
         SharedPreferences.Editor editor = pref.edit();
 
 
-        String x = pref.getString("email",null);
+        String e = pref.getString("email",null);
+        String n=pref.getString("nome", null);
+        String c=pref.getString("cognome", null);
+        String f=pref.getString("foto", null);
 
-        /*if(x!=null) {
-            System.out.println("Email "+x);
+        if(e!=null && n!=null && c!=null && f!=null)
             avviaHome();
-        }*/
 
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -195,18 +196,29 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
 
                 String birth=currentPerson.getBirthday();
 
+                int sex=currentPerson.getGender();
+                String sesso = "";
+                if (sex == 1)
+                    sesso = "F";
+                else sesso = "M";
 
                 personPhotoUrl = personPhotoUrl.substring(0, personPhotoUrl.length() - 6);
 
                 if (tokenLogin) { //E' stato cliccato il bottone per effettuare il Login
                     tokenLogin = false;
                     //Devo verificare che la mail con cui l'utente ha effettuato l'accesso è presente nel nostro DB come artista
-                    if (checkNetwork())
+                    if (checkNetwork()) {
                         /*metto come vuoti i campi già registrati, non li posso recuperare dalla classe Person.
                         Register registra se l'email non è presente nel db, altrimenti restituisce true e fa il login
                          */
-                        new Register(getApplicationContext(), email, nome, cognome, personPhotoUrl, "", "1994-01-12", "F", "", "",
-                                new ArrayList<String>(), "", (long)0, "", new ArrayList<String>(), "", this).execute();
+                        if (birth == null) {
+                            //data default: tanto in register non viene contata se l'utente è giù registrato
+                            birth = "1994-01-12";
+                        }
+
+                        new Register(getApplicationContext(), email, nome, cognome, personPhotoUrl, "", birth, sesso, "", "",
+                                "", "", (long) 0, "", "", "", this).execute();
+                    }
 
                 } else { /* E' stato cliccato il bottone per la registrazione */
                     Intent myIntent = new Intent(Login.this, Registration.class);
@@ -214,12 +226,13 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
                     myIntent.putExtra("cognome", cognome);
                     myIntent.putExtra("email", email);
                     myIntent.putExtra("foto", personPhotoUrl);
-                    System.out.println("BIRTH "+birth);
                     myIntent.putExtra("data", birth);
+                    myIntent.putExtra("sesso", sesso);
                     this.startActivity(myIntent);
                     this.finish();
                 }
             }else{
+                /*
                     // SOLO PER DEBUG
                     nome = "Sara";
                     cognome = "Veterini";
@@ -237,20 +250,19 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
 
                     this.startActivity(myIntent);
                     Toast.makeText(getApplicationContext(), "Login in debug mode", Toast.LENGTH_LONG).show();
-                    this.finish();*/
+                    this.finish();
 
-                /********MODIFICA*****/
                 if (tokenLogin) { //E' stato cliccato il bottone per effettuare il Login
                     tokenLogin = false;
                     //Devo verificare che la mail con cui l'utente ha effettuato l'accesso è presente nel nostro DB come artista
                     if (checkNetwork())
                         /*metto come vuoti i campi già registrati, non li posso recuperare dalla classe Person.
                         Register registra se l'email non è presente nel db, altrimenti restituisce true e fa il login
-                         */
+
                         new Register(getApplicationContext(), email, nome, cognome, personPhotoUrl, "", birth, "", "", "",
                                 new ArrayList<String>(), "", (long)0, "", new ArrayList<String>(), "", this).execute();
 
-                } else { /* E' stato cliccato il bottone per la registrazione */
+                } else { /* E' stato cliccato il bottone per la registrazione
                     Intent myIntent = new Intent(Login.this, Registration.class);
                     myIntent.putExtra("nome", nome);
                     myIntent.putExtra("cognome", cognome);
@@ -260,6 +272,8 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
                     this.startActivity(myIntent);
                     this.finish();
                 }
+                */
+                Toast.makeText(getApplicationContext(), "Non è stato possibile effetture il login. Riprovare in un secondo momento", Toast.LENGTH_LONG).show();
             }
 
         } catch (Exception e) {

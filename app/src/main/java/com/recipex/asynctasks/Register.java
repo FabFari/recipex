@@ -32,11 +32,11 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
     String sesso;
     String città;
     String indirizzo;
-    List<String> numeri;
+    String numeri;
     String campoSpecializzazione;
     Long anniEsperienza;
     String postoLavoro;
-    List<String> numeriBusiness;
+    String numeriBusiness;
     String disponibilità;
 
     GoogleAccountCredential credential;
@@ -50,8 +50,8 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
     }
 
     public Register(Context context, String email, String nome, String cognome, String photo, String bio, String birth,
-                     String sesso, String città, String indirizzo, List<String> numeri, String campoSpecializzazione,
-                    Long anniEsperienza, String postoLavoro, List<String> numeriBusiness, String disponibilità,
+                     String sesso, String città, String indirizzo, String numeri, String campoSpecializzazione,
+                    Long anniEsperienza, String postoLavoro,String numeriBusiness, String disponibilità,
                     TaskCallbackLogin mCallback) {
         mContext = context;
         this.mCallback = mCallback;
@@ -87,17 +87,7 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
                 AppConstants.AUDIENCE);
         setSelectedAccountName(email);
 
-        Log.d("REGISTRAZIONE TASK ", "Do in back");
-
         RecipexServerApi apiServiceHandle = AppConstants.getApiServiceHandle(credential);
-
-
-        if(apiServiceHandle==null){
-            Log.d("REGISTRAZIONE TASK ", "NULL");
-
-            Toast.makeText(mContext, "NULL", Toast.LENGTH_LONG).show();
-        }
-        Log.d("DB","doInBack");
 
         try {
             MainRegisterUserMessage reg = new MainRegisterUserMessage();
@@ -114,14 +104,14 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
 
             //CAMPI FACOLTATIVI USER: potrebbero essere vuoti
             reg.setAddress(indirizzo);
-            //reg.setPersonalNum(numeri.get(0));
+            reg.setPersonalNum(numeri);
             reg.setCity(città);
 
             pref=mContext.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
 
             if(anniEsperienza!=0) {
-                reg.setBusinessNum(numeriBusiness.get(0));
+                reg.setBusinessNum(numeriBusiness);
                 reg.setAvailable(disponibilità);
                 reg.setPlace(postoLavoro);
                 reg.setField(campoSpecializzazione);
@@ -131,7 +121,7 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
                 editor.commit();
             }
             else{
-                editor.putBoolean("utenteSemplice", false);
+                editor.putBoolean("utenteSemplice", true);
                 editor.commit();
             }
 

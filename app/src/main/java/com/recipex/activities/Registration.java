@@ -30,8 +30,7 @@ import java.util.List;
  * Created by Sara on 26/04/2016.
  */
 public class Registration extends ActionBarActivity implements TaskCallbackLogin {
-    private String artist;
-    TextView nomeText, emailText, nomeArteText, biografiaText, sitoText;
+
     ImageView immagine;
 
     String nome, cognome, foto, email, bio, data, sesso, città, indirizzo, numeri, campoSpecializzazione, anniEsperienza,
@@ -40,7 +39,6 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
     inserisciIndirizzo, inserisciNumeri, inserisciSpecializzazione, inserisciAnni, inserisciPosto, inserisciNumeriBusiness,
     inserisciDisponibilità;
 
-    TextView contatore;
     SharedPreferences pref;
 
     public static final String URL_REGEX = "^((https?|ftp)://|(www|ftp)\\.)?[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?$";
@@ -49,10 +47,6 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
 
-
-        /*nomeText = (TextView) findViewById(R.id.nome);
-        emailText = (TextView) findViewById(R.id.email);
-        biografiaText = (TextView) findViewById(R.id.biografia);*/
         immagine = (ImageView) findViewById(R.id.immagine);
 
 
@@ -89,36 +83,19 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
         foto = extras.getString("foto");
         email = extras.getString("email");
         data = extras.getString("data");
+        sesso=extras.getString("sesso");
 
         inserisciNome.setText(nome);
         inserisciCognome.setText(cognome);
         inserisciEmail.setText(email);
         inserisciData.setText(data);
+        inserisciSesso.setText(sesso);
 
         Picasso.with(Registration.this).load(foto).into(immagine);
 
 
     }
 
-    public void done(boolean successo){
-        System.out.println("torno da  Registrazione");
-        if(successo){ //EMAIL NON PRESENTE. REGISTRAZIONE EFFETTUATA CON SUCCESSO
-            pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
-            SharedPreferences.Editor editor = pref.edit();
-            editor.putString("email_artista", email);
-            editor.commit();
-            Intent myIntent = new Intent(Registration.this, MainActivity.class);
-            this.startActivity(myIntent);
-            this.finish();
-        }else{
-            Intent myIntent = new Intent(Registration.this, Login.class);
-            pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
-            SharedPreferences.Editor editor = pref.edit();
-            editor.putBoolean("token", true).commit();
-            this.startActivity(myIntent);
-            this.finish();
-        }
-    }
 
     public void onBackPressed(){
         //do whatever you want the 'Back' button to do
@@ -147,31 +124,30 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
 
         if (id == R.id.registrati) {
             if (inserisciNome.getText().length() > 1 && inserisciCognome.getText().length() > 1 &&
-                    inserisciData.getText().length()>1) {
+                    inserisciData.getText().length()>1 && inserisciSesso.getText().length()>1) {
 
-                bio = inserisciBiografia.getText().toString();
+                nome=inserisciNome.getText().toString();
+                cognome=inserisciCognome.getText().toString();
+                email=inserisciEmail.getText().toString();
                 data = inserisciData.getText().toString();
                 sesso = inserisciSesso.getText().toString();
+
+                bio = inserisciBiografia.getText().toString();
                 città = inserisciCittà.getText().toString();
                 indirizzo = inserisciIndirizzo.getText().toString();
                 numeri = inserisciNumeri.getText().toString();
-                String[] nums=numeri.split("-");
-                List<String> numsFinal= Arrays.asList(nums);
                 campoSpecializzazione = inserisciSpecializzazione.getText().toString();
-                System.out.println("CAMPO SPEC"+ campoSpecializzazione);
                 anniEsperienza = inserisciAnni.getText().toString();
                 if(anniEsperienza.equals("")) anniEsperienza="0";
                 postoLavoro = inserisciPosto.getText().toString();
                 numeriBusiness = inserisciNumeriBusiness.getText().toString();
-                String [] numsBusiness=numeriBusiness.split("-");
-                List<String> numsBusinessFinal=Arrays.asList(numsBusiness);
                 disponibilità = inserisciDisponibilità.getText().toString();
 
                 Log.d("CAMPI ", campoSpecializzazione+"-"+anniEsperienza+"-"+postoLavoro+"-"+bio+"-"+disponibilità);
 
                 Log.d("REGISTRAZIONE ", "Sono qui");
                 if (checkNetwork()) new Register(getApplicationContext(), email, nome, cognome, foto,bio, data, sesso,
-                        città, indirizzo, numsFinal, campoSpecializzazione, Long.parseLong(anniEsperienza), postoLavoro, numsBusinessFinal,
+                        città, indirizzo, numeri, campoSpecializzazione, Long.parseLong(anniEsperienza), postoLavoro, numeriBusiness,
                         disponibilità, this).execute();
 
             }

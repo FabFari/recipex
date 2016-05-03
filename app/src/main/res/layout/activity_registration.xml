@@ -133,7 +133,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sesso:"
+                android:text="Sesso: *"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:paddingLeft="10dp"
                 android:id="@+id/sesso"
@@ -193,7 +193,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Numeri di telefono:"
+                android:text="Numero di telefono:"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:paddingLeft="10dp"
                 android:id="@+id/numeri"
@@ -205,7 +205,6 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/insertNumeri"
                 android:paddingLeft="10dp"
-                android:hint="Inserisci numeri separati da '-'"
                 android:inputType="textCapSentences"
                 android:imeOptions="actionNext"/>
         </LinearLayout>
@@ -298,7 +297,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Numeri di telefono:"
+                android:text="Numero di telefono:"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:paddingLeft="10dp"
                 android:id="@+id/numeriBusiness"
@@ -310,7 +309,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/insertNumeriBusiness"
                 android:paddingLeft="10dp"
-                android:hint="Inserisci numeri separati da '-'"
+                android:hint="Inserisci il numero del posto dove lavori"
                 android:inputType="textCapSentences"
                 android:imeOptions="actionNext"/>
 
