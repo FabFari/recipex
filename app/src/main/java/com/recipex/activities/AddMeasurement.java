@@ -4,12 +4,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.appspot.recipex_1281.recipexServerApi.model.MainAddMeasurementMessage;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.recipex.AppConstants;
 import com.vi.swipenumberpicker.OnValueChangeListener;
@@ -32,6 +35,7 @@ public class AddMeasurement extends AppCompatActivity
     private LinearLayout linearLayout;
     private TextView text_picker1;
     private TextView text_picker2;
+    private EditText bio;
     private RelativeLayout relativeLayout2;
 
     TextView picker_res1;
@@ -41,7 +45,8 @@ public class AddMeasurement extends AppCompatActivity
     CircularProgressView progressView;
 
     // Input
-    String measurement_kind = AppConstants.TEMP_CORPOREA;
+    Long user_id = 5705241014042624L;
+    String measurement_kind = AppConstants.DOLORE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,6 +131,7 @@ public class AddMeasurement extends AppCompatActivity
         text_picker2 = (TextView) findViewById(R.id.measurement_number_picker_text2);
         relativeLayout2 = (RelativeLayout) findViewById(R.id.measurement_relative2);
         progressView = (CircularProgressView) findViewById(R.id.measurement_progress_view);
+        bio = (EditText) findViewById((R.id.measurement_crgv_bio));
     }
 
     private void setupUI() {
@@ -215,6 +221,45 @@ public class AddMeasurement extends AppCompatActivity
             linearLayout.setVisibility(View.VISIBLE);
         }
         progressView.setVisibility(View.GONE);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        if(id == R.id.measurement_confirm) {
+            MainAddMeasurementMessage content = new MainAddMeasurementMessage();
+            content.setKind(measurement_kind);
+            if(measurement_kind.equals(AppConstants.PRESSIONE)) {
+                content.setSystolic(Long.parseLong(picker_res1.getText().toString()));
+                content.setDiastolic(Long.parseLong(picker_res2.getText().toString()));
+            }
+            else if(measurement_kind.equals(AppConstants.FREQ_CARDIACA))
+                content.setBpm(Long.parseLong(picker_res1.getText().toString()));
+            else if(measurement_kind.equals(AppConstants.FREQ_RESPIRAZIONE))
+                content.setRespirations(Long.parseLong(picker_res1.getText().toString()));
+            else if(measurement_kind.equals(AppConstants.SPO2)) {
+                String spo2 = float_picker_res.getText().toString();
+                content.setSpo2(Double.parseDouble(spo2.substring(0,spo2.length()-1)));
+            }
+            else if(measurement_kind.equals(AppConstants.GLUCOSIO)) {
+                content.setHgt(Double.parseDouble(float_picker_res.getText().toString()));
+            }
+            else if(measurement_kind.equals(AppConstants.TEMP_CORPOREA)){
+                content.setDegrees(Double.parseDouble(float_picker_res.getText().toString()));
+            }
+            else if(measurement_kind.equals(AppConstants.DOLORE)) {
+                content.setNrs(Long.parseLong(picker_res1.getText().toString()));
+            }
+            else {
+                content.setChlLevel(Double.parseDouble(float_picker_res.getText().toString()));
+            }
+            content.setNote(bio.getText().toString());
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 }
