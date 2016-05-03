@@ -20,7 +20,7 @@ public class TabFragment extends Fragment {
 
     public static TabLayout tabLayout;
     public static ViewPager viewPager;
-    public static int int_items = 3 ;
+    public static int int_items = 2 ;
 
     @Nullable
     @Override
@@ -69,10 +69,7 @@ public class TabFragment extends Fragment {
         {
             switch (position){
                 case 0 : return new PazientiFragment();
-                case 1 : return new PazientiFragment();
-                case 2 : return new PazientiFragment();
-                /*case 1 : return new MisurazioniFragment();
-                case 2 : return new BisogniFragment();*/
+                case 1 : return new MisurazioniFragment();
             }
             return null;
         }
@@ -96,8 +93,6 @@ public class TabFragment extends Fragment {
                     return "Assistiti";
                 case 1 :
                     return "Misurazioni";
-                case 2 :
-                    return "Bisogni";
             }
             return null;
         }

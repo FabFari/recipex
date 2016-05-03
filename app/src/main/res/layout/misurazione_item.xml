@@ -30,15 +30,29 @@
                 android:layout_marginTop="10dp"
                 android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/titolo"
-                    android:text="Misurazione"
-                    android:textColor="@color/colorPrimaryDark"
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:id="@+id/linlaymain"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:textStyle="bold" />
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+                    <ImageView
+                        xmlns:app="http://schemas.android.com/apk/res-auto"
+                        android:id="@+id/tipo_mes"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginBottom="5dp" />
+
+                    <TextView
+                        android:id="@+id/titolo"
+                        android:text="Misurazione"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:textStyle="bold" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/data"
@@ -87,6 +101,25 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:orientation="horizontal">
+
+            <ImageView
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:src="@drawable/ic_edit"
+                android:id="@+id/ic_fill"
+                android:layout_alignParentRight="true"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp" />
+            <ImageView
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/ic_feedback"
+                android:src="@drawable/feedback"
+                android:layout_alignParentRight="true"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -98,24 +131,6 @@
                 android:background="@drawable/count_view_design"
                 android:textAllCaps="true"
                 android:textStyle="bold" />
-            <ImageView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                android:id="@+id/ic_feedback"
-                android:src="@drawable/feedback"
-                android:layout_alignParentRight="true"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginBottom="5dp"
-                android:layout_marginTop="5dp" />
-            <ImageView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                android:src="drawable/ic_edit"
-                android:id="@+id/ic_fill"
-                android:layout_alignParentRight="true"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginBottom="5dp"
-                android:layout_marginTop="5dp" />
         </LinearLayout>
 
     </android.support.v7.widget.CardView>
