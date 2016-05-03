@@ -32,24 +32,26 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
     String sesso;
     String città;
     String indirizzo;
-    List<String> numeri;
+    String numeri;
     String campoSpecializzazione;
     Long anniEsperienza;
     String postoLavoro;
-    List<String> numeriBusiness;
+    String numeriBusiness;
     String disponibilità;
 
     GoogleAccountCredential credential;
 
     SharedPreferences settings;
 
+    SharedPreferences pref;
+
     public Register(Context context) {
         mContext = context;
     }
 
     public Register(Context context, String email, String nome, String cognome, String photo, String bio, String birth,
-                     String sesso, String città, String indirizzo, List<String> numeri, String campoSpecializzazione,
-                    Long anniEsperienza, String postoLavoro, List<String> numeriBusiness, String disponibilità,
+                     String sesso, String città, String indirizzo, String numeri, String campoSpecializzazione,
+                    Long anniEsperienza, String postoLavoro,String numeriBusiness, String disponibilità,
                     TaskCallbackLogin mCallback) {
         mContext = context;
         this.mCallback = mCallback;
@@ -85,41 +87,42 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
                 AppConstants.AUDIENCE);
         setSelectedAccountName(email);
 
-        Log.d("REGISTRAZIONE TASK ", "Do in back");
-
         RecipexServerApi apiServiceHandle = AppConstants.getApiServiceHandle(credential);
-
-
-        if(apiServiceHandle==null){
-            Log.d("REGISTRAZIONE TASK ", "NULL");
-
-            Toast.makeText(mContext, "NULL", Toast.LENGTH_LONG).show();
-        }
-        Log.d("DB","doInBack");
 
         try {
             MainRegisterUserMessage reg = new MainRegisterUserMessage();
 
             //CAMPI OBBLIGATORI
             reg.setEmail(email);
-            Log.d("Data ", birth);
             reg.setBirth(birth);
+            Log.d("DATA ", birth);
             reg.setName(nome);
             reg.setSurname(cognome);
+            reg.setSex(sesso);
+            Log.d("SESSO ", sesso);
+            reg.setPic(photo);
 
             //CAMPI FACOLTATIVI USER: potrebbero essere vuoti
-            reg.setSex(sesso);
             reg.setAddress(indirizzo);
-            //reg.setPersonalNum(numeri);
+            reg.setPersonalNum(numeri);
             reg.setCity(città);
 
+            pref=mContext.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+
             if(anniEsperienza!=0) {
-                //reg.setBusinessNum(numeriBusiness);
+                reg.setBusinessNum(numeriBusiness);
                 reg.setAvailable(disponibilità);
                 reg.setPlace(postoLavoro);
                 reg.setField(campoSpecializzazione);
                 reg.setYearsExp(anniEsperienza);
                 reg.setBio(bio);
+                editor.putBoolean("utenteSemplice", false);
+                editor.commit();
+            }
+            else{
+                editor.putBoolean("utenteSemplice", true);
+                editor.commit();
             }
 
             System.out.println("CAMPO SPEC 2 "+campoSpecializzazione);
@@ -127,13 +130,16 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
             RecipexServerApi.User.RegisterUser post = apiServiceHandle.user().registerUser(reg);
 
             MainDefaultResponseMessage response = post.execute();
-            if(response.getMessage().equals("User already existent.")){
 
-                return null;
-            }else{
-                Log.d("ERROR ", response.getCode()+ " "+response.getMessage());
+            System.out.println("RESPONSE " + response.getMessage());
+            Log.d("RESPONSE ", response.getMessage());
+
+            if(response.getMessage().equals("User already existent.")){
                 return reg;
+            }else{
+                return null;
             }
+
         } catch (IOException e) {
             Looper.prepare();
             Log.d("REGISTRAZIONE TASK ", "EXCEPTIONC "+e.getCause());
@@ -145,12 +151,26 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
 
 
     protected void onPostExecute(MainRegisterUserMessage greeting) {
-        if (greeting!=null) {
-            Log.d("DEBUG","User NON era REGISTRATO!");
+        SharedPreferences pref=mContext.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
 
-            mCallback.done(true, greeting.get("email").toString());
-        }else{
+        if (greeting!=null) {
             Log.d("DEBUG","User è registrato");
+            if(greeting.getField()==null){
+                Log.d("FIELD ", "field null");
+                editor.putBoolean("utenteSemplice", true);
+                editor.commit();
+                Log.d("UTENTESEMPLICE REGISTER", " "+pref.getBoolean("utenteSemplice", false));
+                mCallback.done(true, greeting.get("email").toString());
+            }
+            else{
+                editor.putBoolean("utenteSemplice", false);
+                editor.commit();
+                mCallback.done(true, greeting.get("email").toString());
+            }
+
+        }else{
+            Log.d("DEBUG","User NON era REGISTRATO!");
             System.out.println(email);
             mCallback.done(false, email.toString());
         }

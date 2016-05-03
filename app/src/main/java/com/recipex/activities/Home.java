@@ -1,5 +1,6 @@
 package com.recipex.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
@@ -30,7 +31,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.recipex.CircleTransform;
 import com.recipex.R;
+import com.recipex.fragments.MisurazioniFragment;
 import com.recipex.fragments.TabFragment;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
@@ -83,9 +86,14 @@ public class Home extends AppCompatActivity
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
 
+        pref = getApplicationContext().getSharedPreferences("MyPref",MODE_PRIVATE);
+        boolean utenteSemplice=pref.getBoolean("utenteSemplice", false);
+        Log.d("UTENTESEMPLICE ", " "+utenteSemplice);
         mFragmentManager = getSupportFragmentManager();
         mFragmentTransaction = mFragmentManager.beginTransaction();
-        mFragmentTransaction.replace(R.id.containerView, new TabFragment()).commit();
+        if(utenteSemplice)
+            mFragmentTransaction.replace(R.id.containerView, new MisurazioniFragment()).commit();
+        else mFragmentTransaction.replace(R.id.containerView, new TabFragment()).commit();
 
         /*String nome = new StringBuilder(getIntent().getStringExtra("nome")).append(" ").append(getIntent().getStringExtra("cognome")).toString();
 
@@ -93,7 +101,6 @@ public class Home extends AppCompatActivity
 
         String photo = new StringBuilder(getIntent().getStringExtra("foto")).toString();
         System.out.println(photo);*/
-        pref = getApplicationContext().getSharedPreferences("MyPref",MODE_PRIVATE);
 
         String nome=pref.getString("nome", "");
         String cognome=pref.getString("cognome", "");
@@ -165,7 +172,7 @@ public class Home extends AppCompatActivity
 
         if (id == R.id.action_logout) {
             //Login.signOutFromGplus();
-            pref.edit().remove("email_artista").commit();
+            pref.edit().remove("email").commit();
             pref.edit().putBoolean("token", true).commit();
 
             Intent i = new Intent(Home.this, Login.class);
@@ -189,6 +196,8 @@ public class Home extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+
+        //containerView è il FrameLayout del layout della home
 
         if (id == R.id.home) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
@@ -298,38 +307,4 @@ public class Home extends AppCompatActivity
         return color;
     }
 
-}
-class CircleTransform implements Transformation {
-    @Override
-    public Bitmap transform(Bitmap source) {
-        int size = Math.min(source.getWidth(), source.getHeight());
-
-        int x = (source.getWidth() - size) / 2;
-        int y = (source.getHeight() - size) / 2;
-
-        Bitmap squaredBitmap = Bitmap.createBitmap(source, x, y, size, size);
-        if (squaredBitmap != source) {
-            source.recycle();
-        }
-
-        Bitmap bitmap = Bitmap.createBitmap(size, size, source.getConfig());
-
-        Canvas canvas = new Canvas(bitmap);
-        Paint paint = new Paint();
-        BitmapShader shader = new BitmapShader(squaredBitmap,
-                BitmapShader.TileMode.CLAMP, BitmapShader.TileMode.CLAMP);
-        paint.setShader(shader);
-        paint.setAntiAlias(true);
-
-        float r = size / 2f;
-        canvas.drawCircle(r, r, r, paint);
-
-        squaredBitmap.recycle();
-        return bitmap;
-    }
-
-    @Override
-    public String key() {
-        return "circle";
-    }
 }
