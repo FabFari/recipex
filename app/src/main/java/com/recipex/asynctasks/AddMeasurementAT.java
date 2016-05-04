@@ -2,7 +2,9 @@ package com.recipex.asynctasks;
 
 import android.app.Activity;
 import android.os.AsyncTask;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
+import android.view.View;
 
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.appspot.recipex_1281.recipexServerApi.model.MainAddMeasurementMessage;
@@ -22,15 +24,16 @@ public class AddMeasurementAT extends AsyncTask<Void, Void, MainDefaultResponseM
     public static String TAG = "GET_USER_AT";
     RecipexServerApi apiHandler;
     Activity activity;
+    View mainView;
     AddMeasurementTC taskCallback;
     Long user_id;
     MainAddMeasurementMessage content;
-    AlertDialogManager alert = new AlertDialogManager();
 
-    public AddMeasurementAT(AddMeasurementTC taskCallback, Activity activity, Long user_id,
+    public AddMeasurementAT(AddMeasurementTC taskCallback, Activity activity, View mainView, Long user_id,
                             MainAddMeasurementMessage content, RecipexServerApi apiHandler) {
         this.taskCallback = taskCallback;
         this.activity = activity;
+        this.mainView = mainView;
         this.user_id = user_id;
         this.content = content;
         this.apiHandler = apiHandler;
@@ -44,6 +47,19 @@ public class AddMeasurementAT extends AsyncTask<Void, Void, MainDefaultResponseM
             return response;
         }
         catch(IOException e) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    activity.runOnUiThread(new Runnable(){
+                        @Override
+                        public void run(){
+                            Snackbar snackbar = Snackbar
+                                    .make(mainView, "Operazione non riuscita!", Snackbar.LENGTH_SHORT);
+                            snackbar.show();
+                        }
+                    });
+                }
+            });
             taskCallback.done(false, null);
         }
 
@@ -54,17 +70,8 @@ public class AddMeasurementAT extends AsyncTask<Void, Void, MainDefaultResponseM
     protected void onPostExecute(MainDefaultResponseMessage response) {
         if(response != null && response.getCode().equals(AppConstants.CREATED))
             taskCallback.done(true, response);
-        else {
-            activity.runOnUiThread(new Runnable() {
-                              @Override
-                              public void run() {
-                                  alert.showAlertDialog(activity,
-                                          "Attenzione!",
-                                          "Si è verificato un problema. Riprovare!", false);
-                              }
-            });
+        else
             taskCallback.done(false, null);
-        }
 
     }
 
