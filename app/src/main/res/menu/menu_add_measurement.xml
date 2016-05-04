@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.recipex.activities.AddMeasurement">
     <item
-        android:id="@+id/profile.user_edit"
-        android:title="@string/edit"
+        android:id="@+id/measurement.confirm"
+        android:title="Confirm"
         android:orderInCategory="100"
         app:showAsAction="always"
         android:icon="@drawable/ic_checkmark"/>

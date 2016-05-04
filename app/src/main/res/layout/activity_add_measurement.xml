@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/measurement.main_relative"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -258,7 +259,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
                 <EditText
-                    android:id="@+id/profile.crgv_bio"
+                    android:id="@+id/measurement.crgv_bio"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="120dp"
