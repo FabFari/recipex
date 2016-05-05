@@ -15,16 +15,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.recipex.R;
 import com.recipex.asynctasks.Register;
-import com.recipex.TaskCallbackLogin;
+import com.recipex.taskcallbacks.TaskCallbackLogin;
 import com.squareup.picasso.Picasso;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by Sara on 26/04/2016.
@@ -40,8 +36,6 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
     inserisciDisponibilità;
 
     SharedPreferences pref;
-
-    public static final String URL_REGEX = "^((https?|ftp)://|(www|ftp)\\.)?[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?$";
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
