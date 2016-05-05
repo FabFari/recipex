@@ -204,7 +204,6 @@
                 fab:fab_colorDisabled="@android:color/darker_gray"
                 fab:fab_size="mini"
                 fab:fab_label="Familiare" />
-
         </com.github.clans.fab.FloatingActionMenu>
 
         <de.hdodenhof.circleimageview.CircleImageView
