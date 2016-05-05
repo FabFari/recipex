@@ -35,6 +35,7 @@ import com.recipex.CircleTransform;
 import com.recipex.R;
 import com.recipex.fragments.MisurazioniFragment;
 import com.recipex.fragments.TabFragment;
+import com.recipex.fragments.TerapieFragment;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 
@@ -218,7 +219,7 @@ public class Home extends AppCompatActivity
             fragmentTransaction.replace(R.id.containerView,new TabFragment()).commit();
         } else if (id == R.id.nav_terapie) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.containerView,new TabFragment()).commit();
+            fragmentTransaction.replace(R.id.containerView,new TerapieFragment()).commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

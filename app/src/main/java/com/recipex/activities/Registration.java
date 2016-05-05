@@ -19,7 +19,7 @@ import android.widget.Toast;
 
 import com.recipex.R;
 import com.recipex.asynctasks.Register;
-import com.recipex.utilities.TaskCallbackLogin;
+import com.recipex.taskcallbacks.TaskCallbackLogin;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -36,8 +36,6 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
     inserisciDisponibilità;
 
     SharedPreferences pref;
-
-    public static final String URL_REGEX = "^((https?|ftp)://|(www|ftp)\\.)?[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?$";
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
