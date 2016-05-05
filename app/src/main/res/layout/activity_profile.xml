@@ -112,6 +112,7 @@
             </LinearLayout>
         </android.support.v7.widget.Toolbar>
 
+        <!--
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/profile.fab"
             android:layout_width="wrap_content"
@@ -120,8 +121,91 @@
             android:layout_margin="16dp"
             android:scaleType="center"
             android:src="@drawable/ic_message"
-            android:visibility="invisible"
-            />
+            android:visibility="invisible" />
+        -->
+
+        <com.github.clans.fab.FloatingActionMenu
+            xmlns:fab="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/profile.fab_menu_requests"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|right"
+            android:layout_margin="16dp"
+            fab:menu_fab_size="normal"
+            fab:menu_colorNormal="@color/colorAccent"
+            fab:menu_colorPressed="@color/colorAccentDark"
+            fab:menu_colorRipple="#99FFFFFF"
+            fab:menu_animationDelayPerItem="50"
+            fab:menu_icon="@drawable/fab_add"
+            fab:menu_buttonSpacing="0dp"
+            fab:menu_labels_margin="0dp"
+            fab:menu_labels_showAnimation="@anim/fab_slide_in_from_right"
+            fab:menu_labels_hideAnimation="@anim/fab_slide_out_to_right"
+            fab:menu_labels_paddingTop="4dp"
+            fab:menu_labels_paddingRight="8dp"
+            fab:menu_labels_paddingBottom="4dp"
+            fab:menu_labels_paddingLeft="8dp"
+            fab:menu_labels_padding="8dp"
+            fab:menu_labels_textColor="#FFFFFF"
+            fab:menu_labels_textSize="14sp"
+            fab:menu_labels_cornerRadius="3dp"
+            fab:menu_labels_colorNormal="@color/colorPrimary"
+            fab:menu_labels_colorPressed="@color/colorPrimary"
+            fab:menu_labels_colorRipple="#66FFFFFF"
+            fab:menu_labels_showShadow="true"
+            fab:menu_labels_singleLine="false"
+            fab:menu_labels_ellipsize="none"
+            fab:menu_labels_maxLines="-1"
+            fab:menu_labels_position="left"
+            fab:menu_openDirection="up"
+            fab:menu_backgroundColor="@android:color/transparent"
+            fab:menu_fab_label="Aggiungi come">
+
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/profile.fab_menu_item4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_caregivers_v2"
+                fab:fab_colorNormal="@color/colorAccent"
+                fab:fab_colorPressed="@color/colorAccentDark"
+                fab:fab_colorDisabled="@android:color/darker_gray"
+                fab:fab_size="mini"
+                fab:fab_label="Caregiver" />
+
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/profile.fab_menu_item3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_visiting_nurse"
+                fab:fab_colorNormal="@color/colorAccent"
+                fab:fab_colorPressed="@color/colorAccentDark"
+                fab:fab_colorDisabled="@android:color/darker_gray"
+                fab:fab_size="mini"
+                fab:fab_label="Infermiere domiciliare" />
+
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/profile.fab_menu_item2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_pc_physician"
+                fab:fab_colorNormal="@color/colorAccent"
+                fab:fab_colorPressed="@color/colorAccentDark"
+                fab:fab_colorDisabled="@android:color/darker_gray"
+                fab:fab_size="mini"
+                fab:fab_label="Medico di base" />
+
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/profile.fab_menu_item1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_relatives"
+                fab:fab_colorNormal="@color/colorAccent"
+                fab:fab_colorPressed="@color/colorAccentDark"
+                fab:fab_colorDisabled="@android:color/darker_gray"
+                fab:fab_size="mini"
+                fab:fab_label="Familiare" />
+
+        </com.github.clans.fab.FloatingActionMenu>
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/profile.usr_pic"

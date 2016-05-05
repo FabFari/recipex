@@ -19,7 +19,7 @@
 package com.appspot.recipex_1281.recipexServerApi.model;
 
 /**
- * Model definition for MainRequestInfoMessage.
+ * Model definition for MainAddPrescriptionMessage.
  *
  * <p> This is the Java data model class that specifies how to parse/serialize into the JSON that is
  * transmitted over HTTP when working with the recipexServerApi. For a detailed explanation see:
@@ -29,7 +29,13 @@ package com.appspot.recipex_1281.recipexServerApi.model;
  * @author Google, Inc.
  */
 @SuppressWarnings("javadoc")
-public final class MainRequestInfoMessage extends com.google.api.client.json.GenericJson {
+public final class MainAddPrescriptionMessage extends com.google.api.client.json.GenericJson {
+
+  /**
+   * The value may be {@code null}.
+   */
+  @com.google.api.client.util.Key("active_ingredient") @com.google.api.client.json.JsonString
+  private java.lang.Long activeIngredient;
 
   /**
    * The value may be {@code null}.
@@ -41,7 +47,7 @@ public final class MainRequestInfoMessage extends com.google.api.client.json.Gen
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key @com.google.api.client.json.JsonString
-  private java.lang.Long id;
+  private java.lang.Long dose;
 
   /**
    * The value may be {@code null}.
@@ -53,31 +59,46 @@ public final class MainRequestInfoMessage extends com.google.api.client.json.Gen
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private java.lang.String message;
-
-  /**
-   * The value may be {@code null}.
-   */
-  @com.google.api.client.util.Key @com.google.api.client.json.JsonString
-  private java.lang.Long receiver;
+  private java.lang.String name;
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private MainDefaultResponseMessage response;
-
-  /**
-   * The value may be {@code null}.
-   */
-  @com.google.api.client.util.Key
-  private java.lang.String role;
+  private java.lang.String pil;
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key @com.google.api.client.json.JsonString
-  private java.lang.Long sender;
+  private java.lang.Long quantity;
+
+  /**
+   * The value may be {@code null}.
+   */
+  @com.google.api.client.util.Key
+  private java.lang.Boolean recipe;
+
+  /**
+   * The value may be {@code null}.
+   */
+  @com.google.api.client.util.Key
+  private java.lang.String units;
+
+  /**
+   * @return value or {@code null} for none
+   */
+  public java.lang.Long getActiveIngredient() {
+    return activeIngredient;
+  }
+
+  /**
+   * @param activeIngredient activeIngredient or {@code null} for none
+   */
+  public MainAddPrescriptionMessage setActiveIngredient(java.lang.Long activeIngredient) {
+    this.activeIngredient = activeIngredient;
+    return this;
+  }
 
   /**
    * @return value or {@code null} for none
@@ -89,7 +110,7 @@ public final class MainRequestInfoMessage extends com.google.api.client.json.Gen
   /**
    * @param caregiver caregiver or {@code null} for none
    */
-  public MainRequestInfoMessage setCaregiver(java.lang.Long caregiver) {
+  public MainAddPrescriptionMessage setCaregiver(java.lang.Long caregiver) {
     this.caregiver = caregiver;
     return this;
   }
@@ -97,15 +118,15 @@ public final class MainRequestInfoMessage extends com.google.api.client.json.Gen
   /**
    * @return value or {@code null} for none
    */
-  public java.lang.Long getId() {
-    return id;
+  public java.lang.Long getDose() {
+    return dose;
   }
 
   /**
-   * @param id id or {@code null} for none
+   * @param dose dose or {@code null} for none
    */
-  public MainRequestInfoMessage setId(java.lang.Long id) {
-    this.id = id;
+  public MainAddPrescriptionMessage setDose(java.lang.Long dose) {
+    this.dose = dose;
     return this;
   }
 
@@ -119,7 +140,7 @@ public final class MainRequestInfoMessage extends com.google.api.client.json.Gen
   /**
    * @param kind kind or {@code null} for none
    */
-  public MainRequestInfoMessage setKind(java.lang.String kind) {
+  public MainAddPrescriptionMessage setKind(java.lang.String kind) {
     this.kind = kind;
     return this;
   }
@@ -127,86 +148,86 @@ public final class MainRequestInfoMessage extends com.google.api.client.json.Gen
   /**
    * @return value or {@code null} for none
    */
-  public java.lang.String getMessage() {
-    return message;
+  public java.lang.String getName() {
+    return name;
   }
 
   /**
-   * @param message message or {@code null} for none
+   * @param name name or {@code null} for none
    */
-  public MainRequestInfoMessage setMessage(java.lang.String message) {
-    this.message = message;
+  public MainAddPrescriptionMessage setName(java.lang.String name) {
+    this.name = name;
     return this;
   }
 
   /**
    * @return value or {@code null} for none
    */
-  public java.lang.Long getReceiver() {
-    return receiver;
+  public java.lang.String getPil() {
+    return pil;
   }
 
   /**
-   * @param receiver receiver or {@code null} for none
+   * @param pil pil or {@code null} for none
    */
-  public MainRequestInfoMessage setReceiver(java.lang.Long receiver) {
-    this.receiver = receiver;
+  public MainAddPrescriptionMessage setPil(java.lang.String pil) {
+    this.pil = pil;
     return this;
   }
 
   /**
    * @return value or {@code null} for none
    */
-  public MainDefaultResponseMessage getResponse() {
-    return response;
+  public java.lang.Long getQuantity() {
+    return quantity;
   }
 
   /**
-   * @param response response or {@code null} for none
+   * @param quantity quantity or {@code null} for none
    */
-  public MainRequestInfoMessage setResponse(MainDefaultResponseMessage response) {
-    this.response = response;
+  public MainAddPrescriptionMessage setQuantity(java.lang.Long quantity) {
+    this.quantity = quantity;
     return this;
   }
 
   /**
    * @return value or {@code null} for none
    */
-  public java.lang.String getRole() {
-    return role;
+  public java.lang.Boolean getRecipe() {
+    return recipe;
   }
 
   /**
-   * @param role role or {@code null} for none
+   * @param recipe recipe or {@code null} for none
    */
-  public MainRequestInfoMessage setRole(java.lang.String role) {
-    this.role = role;
+  public MainAddPrescriptionMessage setRecipe(java.lang.Boolean recipe) {
+    this.recipe = recipe;
     return this;
   }
 
   /**
    * @return value or {@code null} for none
    */
-  public java.lang.Long getSender() {
-    return sender;
+  public java.lang.String getUnits() {
+    return units;
   }
 
   /**
-   * @param sender sender or {@code null} for none
+   * @param units units or {@code null} for none
    */
-  public MainRequestInfoMessage setSender(java.lang.Long sender) {
-    this.sender = sender;
+  public MainAddPrescriptionMessage setUnits(java.lang.String units) {
+    this.units = units;
     return this;
   }
 
   @Override
-  public MainRequestInfoMessage set(String fieldName, Object value) {
-    return (MainRequestInfoMessage) super.set(fieldName, value);
+  public MainAddPrescriptionMessage set(String fieldName, Object value) {
+    return (MainAddPrescriptionMessage) super.set(fieldName, value);
   }
 
   @Override
-  public MainRequestInfoMessage clone() {
-    return (MainRequestInfoMessage) super.clone();
+  public MainAddPrescriptionMessage clone() {
+    return (MainAddPrescriptionMessage) super.clone();
   }
 
 }

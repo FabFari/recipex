@@ -105,6 +105,14 @@ public class AddMeasurement extends AppCompatActivity
     }
 
     @Override
+    public void onBackPressed(){
+        Intent myIntent = new Intent(getApplicationContext(), Home.class);
+        myIntent.putExtra("UserId", user_id);
+        startActivity(myIntent);
+        this.finish();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_add_measurement, menu);
         return true;

@@ -31,9 +31,7 @@ import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 import com.recipex.R;
 import com.recipex.asynctasks.Register;
-import com.recipex.TaskCallbackLogin;
-
-import java.util.ArrayList;
+import com.recipex.utilities.TaskCallbackLogin;
 
 
 public class Login extends AppCompatActivity implements TaskCallbackLogin, OnClickListener, ConnectionCallbacks, OnConnectionFailedListener {
