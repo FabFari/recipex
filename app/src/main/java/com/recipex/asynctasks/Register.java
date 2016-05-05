@@ -12,8 +12,7 @@ import com.appspot.recipex_1281.recipexServerApi.model.MainDefaultResponseMessag
 import com.appspot.recipex_1281.recipexServerApi.model.MainRegisterUserMessage;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.recipex.AppConstants;
-import com.recipex.utilities.TaskCallbackLogin;
-
+import com.recipex.taskcallbacks.TaskCallbackLogin;
 import java.io.IOException;
 
 /**
