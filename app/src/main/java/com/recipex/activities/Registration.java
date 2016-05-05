@@ -15,16 +15,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.recipex.R;
 import com.recipex.asynctasks.Register;
-import com.recipex.TaskCallbackLogin;
+import com.recipex.utilities.TaskCallbackLogin;
 import com.squareup.picasso.Picasso;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by Sara on 26/04/2016.

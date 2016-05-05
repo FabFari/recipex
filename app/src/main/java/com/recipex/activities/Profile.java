@@ -1,15 +1,23 @@
 package com.recipex.activities;
 
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
+import com.appspot.recipex_1281.recipexServerApi.model.MainDefaultResponseMessage;
+import com.appspot.recipex_1281.recipexServerApi.model.MainRequestSendMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserInfoMessage;
+import com.appspot.recipex_1281.recipexServerApi.model.MainUserRelationsMessage;
+import com.github.clans.fab.FloatingActionMenu;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.recipex.AppConstants;
 import com.recipex.AppConstants.*;
 import com.recipex.R;
+import com.recipex.asynctasks.CheckUserRelationsAT;
 import com.recipex.asynctasks.GetUserAT;
+import com.recipex.asynctasks.SendRequestAT;
+import com.recipex.taskcallbacks.CheckUserRelationsTC;
 import com.recipex.taskcallbacks.GetUserTC;
+import com.recipex.taskcallbacks.SendRequestTC;
 import com.recipex.utilities.AlertDialogManager;
 import com.recipex.utilities.ConnectionDetector;
 import com.squareup.picasso.Picasso;
@@ -49,7 +57,8 @@ import java.util.Locale;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class Profile extends AppCompatActivity
-        implements AppBarLayout.OnOffsetChangedListener, GetUserTC {
+        implements AppBarLayout.OnOffsetChangedListener, GetUserTC, CheckUserRelationsTC,
+        SendRequestTC,View.OnClickListener {
 
     public static final String TAG = "PROFILE";
     private static final float PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR  = 0.9f;
@@ -80,7 +89,15 @@ public class Profile extends AppCompatActivity
     private TextView tolbar_usr_name;
     private TextView crgv_subtitle;
     private CircularProgressView progressView;
-    private FloatingActionButton fab;
+    //private FloatingActionButton fab;
+
+    // As a visitor
+    // TODO Aggiungere un fab per aggiungere paziente se caregiver
+    private com.github.clans.fab.FloatingActionButton fab_relatives;
+    private com.github.clans.fab.FloatingActionButton fab_pc_physician;
+    private com.github.clans.fab.FloatingActionButton fab_visiting_nurse;
+    private com.github.clans.fab.FloatingActionButton fab_caregivers;
+
     // USER
     // Required
     private TextView name;
@@ -151,7 +168,10 @@ public class Profile extends AppCompatActivity
         else {
             progressView.startAnimation();
             RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-            if (checkNetwork()) new GetUserAT(this, this, profile_id, apiHandler).execute();
+            if (checkNetwork()) {
+                new GetUserAT(this, this, profile_id, apiHandler).execute();
+                new CheckUserRelationsAT(this, this, coordinatorLayout, user_id, profile_id, apiHandler).execute();
+            }
         }
     }
 
@@ -165,7 +185,7 @@ public class Profile extends AppCompatActivity
         userCard = (CardView) findViewById(R.id.card_view_user);
         tolbar_usr_name = (TextView) findViewById(R.id.profile_bar_usr_name);
         progressView = (CircularProgressView) findViewById(R.id.profile_progress_view);
-        fab = (FloatingActionButton) findViewById(R.id.profile_fab);
+        //fab = (FloatingActionButton) findViewById(R.id.profile_fab);
         crgv_subtitle = (TextView) findViewById(R.id.profile_crgv_subtitle);
         // USER
         name = (TextView) findViewById(R.id.profile_usr_name);
@@ -193,6 +213,11 @@ public class Profile extends AppCompatActivity
         bio_lbl = (TextView) findViewById(R.id.profile_crgv_bio_lbl);
         bio_card = (CardView) findViewById(R.id.profile_card_view_crgv_bio);
         bio = (TextView) findViewById(R.id.profile_crgv_bio);
+        // VISITOR
+        fab_relatives = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.profile_fab_menu_item1);
+        fab_pc_physician = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.profile_fab_menu_item2);
+        fab_visiting_nurse = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.profile_fab_menu_item3);
+        fab_caregivers = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.profile_fab_menu_item4);
     }
 
     @Override
@@ -270,7 +295,10 @@ public class Profile extends AppCompatActivity
                         editor.apply();
                         // User is authorized
                         RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-                        if(checkNetwork()) new GetUserAT(this, this, user_id, apiHandler).execute();
+                        if(checkNetwork()) {
+                            new GetUserAT(this, this, user_id, apiHandler).execute();
+                            new CheckUserRelationsAT(this, this, coordinatorLayout, user_id, profile_id, apiHandler).execute();
+                        }
                     }
                 }
                 break;
@@ -375,12 +403,42 @@ public class Profile extends AppCompatActivity
         caregiverCard.setVisibility(View.VISIBLE);
         }
 
-        if(!user_id.equals(profile_id))
-            fab.setVisibility(View.VISIBLE);
+        //if(!user_id.equals(profile_id))
+            //fab.setVisibility(View.VISIBLE);
 
         progressView.stopAnimation();
         progressView.setVisibility(View.GONE);
 
+    }
+
+    @Override
+    public void done(boolean res, final MainUserRelationsMessage response) {
+        if(response != null) {
+            if(res) {
+                Log.d(TAG, "RESPONSE: "+ response);
+                if(response.getIsRelative())
+                    fab_relatives.setEnabled(false);
+                else
+                    fab_relatives.setOnClickListener(this);
+                if(response.getIsPcPhysician())
+                    fab_pc_physician.setEnabled(false);
+                else
+                    fab_pc_physician.setOnClickListener(this);
+                if(response.getIsVisitingNurse())
+                    fab_visiting_nurse.setEnabled(false);
+                else
+                    fab_visiting_nurse.setOnClickListener(this);
+                if(response.getIsCaregiver())
+                    fab_caregivers.setEnabled(false);
+                else
+                    fab_caregivers.setOnClickListener(this);
+            }
+            else {
+                Snackbar snackbar = Snackbar
+                        .make(coordinatorLayout, "Operazione non riuscita: "+response.getResponse().getCode(), Snackbar.LENGTH_SHORT);
+                snackbar.show();
+            }
+        }
     }
 
     // setSelectedAccountName definition
@@ -416,4 +474,51 @@ public class Profile extends AppCompatActivity
         return false;
     }
 
+    @Override
+    public void onClick(View v) {
+        MainRequestSendMessage content = new MainRequestSendMessage();
+        content.setSender(user_id);
+        // TODO Aggiungere Dialog per inserimento messaggio
+        switch(v.getId()) {
+            case R.id.profile_fab_menu_item1:
+                content.setKind(AppConstants.FAMILIARE);
+                break;
+            case R.id.profile_fab_menu_item2:
+                content.setKind(AppConstants.MEDICO_BASE);
+                content.setRole(AppConstants.ASSISTITO);
+                break;
+            case R.id.profile_fab_menu_item3:
+                content.setKind(AppConstants.INF_DOMICILIARE);
+                content.setRole(AppConstants.ASSISTITO);
+                break;
+            case R.id.profile_fab_menu_item4:
+                content.setKind(AppConstants.CAREGIVER);
+                content.setRole(AppConstants.ASSISTITO);
+                break;
+        }
+
+        progressView.startAnimation();
+        progressView.setVisibility(View.VISIBLE);
+        RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
+        if (checkNetwork()) new SendRequestAT(this, this, coordinatorLayout, profile_id, content, apiHandler).execute();
+
+    }
+
+    @Override
+    public void done(boolean resp, MainDefaultResponseMessage response) {
+        if(response != null) {
+            if(resp) {
+                Snackbar snackbar = Snackbar
+                        .make(coordinatorLayout, "Richiesta inviata: "+response.getPayload(), Snackbar.LENGTH_SHORT);
+                snackbar.show();
+            }
+            else {
+                Snackbar snackbar = Snackbar
+                        .make(coordinatorLayout, "Operazione non riuscita: "+response.getCode(), Snackbar.LENGTH_SHORT);
+                snackbar.show();
+            }
+        }
+        progressView.stopAnimation();
+        progressView.setVisibility(View.INVISIBLE);
+    }
 }

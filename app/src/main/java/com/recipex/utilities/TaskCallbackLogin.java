@@ -1,4 +1,4 @@
-package com.recipex;
+package com.recipex.utilities;
 
 /**
  * Created by Sara on 26/04/2016.
