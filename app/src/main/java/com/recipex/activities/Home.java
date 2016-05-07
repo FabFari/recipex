@@ -1,5 +1,6 @@
 package com.recipex.activities;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -73,8 +74,11 @@ public class Home extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                // Change Fabrizio
+                Intent myIntent = new Intent(Home.this, AddMeasurement.class);
+                Activity activity = (Activity) view.getContext();
+                activity.startActivity(myIntent);
+                activity.finish();
             }
         });
 
@@ -103,6 +107,8 @@ public class Home extends AppCompatActivity
         String photo = new StringBuilder(getIntent().getStringExtra("foto")).toString();
         System.out.println(photo);*/
 
+        // Change Fabrizio
+        Long userId=pref.getLong("userId", 0L);
         String nome=pref.getString("nome", "");
         String cognome=pref.getString("cognome", "");
         String email=pref.getString("email","");
