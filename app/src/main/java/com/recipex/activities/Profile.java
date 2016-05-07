@@ -128,6 +128,8 @@ public class Profile extends AppCompatActivity
     private CardView bio_card;
     private TextView bio;
 
+    SharedPreferences myPrefs;
+
     // INPUT VARIABLES
     private Long user_id;
     private Long profile_id;
@@ -141,11 +143,17 @@ public class Profile extends AppCompatActivity
 
         mAppBarLayout.addOnOffsetChangedListener(this);
 
-        Bundle extras = getIntent().getExtras();
-        //user_id = (Long) extras.get("userId");
+        myPrefs = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
+        // user_id = myPrefs.getLong("userId", 0L);
         user_id = 5705241014042624L;
         //user_id = 5724160613416960L;
-        profile_id = 5724160613416960L;
+
+        Bundle extras = getIntent().getExtras();
+        //profile_id = 5724160613416960L;
+        profile_id = extras.getLong("profileId", 0L);
+        Log.d(TAG, "profile_id: "+ profile_id);
+
+        //mToolbar.setPadding(0, getStatusBarHeight(), 0, 0);
 
         if(user_id.equals(profile_id))
             mToolbar.inflateMenu(R.menu.menu_profile);
@@ -521,4 +529,15 @@ public class Profile extends AppCompatActivity
         progressView.stopAnimation();
         progressView.setVisibility(View.INVISIBLE);
     }
+    /*
+    // A method to find height of the status bar
+    public int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
+    }
+    */
 }

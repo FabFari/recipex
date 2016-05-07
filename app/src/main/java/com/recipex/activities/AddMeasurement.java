@@ -67,13 +67,18 @@ public class AddMeasurement extends AppCompatActivity
 
     private CircularProgressView progressView;
     // Input
-    Long user_id = 5724160613416960L;
+    // Long user_id = 5724160613416960L;
+    private Long user_id;
+    private SharedPreferences pref;
     String measurement_kind = AppConstants.COLESTEROLO;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_measurement);
+
+        pref = getApplicationContext().getSharedPreferences("MyPref",MODE_PRIVATE);
+        user_id = pref.getLong("userId", 0L);
 
         bindActivity();
         setupUI();
@@ -104,13 +109,14 @@ public class AddMeasurement extends AppCompatActivity
 
     }
 
+    /*
     @Override
     public void onBackPressed(){
         Intent myIntent = new Intent(getApplicationContext(), Home.class);
-        myIntent.putExtra("UserId", user_id);
         startActivity(myIntent);
         this.finish();
     }
+    */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

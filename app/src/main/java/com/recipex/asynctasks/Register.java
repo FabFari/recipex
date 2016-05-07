@@ -36,6 +36,7 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
     String postoLavoro;
     String numeriBusiness;
     String disponibilità;
+    Long userId;
 
     GoogleAccountCredential credential;
 
@@ -132,6 +133,10 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
             System.out.println("RESPONSE " + response.getMessage());
             Log.d("RESPONSE ", response.getMessage());
 
+            // Change Fabrizio
+            if(response.getPayload() != null)
+                userId = Long.parseLong(response.getPayload());
+
             if(response.getMessage().equals("User already existent.")){
                 return reg;
             }else{
@@ -151,6 +156,8 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
     protected void onPostExecute(MainRegisterUserMessage greeting) {
         SharedPreferences pref=mContext.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
+        // Change Fabrizio
+        editor.putLong("userId", userId);
 
         if (greeting!=null) {
             Log.d("DEBUG","User è registrato");

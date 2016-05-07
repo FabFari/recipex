@@ -4,232 +4,238 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:ignore="RtlHardcoded">
+    tools:ignore="RtlHardcoded" >
 
     <android.support.design.widget.CoordinatorLayout
-        android:id="@+id/profile.coordinator"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
 
-        <android.support.design.widget.AppBarLayout
-            android:id="@+id/profile.appbar"
+        <android.support.design.widget.CoordinatorLayout
+            android:id="@+id/profile.coordinator"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fitsSystemWindows="true"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+            android:layout_height="match_parent" >
 
-            <android.support.design.widget.CollapsingToolbarLayout
-                android:id="@+id/profile.collapsing"
+            <android.support.design.widget.AppBarLayout
+                android:id="@+id/profile.appbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-                <ImageView
-                    android:id="@+id/profile.imageview.placeholder"
+                <android.support.design.widget.CollapsingToolbarLayout
+                    android:id="@+id/profile.collapsing"
                     android:layout_width="match_parent"
-                    android:layout_height="250dp"
-                    android:scaleType="centerCrop"
-                    android:tint="#11000000"
-                    app:layout_collapseMode="parallax"
-                    app:layout_collapseParallaxMultiplier="0.9" />
+                    android:layout_height="wrap_content"
+                    app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
 
-                <FrameLayout
-                    android:id="@+id/profile.framelayout.title"
-                    android:layout_width="match_parent"
-                    android:layout_height="100dp"
-                    android:layout_gravity="bottom|center_horizontal"
-                    android:background="@color/colorPrimary"
-                    android:orientation="vertical"
-                    app:layout_collapseMode="parallax"
-                    app:layout_collapseParallaxMultiplier="0.3">
+                    <ImageView
+                        android:id="@+id/profile.imageview.placeholder"
+                        android:layout_width="match_parent"
+                        android:layout_height="250dp"
+                        android:scaleType="centerCrop"
+                        android:tint="#11000000"
+                        app:layout_collapseMode="parallax"
+                        app:layout_collapseParallaxMultiplier="0.9" />
 
-                    <LinearLayout
-                        android:id="@+id/profile.linearlayout.title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom|center"
-                        android:layout_marginBottom="@dimen/spacing_super_low"
-                        android:orientation="vertical">
+                    <FrameLayout
+                        android:id="@+id/profile.framelayout.title"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:layout_gravity="bottom|center_horizontal"
+                        android:background="@color/colorPrimary"
+                        android:orientation="vertical"
+                        app:layout_collapseMode="parallax"
+                        app:layout_collapseParallaxMultiplier="0.3">
 
-                        <TextView
-                            android:id="@+id/profile.bar_usr_name"
+                        <LinearLayout
+                            android:id="@+id/profile.linearlayout.title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:text="John Smith"
-                            android:textColor="@android:color/white"
-                            android:textSize="30sp"
-                            android:visibility="invisible"/>
+                            android:layout_gravity="bottom|center"
+                            android:layout_marginBottom="@dimen/spacing_super_low"
+                            android:orientation="vertical">
 
-                        <TextView
-                            android:id="@+id/profile.crgv_subtitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:layout_marginTop="-4dp"
-                            android:text="Caregiver"
-                            android:textSize="18sp"
-                            android:textColor="@android:color/white"
-                            android:visibility="invisible"/>
+                            <TextView
+                                android:id="@+id/profile.bar_usr_name"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal"
+                                android:text="John Smith"
+                                android:textColor="@android:color/white"
+                                android:textSize="30sp"
+                                android:visibility="invisible"/>
 
-                    </LinearLayout>
-                </FrameLayout>
-            </android.support.design.widget.CollapsingToolbarLayout>
-        </android.support.design.widget.AppBarLayout>
+                            <TextView
+                                android:id="@+id/profile.crgv_subtitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginTop="-4dp"
+                                android:text="Caregiver"
+                                android:textSize="18sp"
+                                android:textColor="@android:color/white"
+                                android:visibility="invisible"/>
 
-        <include layout="@layout/content_profile"
-            android:id="@+id/profile.layout_nested_scrollview"/>
+                        </LinearLayout>
+                    </FrameLayout>
+                </android.support.design.widget.CollapsingToolbarLayout>
+            </android.support.design.widget.AppBarLayout>
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/profile.toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorPrimary"
-            app:layout_anchor="@id/profile.framelayout.title"
-            app:theme="@style/ThemeOverlay.AppCompat.Dark"
-            app:title="">
-
-            <LinearLayout
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/profile.fab"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content"
+                app:layout_collapseMode="parallax"
+                app:layout_anchor="@id/profile.appbar"
+                app:layout_anchorGravity="bottom|right"
+                app:fabSize="mini"
+                android:layout_margin="30dp"
+                android:scaleType="center"
+                android:src="@drawable/ic_message" />
 
-                <Space
-                    android:layout_width="@dimen/image_final_width"
-                    android:layout_height="@dimen/image_final_width" />
+            <include layout="@layout/content_profile"
+                android:id="@+id/profile.layout_nested_scrollview"/>
 
-                <TextView
-                    android:id="@+id/profile.textview.title"
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/profile.toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/colorPrimary"
+                app:layout_anchor="@id/profile.framelayout.title"
+                app:theme="@style/ThemeOverlay.AppCompat.Dark"
+                app:title="">
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:layout_marginLeft="8dp"
-                    android:text="John Smith"
-                    android:textColor="@android:color/white"
-                    android:textSize="20sp"
-                    android:visibility="invisible"/>
+                    android:orientation="horizontal">
 
-            </LinearLayout>
-        </android.support.v7.widget.Toolbar>
+                    <Space
+                        android:layout_width="@dimen/image_final_width"
+                        android:layout_height="@dimen/image_final_width" />
 
-        <!--
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/profile.fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|right"
-            android:layout_margin="16dp"
-            android:scaleType="center"
-            android:src="@drawable/ic_message"
-            android:visibility="invisible" />
-        -->
+                    <TextView
+                        android:id="@+id/profile.textview.title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:layout_marginLeft="8dp"
+                        android:text="John Smith"
+                        android:textColor="@android:color/white"
+                        android:textSize="20sp"
+                        android:visibility="invisible"/>
 
-        <com.github.clans.fab.FloatingActionMenu
-            xmlns:fab="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/profile.fab_menu_requests"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|right"
-            android:layout_margin="16dp"
-            fab:menu_fab_size="normal"
-            fab:menu_colorNormal="@color/colorAccent"
-            fab:menu_colorPressed="@color/colorAccentDark"
-            fab:menu_colorRipple="#99FFFFFF"
-            fab:menu_animationDelayPerItem="50"
-            fab:menu_icon="@drawable/fab_add"
-            fab:menu_buttonSpacing="0dp"
-            fab:menu_labels_margin="0dp"
-            fab:menu_labels_showAnimation="@anim/fab_slide_in_from_right"
-            fab:menu_labels_hideAnimation="@anim/fab_slide_out_to_right"
-            fab:menu_labels_paddingTop="4dp"
-            fab:menu_labels_paddingRight="8dp"
-            fab:menu_labels_paddingBottom="4dp"
-            fab:menu_labels_paddingLeft="8dp"
-            fab:menu_labels_padding="8dp"
-            fab:menu_labels_textColor="#FFFFFF"
-            fab:menu_labels_textSize="14sp"
-            fab:menu_labels_cornerRadius="3dp"
-            fab:menu_labels_colorNormal="@color/colorPrimary"
-            fab:menu_labels_colorPressed="@color/colorPrimary"
-            fab:menu_labels_colorRipple="#66FFFFFF"
-            fab:menu_labels_showShadow="true"
-            fab:menu_labels_singleLine="false"
-            fab:menu_labels_ellipsize="none"
-            fab:menu_labels_maxLines="-1"
-            fab:menu_labels_position="left"
-            fab:menu_openDirection="up"
-            fab:menu_backgroundColor="@android:color/transparent"
-            fab:menu_fab_label="Aggiungi come">
+                </LinearLayout>
+            </android.support.v7.widget.Toolbar>
 
-            <com.github.clans.fab.FloatingActionButton
-                android:id="@+id/profile.fab_menu_item4"
+            <com.github.clans.fab.FloatingActionMenu
+                xmlns:fab="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/profile.fab_menu_requests"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_caregivers_v2"
-                fab:fab_colorNormal="@color/colorAccent"
-                fab:fab_colorPressed="@color/colorAccentDark"
-                fab:fab_colorDisabled="@android:color/darker_gray"
-                fab:fab_size="mini"
-                fab:fab_label="Caregiver" />
+                android:layout_gravity="bottom|right"
+                android:layout_margin="16dp"
+                fab:menu_fab_size="normal"
+                fab:menu_colorNormal="@color/colorAccent"
+                fab:menu_colorPressed="@color/colorAccentDark"
+                fab:menu_colorRipple="#99FFFFFF"
+                fab:menu_animationDelayPerItem="50"
+                fab:menu_icon="@drawable/fab_add"
+                fab:menu_buttonSpacing="0dp"
+                fab:menu_labels_margin="0dp"
+                fab:menu_labels_showAnimation="@anim/fab_slide_in_from_right"
+                fab:menu_labels_hideAnimation="@anim/fab_slide_out_to_right"
+                fab:menu_labels_paddingTop="4dp"
+                fab:menu_labels_paddingRight="8dp"
+                fab:menu_labels_paddingBottom="4dp"
+                fab:menu_labels_paddingLeft="8dp"
+                fab:menu_labels_padding="8dp"
+                fab:menu_labels_textColor="#FFFFFF"
+                fab:menu_labels_textSize="14sp"
+                fab:menu_labels_cornerRadius="3dp"
+                fab:menu_labels_colorNormal="@color/colorPrimary"
+                fab:menu_labels_colorPressed="@color/colorPrimary"
+                fab:menu_labels_colorRipple="#66FFFFFF"
+                fab:menu_labels_showShadow="true"
+                fab:menu_labels_singleLine="false"
+                fab:menu_labels_ellipsize="none"
+                fab:menu_labels_maxLines="-1"
+                fab:menu_labels_position="left"
+                fab:menu_openDirection="up"
+                fab:menu_backgroundColor="@android:color/transparent"
+                fab:menu_fab_label="Aggiungi come">
 
-            <com.github.clans.fab.FloatingActionButton
-                android:id="@+id/profile.fab_menu_item3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_visiting_nurse"
-                fab:fab_colorNormal="@color/colorAccent"
-                fab:fab_colorPressed="@color/colorAccentDark"
-                fab:fab_colorDisabled="@android:color/darker_gray"
-                fab:fab_size="mini"
-                fab:fab_label="Infermiere domiciliare" />
+                <com.github.clans.fab.FloatingActionButton
+                    android:id="@+id/profile.fab_menu_item4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_caregivers_v2"
+                    fab:fab_colorNormal="@color/colorAccent"
+                    fab:fab_colorPressed="@color/colorAccentDark"
+                    fab:fab_colorDisabled="@android:color/darker_gray"
+                    fab:fab_size="mini"
+                    fab:fab_label="Caregiver" />
 
-            <com.github.clans.fab.FloatingActionButton
-                android:id="@+id/profile.fab_menu_item2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_pc_physician"
-                fab:fab_colorNormal="@color/colorAccent"
-                fab:fab_colorPressed="@color/colorAccentDark"
-                fab:fab_colorDisabled="@android:color/darker_gray"
-                fab:fab_size="mini"
-                fab:fab_label="Medico di base" />
+                <com.github.clans.fab.FloatingActionButton
+                    android:id="@+id/profile.fab_menu_item3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_visiting_nurse"
+                    fab:fab_colorNormal="@color/colorAccent"
+                    fab:fab_colorPressed="@color/colorAccentDark"
+                    fab:fab_colorDisabled="@android:color/darker_gray"
+                    fab:fab_size="mini"
+                    fab:fab_label="Infermiere domiciliare" />
 
-            <com.github.clans.fab.FloatingActionButton
-                android:id="@+id/profile.fab_menu_item1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_relatives"
-                fab:fab_colorNormal="@color/colorAccent"
-                fab:fab_colorPressed="@color/colorAccentDark"
-                fab:fab_colorDisabled="@android:color/darker_gray"
-                fab:fab_size="mini"
-                fab:fab_label="Familiare" />
-        </com.github.clans.fab.FloatingActionMenu>
+                <com.github.clans.fab.FloatingActionButton
+                    android:id="@+id/profile.fab_menu_item2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_pc_physician"
+                    fab:fab_colorNormal="@color/colorAccent"
+                    fab:fab_colorPressed="@color/colorAccentDark"
+                    fab:fab_colorDisabled="@android:color/darker_gray"
+                    fab:fab_size="mini"
+                    fab:fab_label="Medico di base" />
 
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/profile.usr_pic"
-            android:layout_width="@dimen/image_width"
-            android:layout_height="@dimen/image_width"
-            android:src="@drawable/recipex_square_logo"
-            android:layout_gravity="center_horizontal"
-            app:border_color="@android:color/white"
-            app:border_width="2dp"
-            app:layout_behavior="com.recipex.utilities.AvatarImageBehavior"
-            app:finalYPosition="2dp"
-            app:finalHeight="@dimen/image_final_width"
-            app:startToolbarPosition="2dp"
-            app:startHeight="2dp"
-            app:startXPosition="2dp"
-            android:visibility="invisible"/>
+                <com.github.clans.fab.FloatingActionButton
+                    android:id="@+id/profile.fab_menu_item1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_relatives"
+                    fab:fab_colorNormal="@color/colorAccent"
+                    fab:fab_colorPressed="@color/colorAccentDark"
+                    fab:fab_colorDisabled="@android:color/darker_gray"
+                    fab:fab_size="mini"
+                    fab:fab_label="Familiare" />
+            </com.github.clans.fab.FloatingActionMenu>
 
-        <com.github.rahatarmanahmed.cpv.CircularProgressView
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/profile.progress_view"
-            android:layout_gravity="center"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            app:cpv_animAutostart="true"
-            app:cpv_indeterminate="true" />
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/profile.usr_pic"
+                android:layout_width="@dimen/image_width"
+                android:layout_height="@dimen/image_width"
+                android:src="@drawable/recipex_square_logo"
+                android:layout_gravity="center_horizontal"
+                app:border_color="@android:color/white"
+                app:border_width="2dp"
+                app:layout_behavior="com.recipex.utilities.AvatarImageBehavior"
+                app:finalYPosition="2dp"
+                app:finalHeight="@dimen/image_final_width"
+                app:startToolbarPosition="2dp"
+                app:startHeight="2dp"
+                app:startXPosition="2dp"
+                android:visibility="invisible"/>
+
+            <com.github.rahatarmanahmed.cpv.CircularProgressView
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/profile.progress_view"
+                android:layout_gravity="center"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                app:cpv_animAutostart="true"
+                app:cpv_indeterminate="true" />
+
+        </android.support.design.widget.CoordinatorLayout>
 
     </android.support.design.widget.CoordinatorLayout>
 
