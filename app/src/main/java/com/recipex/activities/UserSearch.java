@@ -145,7 +145,6 @@ public class UserSearch extends AppCompatActivity implements GetUsersTC {
                     // Not uses for this program
                     @Override
                     public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
-                        // TODO Auto-generated method stub
 
                     }
 
