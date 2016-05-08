@@ -20,4 +20,5 @@
     </string>
     <string name="title_activity_aggiungi_terapia">AggiungiTerapia</string>
     <string name="title_activity_user_requests">Le tue richieste</string>
+    <string name="title_activity_user_search">Ricerca utenti</string>
 </resources>
