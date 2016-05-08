@@ -129,7 +129,6 @@ public class UserSearch extends AppCompatActivity implements GetUsersTC {
 
                 searchBar.addTextChangedListener(new TextWatcher() {
 
-                    // As the user types in the search field, the list is
                     @Override
                     public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
                         emptyText.setVisibility(View.GONE);
