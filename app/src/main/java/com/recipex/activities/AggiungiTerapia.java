@@ -7,10 +7,12 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -19,10 +21,15 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.appspot.recipex_1281.recipexServerApi.model.MainDefaultResponseMessage;
+import com.recipex.AppConstants;
 import com.recipex.R;
+import com.recipex.adapters.TerapieAdapter;
 import com.recipex.asynctasks.AggiungiTerapiaAT;
 import com.recipex.asynctasks.Register;
+import com.recipex.fragments.TerapieFragment;
 import com.recipex.taskcallbacks.TaskCallbackAggiungiTerapia;
+import com.recipex.utilities.Terapia;
 
 public class AggiungiTerapia extends AppCompatActivity implements TaskCallbackAggiungiTerapia{
 
@@ -35,7 +42,6 @@ public class AggiungiTerapia extends AppCompatActivity implements TaskCallbackAg
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_aggiungi_terapia);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
         toolbar.setTitle("Aggiungi Terapia");
 
         inserisciNome= (EditText)findViewById(R.id.insertNomeTerapia);
@@ -65,9 +71,9 @@ public class AggiungiTerapia extends AppCompatActivity implements TaskCallbackAg
         int id = item.getItemId();
 
         if (id == R.id.registrati) {
-            if (inserisciNome.getText().length() > 1 && inserisciIngrediente.getText().length() > 1 &&
-                    inserisciTipo.getText().length()>1 && inserisciDose.getText().length()>1 &&
-                    inserisciUnità.getText().length()>1 && inserisciQuantità.getText().length()>1 &&
+            if (inserisciNome.getText().length() > 1 && inserisciIngrediente.getText().length() > 0 &&
+                    inserisciTipo.getText().length()>1 && inserisciDose.getText().length()>0 &&
+                    inserisciUnità.getText().length()>1 && inserisciQuantità.getText().length()>0 &&
                     inserisciRicetta.getText().length()>1) {
 
                 nome=inserisciNome.getText().toString();
@@ -92,15 +98,19 @@ public class AggiungiTerapia extends AppCompatActivity implements TaskCallbackAg
                 foglio = inserisciFoglio.getText().toString();
                 caregiver = inserisciCaregiver.getText().toString();
 
-                int assistente=Integer.parseInt(caregiver);
+                int assistente=0;
+                if(!caregiver.equals(""))
+                    assistente=Integer.parseInt(caregiver);
 
                 tempo =inserisciTempo.getText().toString();
 
-                int cadenza=Integer.parseInt(tempo);
+                int cadenza=0;
+                if(!tempo.equals(""))
+                    cadenza= Integer.parseInt(tempo);
 
 
                 Log.d("REGISTRAZIONE ", "Sono qui");
-                if (checkNetwork()) new AggiungiTerapiaAT(getApplicationContext(), nome, ingr2, tipo, dose2, unità,
+                if (checkNetwork()) new AggiungiTerapiaAT(getApplicationContext(), nome, 4840840459452416L, AppConstants.PILLOLA, dose2, unità,
                         quanto, recipe, foglio, assistente, cadenza, this).execute();
 
             }
@@ -134,5 +144,30 @@ public class AggiungiTerapia extends AppCompatActivity implements TaskCallbackAg
         }
     }
 
+
+    public void done(boolean b, MainDefaultResponseMessage response){
+        if(response != null) {
+            if(b) {
+                Toast.makeText(this, "Terapia inserita "+response.getMessage(), Toast.LENGTH_LONG).show();
+                boolean recipe=(ricetta.equals("SI"))? true: false;
+                //TerapieAdapter adapter = new TerapieAdapter(new Terapia(nome, Integer.parseInt(dose), tipo, recipe));
+                //adapter.notifyDataSetChanged();
+                Intent i=new Intent(AggiungiTerapia.this, Home.class);
+                i.putExtra("nuovaTerapia", true);
+                i.putExtra("nomeTerapia", nome);
+                i.putExtra("doseTerapia", dose);
+                i.putExtra("tipoTerapia", tipo);
+                i.putExtra("ricettaTerapia", recipe);
+                startActivity(i);
+                //TerapieFragment.onDataChanged(new Terapia(nome, Integer.parseInt(dose), tipo, recipe));
+                this.finish();
+
+            }
+            else {
+                Toast.makeText(this, "Operazione non riuscita", Toast.LENGTH_LONG).show();
+
+            }
+        }
+    }
 
 }

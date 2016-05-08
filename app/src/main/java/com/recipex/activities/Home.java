@@ -189,6 +189,10 @@ public class Home extends AppCompatActivity
             presentShowcaseView(350);
 
         }
+        else if(id==R.id.action_addprescription){
+            Intent i=new Intent(Home.this, AggiungiTerapia.class);
+            startActivity(i);
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -219,7 +223,27 @@ public class Home extends AppCompatActivity
             fragmentTransaction.replace(R.id.containerView,new TabFragment()).commit();
         } else if (id == R.id.nav_terapie) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.containerView,new TerapieFragment()).commit();
+
+            //da usare se c'è una nuova terapia.
+            boolean nuovaTerapia=false;
+            if(getIntent().getExtras()!=null)
+                nuovaTerapia=(boolean)getIntent().getExtras().get("nuovaTerapia");
+            TerapieFragment t=new TerapieFragment();
+            if(nuovaTerapia){
+                //ora lo posso rimuovere perchè sto prendendo i parametri della nuova terapia
+                getIntent().removeExtra("nuovaTerapia");
+                String nomeTerapia=(String)getIntent().getExtras().get("nomeTerapia");
+                int doseTerapia=Integer.parseInt((String)getIntent().getExtras().get("doseTerapia"));
+                String tipoTerapia=(String)getIntent().getExtras().get("tipoTerapia");
+                boolean ricettaTerapia=(boolean)getIntent().getExtras().get("ricettaTerapia");
+                Bundle bundle=new Bundle();
+                bundle.putString("nomeTerapia", nomeTerapia);
+                bundle.putInt("doseTerapia", doseTerapia);
+                bundle.putString("tipoTerapia", tipoTerapia);
+                bundle.putBoolean("ricettaTerapia", ricettaTerapia);
+                t.setArguments(bundle);
+            }
+            fragmentTransaction.replace(R.id.containerView,t).commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

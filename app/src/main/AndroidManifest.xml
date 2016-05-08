@@ -11,6 +11,7 @@
     <application
         android:allowBackup="true"
         android:label="@string/app_name"
+        android:icon="@drawable/logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <meta-data
@@ -54,8 +55,7 @@
             android:label="RecipeX"></activity>
         <activity
             android:name=".activities.AggiungiTerapia"
-            android:label="@string/title_activity_aggiungi_terapia"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:label="@string/title_activity_aggiungi_terapia"></activity>
     </application>
 
 </manifest>

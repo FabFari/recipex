@@ -3,6 +3,7 @@ package com.recipex.asynctasks;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -24,7 +25,7 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
     Context mContext;
     TaskCallbackAggiungiTerapia mCallback;
     String nome;
-    int ingrediente;
+    long ingrediente;
     String tipo;
     int dose;
     String unità;
@@ -43,7 +44,7 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
         mContext = context;
     }
 
-    public AggiungiTerapiaAT(Context context, String nome, int ingrediente, String tipo, int dose, String unità,
+    public AggiungiTerapiaAT(Context context, String nome, long ingrediente, String tipo, int dose, String unità,
                              int quantità, boolean ricetta, String foglioIllustrativo, int assistente, int cadenza,
                              TaskCallbackAggiungiTerapia mCallback) {
         mContext = context;
@@ -86,17 +87,19 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
 
             //CAMPI OBBLIGATORI
             reg.setName(nome);
-            reg.setActiveIngredient((long)ingrediente);
+            reg.setActiveIngredient(ingrediente);
             reg.setKind(tipo);
             reg.setDose((long) dose);
             reg.setUnits(unità);
             reg.setQuantity((long) quantità);
+            reg.setRecipe(ricetta);
 
             //NON OBBLIGATORI
             reg.setPil(foglioIllustrativo);
-            reg.setCaregiver((long)assistente);
+            if(assistente!=0)
+                reg.setCaregiver((long)assistente);
 
-            RecipexServerApi.Prescription.AddPrescription post = apiServiceHandle.prescription().addPrescription((long)5719238044024832L, reg);
+            RecipexServerApi.Prescription.AddPrescription post = apiServiceHandle.prescription().addPrescription(5719238044024832L, reg);
 
             MainDefaultResponseMessage response = post.execute();
 
@@ -105,13 +108,18 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
 
             return response;
         } catch (IOException e) {
+            Looper.prepare();
             Toast.makeText(mContext, "Exception during API call! " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
         return null;
     }
 
 
-    protected void onPostExecute(MainDefaultResponseMessage greeting) {
+    protected void onPostExecute(MainDefaultResponseMessage response) {
+        if(response != null && response.getCode().equals(AppConstants.CREATED))
+            mCallback.done(true, response);
+        else
+            mCallback.done(false, null);
 
     }
 }
