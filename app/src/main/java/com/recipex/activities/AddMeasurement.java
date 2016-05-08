@@ -4,6 +4,10 @@ import android.accounts.AccountManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.nfc.NdefMessage;
+import android.nfc.NfcAdapter;
+import android.nfc.Tag;
+import android.os.Parcelable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -26,7 +30,9 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.googleapis.media.MediaHttpDownloader;
 import com.recipex.AppConstants;
 import com.recipex.asynctasks.AddMeasurementAT;
+import com.recipex.asynctasks.NdefReaderTask;
 import com.recipex.taskcallbacks.AddMeasurementTC;
+import com.recipex.taskcallbacks.NdefReaderTaskCallback;
 import com.recipex.utilities.ConnectionDetector;
 import com.vi.swipenumberpicker.OnValueChangeListener;
 import com.vi.swipenumberpicker.SwipeNumberPicker;
@@ -38,7 +44,8 @@ import java.util.Locale;
 import me.angrybyte.numberpicker.view.ActualNumberPicker;
 
 public class AddMeasurement extends AppCompatActivity
-        implements AddMeasurementTC, me.angrybyte.numberpicker.listener.OnValueChangeListener {
+        implements AddMeasurementTC, me.angrybyte.numberpicker.listener.OnValueChangeListener,
+        NdefReaderTaskCallback {
 
     public static final String TAG = "ADD_MEASUREMENT";
 
@@ -72,6 +79,8 @@ public class AddMeasurement extends AppCompatActivity
     private SharedPreferences pref;
     String measurement_kind = AppConstants.COLESTEROLO;
 
+    private NfcAdapter mNfcAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,8 +89,22 @@ public class AddMeasurement extends AppCompatActivity
         pref = getApplicationContext().getSharedPreferences("MyPref",MODE_PRIVATE);
         user_id = pref.getLong("userId", 0L);
 
+
+
         bindActivity();
-        setupUI();
+
+        Intent intent = getIntent();
+        NdefMessage msgs[];
+        super.onResume();
+        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
+            Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+            new NdefReaderTask(main_relative, this).execute(tag);
+        }
+
+        progressView.startAnimation();
+        progressView.setVisibility(View.VISIBLE);
+
+        //setupUI();
 
         picker1.setOnValueChangeListener(new OnValueChangeListener() {
             @Override
@@ -173,7 +196,7 @@ public class AddMeasurement extends AppCompatActivity
         main_relative = (RelativeLayout) findViewById(R.id.measurement_main_relative);
     }
 
-    private void setupUI() {
+    private void setupUI(String measurement_kind) {
         if(measurement_kind.equals(AppConstants.PRESSIONE)) {
             text_picker2.setVisibility(View.VISIBLE);
             relativeLayout2.setVisibility(View.VISIBLE);
@@ -410,4 +433,25 @@ public class AddMeasurement extends AppCompatActivity
         progressView.setVisibility(View.INVISIBLE);
     }
 
+    @Override
+    public void onResume() {
+        Intent intent = getIntent();
+        NdefMessage msgs[];
+        super.onResume();
+        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
+            Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+            new NdefReaderTask(main_relative, this).execute(tag);
+            progressView.startAnimation();
+            progressView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void done(String result) {
+        if(result != null)
+            setupUI(result);
+
+        progressView.stopAnimation();
+        progressView.setVisibility(View.GONE);
+    }
 }
