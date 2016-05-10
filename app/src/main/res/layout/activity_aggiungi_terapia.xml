@@ -2,6 +2,7 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/lay_aggiungiterapia"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
@@ -73,20 +74,19 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Ingrediente principale: *"
+                    android:text="Ingrediente: *"
                     android:textAppearance="?android:attr/textAppearanceLarge"
                     android:paddingLeft="10dp"
-                    android:id="@+id/ingrediente"
+                    android:id="@+id/ingrTerapia"
                     android:layout_alignParentTop="true"
                     android:layout_centerHorizontal="true"/>
 
-                <EditText
+                <Spinner
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/insertIngrediente"
-                    android:paddingLeft="10dp"
-                    android:inputType="textCapSentences"
-                    android:imeOptions="actionNext"/>
+                    android:tag="Ingrediente principale"
+                    android:id="@+id/ingredienti"
+                    />
 
                 <!--tipo-->
                 <TextView
@@ -99,13 +99,10 @@
                     android:layout_alignParentTop="true"
                     android:layout_centerHorizontal="true"/>
 
-                <EditText
+                <Spinner
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/insertTipo"
-                    android:paddingLeft="10dp"
-                    android:inputType="textCapSentences"
-                    android:imeOptions="actionNext"/>
+                    android:id="@+id/tipi"/>
 
                 <!--dose-->
                 <TextView
@@ -123,7 +120,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/insertDose"
                     android:paddingLeft="10dp"
-                    android:inputType="textCapSentences"
+                    android:inputType="numberDecimal"
                     android:imeOptions="actionNext"/>
 
                 <!--unità-->
@@ -161,7 +158,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/insertQuantità"
                     android:paddingLeft="10dp"
-                    android:inputType="textCapSentences"
+                    android:inputType="numberDecimal"
                     android:imeOptions="actionNext"/>
 
                 <!--ricetta-->
@@ -175,14 +172,10 @@
                     android:layout_alignParentTop="true"
                     android:layout_centerHorizontal="true"/>
 
-                <EditText
+                <Spinner
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/insertRicetta"
-                    android:paddingLeft="10dp"
-                    android:hint="SI o NO"
-                    android:inputType="textCapSentences"
-                    android:imeOptions="actionNext"/>
+                    android:id="@+id/ricettaSINO"/>
 
                 <!--foglio-->
                 <TextView
@@ -235,6 +228,26 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/insertTempo"
+                    android:paddingLeft="10dp"
+                    android:inputType="textCapSentences"
+                    android:imeOptions="actionNext"/>
+
+                <!--data di inizio-->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Data d'inizio"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:paddingLeft="10dp"
+                    android:id="@+id/inizio"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"/>
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/insertInizio"
+                    android:hint="YYYY-MM-DD"
                     android:paddingLeft="10dp"
                     android:inputType="textCapSentences"
                     android:imeOptions="actionNext"/>
