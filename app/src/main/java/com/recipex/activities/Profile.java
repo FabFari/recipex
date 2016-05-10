@@ -7,6 +7,9 @@ import com.appspot.recipex_1281.recipexServerApi.model.MainUserInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserRelationsMessage;
 import com.github.clans.fab.FloatingActionMenu;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.recipex.AppConstants;
@@ -28,6 +31,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Credentials;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -43,6 +47,7 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
@@ -58,16 +63,17 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class Profile extends AppCompatActivity
         implements AppBarLayout.OnOffsetChangedListener, GetUserTC, CheckUserRelationsTC,
-        SendRequestTC,View.OnClickListener {
+        SendRequestTC, View.OnClickListener {
 
     public static final String TAG = "PROFILE";
-    private static final float PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR  = 0.9f;
-    private static final float PERCENTAGE_TO_HIDE_TITLE_DETAILS     = 0.3f;
-    private static final int ALPHA_ANIMATIONS_DURATION              = 200;
+    private static final float PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR = 0.9f;
+    private static final float PERCENTAGE_TO_HIDE_TITLE_DETAILS = 0.3f;
+    private static final int ALPHA_ANIMATIONS_DURATION = 200;
 
+    private static final int EDIT_PROFILE = 1;
     private static final int REQUEST_ACCOUNT_PICKER = 2;
 
-    private boolean mIsTheTitleVisible          = false;
+    private boolean mIsTheTitleVisible = false;
     private boolean mIsTheTitleContainerVisible = true;
 
     private LinearLayout mTitleContainer;
@@ -134,6 +140,29 @@ public class Profile extends AppCompatActivity
     private Long user_id;
     private Long profile_id;
 
+    // INFO VARIABLES
+    // USER
+    // Required
+    private String user_name;
+    private String user_surname;
+    private String user_pic;
+    private String user_email;
+    private String user_birth;
+    private String user_sex;
+    // Not Required
+    private String user_city;
+    private String user_address;
+    private String user_phone;
+    // CAREGIVER
+    // Required
+    private String crgv_field;
+    // Not Required
+    private Long crgv_years_exp;
+    private String crgv_place;
+    private String crgv_available;
+    private String crgv_phone;
+    private String crgv_bio;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -151,29 +180,24 @@ public class Profile extends AppCompatActivity
         Bundle extras = getIntent().getExtras();
         //profile_id = 5724160613416960L;
         profile_id = extras.getLong("profileId", 0L);
-        Log.d(TAG, "profile_id: "+ profile_id);
+        Log.d(TAG, "profile_id: " + profile_id);
 
         //mToolbar.setPadding(0, getStatusBarHeight(), 0, 0);
 
-        if(user_id.equals(profile_id))
-            mToolbar.inflateMenu(R.menu.menu_profile);
-        else
-            mToolbar.inflateMenu(R.menu.menu_profile_visitor);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         startAlphaAnimation(mTitle, 0, View.INVISIBLE);
 
-        alert = new AlertDialogManager();
-
         settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
         credential = GoogleAccountCredential.usingAudience(this, AppConstants.AUDIENCE);
-        Log.d(TAG, "Credential: "+credential);
+        Log.d(TAG, "Credential: " + credential);
         setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
 
-        if(credential.getSelectedAccountName() == null) {
+        if (credential.getSelectedAccountName() == null) {
             Log.d(TAG, "AccountName == null: startActivityForResult.");
             startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
-        }
-        else {
+        } else {
             progressView.startAnimation();
             RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
             if (checkNetwork()) {
@@ -181,13 +205,14 @@ public class Profile extends AppCompatActivity
                 new CheckUserRelationsAT(this, this, coordinatorLayout, user_id, profile_id, apiHandler).execute();
             }
         }
+
     }
 
     private void bindActivity() {
-        mToolbar        = (Toolbar) findViewById(R.id.profile_toolbar);
-        mTitle          = (TextView) findViewById(R.id.profile_textview_title);
+        mToolbar = (Toolbar) findViewById(R.id.profile_toolbar);
+        mTitle = (TextView) findViewById(R.id.profile_textview_title);
         mTitleContainer = (LinearLayout) findViewById(R.id.profile_linearlayout_title);
-        mAppBarLayout   = (AppBarLayout) findViewById(R.id.profile_appbar);
+        mAppBarLayout = (AppBarLayout) findViewById(R.id.profile_appbar);
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.profile_coordinator);
         caregiverCard = (CardView) findViewById(R.id.card_view_caregiver);
         userCard = (CardView) findViewById(R.id.card_view_user);
@@ -230,7 +255,16 @@ public class Profile extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        if (profile_id == null) {
+            Bundle extras = getIntent().getExtras();
+            profile_id = extras.getLong("profileId", 0L);
+        }
+
+        if (user_id.equals(profile_id))
+            mToolbar.inflateMenu(R.menu.menu_profile);
+        else
+            mToolbar.inflateMenu(R.menu.menu_profile_visitor);
+        // getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
@@ -247,7 +281,7 @@ public class Profile extends AppCompatActivity
     private void handleToolbarTitleVisibility(float percentage) {
         if (percentage >= PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR) {
 
-            if(!mIsTheTitleVisible) {
+            if (!mIsTheTitleVisible) {
                 startAlphaAnimation(mTitle, ALPHA_ANIMATIONS_DURATION, View.VISIBLE);
                 mIsTheTitleVisible = true;
             }
@@ -263,7 +297,7 @@ public class Profile extends AppCompatActivity
 
     private void handleAlphaOnTitle(float percentage) {
         if (percentage >= PERCENTAGE_TO_HIDE_TITLE_DETAILS) {
-            if(mIsTheTitleContainerVisible) {
+            if (mIsTheTitleContainerVisible) {
                 startAlphaAnimation(mTitleContainer, ALPHA_ANIMATIONS_DURATION, View.INVISIBLE);
                 mIsTheTitleContainerVisible = false;
             }
@@ -277,7 +311,7 @@ public class Profile extends AppCompatActivity
         }
     }
 
-    public static void startAlphaAnimation (View v, long duration, int visibility) {
+    public static void startAlphaAnimation(View v, long duration, int visibility) {
         AlphaAnimation alphaAnimation = (visibility == View.VISIBLE)
                 ? new AlphaAnimation(0f, 1f)
                 : new AlphaAnimation(1f, 0f);
@@ -292,6 +326,7 @@ public class Profile extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case REQUEST_ACCOUNT_PICKER:
+                Log.d(TAG, "Nell'if.");
                 if (data != null && data.getExtras() != null) {
                     String accountName =
                             data.getExtras().getString(
@@ -303,13 +338,35 @@ public class Profile extends AppCompatActivity
                         editor.apply();
                         // User is authorized
                         RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-                        if(checkNetwork()) {
+                        if (checkNetwork()) {
                             new GetUserAT(this, this, user_id, apiHandler).execute();
                             new CheckUserRelationsAT(this, this, coordinatorLayout, user_id, profile_id, apiHandler).execute();
                         }
                     }
                 }
                 break;
+            case EDIT_PROFILE:
+                if(resultCode == RESULT_OK) {
+                    Snackbar snackbar = Snackbar
+                            .make(coordinatorLayout, "Profilo Aggiornato con successo", Snackbar.LENGTH_SHORT);
+                    snackbar.show();
+                    settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
+                    credential = GoogleAccountCredential.usingAudience(this, AppConstants.AUDIENCE);
+
+                    setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+
+                    if (credential.getSelectedAccountName() == null)
+                        startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
+                    else {
+                        Log.d(TAG, "Nell'else.");
+                        progressView.startAnimation();
+                        RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
+                        if (checkNetwork())
+                            new GetUserAT(this, this, profile_id, apiHandler).execute();
+                    }
+                }
+                break;
+
         }
     }
 
@@ -340,79 +397,127 @@ public class Profile extends AppCompatActivity
 
         // USER
         // Required
+        user_pic = message.getPic();
         Picasso.with(this).load(message.getPic()).into(pic);
         pic.setVisibility(View.VISIBLE);
         tolbar_usr_name.setText(String.format("%s %s", message.getName(), message.getSurname()));
         tolbar_usr_name.setVisibility(View.VISIBLE);
         mTitle.setText(String.format("%s %s", message.getName(), message.getSurname()));
         mTitle.setVisibility(View.VISIBLE);
+        user_name = message.getName();
         name.setText(message.getName());
+        user_surname = message.getSurname();
         surname.setText(message.getSurname());
+        user_email = message.getEmail();
         email.setText(message.getEmail());
+        user_birth = message.getBirth();
         birth.setText(message.getBirth());
+        user_sex = message.getSex();
         sex.setText(message.getSex());
         // Not Required
-        if(message.getCity() != null) {
+        if (message.getCity() != null) {
+            user_city = message.getCity();
             city.setText(message.getCity());
             city_lbl.setVisibility(View.VISIBLE);
             city.setVisibility(View.VISIBLE);
         }
-        if(message.getAddress() != null) {
+        else {
+            city_lbl.setVisibility(View.GONE);
+            city.setVisibility(View.GONE);
+        }
+        if (message.getAddress() != null) {
+            user_address = message.getAddress();
             address.setText(message.getAddress());
             address_lbl.setVisibility(View.VISIBLE);
             address.setVisibility(View.VISIBLE);
         }
-        if(message.getPersonalNum() != null) {
-            personal_num.setText(message.getCity());
+        else {
+            address_lbl.setVisibility(View.GONE);
+            address.setVisibility(View.GONE);
+        }
+        if (message.getPersonalNum() != null) {
+            user_phone = message.getPersonalNum();
+            personal_num.setText(message.getPersonalNum());
             personal_num_lbl.setVisibility(View.VISIBLE);
             personal_num.setVisibility(View.VISIBLE);
+        }
+        else {
+            personal_num_lbl.setVisibility(View.GONE);
+            personal_num.setVisibility(View.GONE);
         }
         userCard.setVisibility(View.VISIBLE);
         // CAREGIVER
         // Required
-        if(message.getField() != null) {
+        if (message.getField() != null) {
+            crgv_field = message.getField();
             field.setText(message.getField());
             crgv_subtitle.setVisibility(View.VISIBLE);
 
-            if(message.getYearsExp() != null) {
+            if (message.getYearsExp() != null) {
+                crgv_years_exp = message.getYearsExp();
                 // years_exp.setText(String.format(Locale.getDefault(), "%d", message.getYearsExp()));
-                if(message.getYearsExp() > 20)
+                if (message.getYearsExp() > 20)
                     years_exp.setText("Più di 20 anni");
-                else if(message.getYearsExp() > 10)
+                else if (message.getYearsExp() > 10)
                     years_exp.setText("Trai 10 e i 20 anni");
-                else if(message.getYearsExp() > 5)
+                else if (message.getYearsExp() > 5)
                     years_exp.setText("Trai 5 e i 10 anni");
                 else
                     years_exp.setText("Meno di 5 anni");
                 years_exp_lbl.setVisibility(View.VISIBLE);
                 years_exp.setVisibility(View.VISIBLE);
             }
-            if(message.getPlace() != null) {
+            else {
+                years_exp_lbl.setVisibility(View.GONE);
+                years_exp.setVisibility(View.GONE);
+            }
+            if (message.getPlace() != null) {
+                crgv_place = message.getPlace();
                 place.setText(message.getPlace());
                 place_lbl.setVisibility(View.VISIBLE);
                 place.setVisibility(View.VISIBLE);
             }
-            if(message.getAvailable() != null) {
+            else {
+                place_lbl.setVisibility(View.GONE);
+                place.setVisibility(View.GONE);
+            }
+            if (message.getAvailable() != null) {
+                crgv_available = message.getAvailable();
                 available.setText(message.getAvailable());
                 available_lbl.setVisibility(View.VISIBLE);
                 available.setVisibility(View.VISIBLE);
             }
-            if(message.getBusinessNum() != null) {
+            else {
+                available_lbl.setVisibility(View.GONE);
+                available.setVisibility(View.GONE);
+            }
+            if (message.getBusinessNum() != null) {
+                crgv_phone = message.getBusinessNum();
                 business_num.setText(message.getBusinessNum());
                 business_num_lbl.setVisibility(View.VISIBLE);
                 business_num.setVisibility(View.VISIBLE);
             }
-            if(message.getBio() != null) {
+            else {
+                business_num_lbl.setVisibility(View.GONE);
+                business_num.setVisibility(View.GONE);
+            }
+            if (message.getBio() != null) {
+                crgv_bio = message.getBio();
                 bio.setText(message.getBio());
                 bio_lbl.setVisibility(View.VISIBLE);
                 bio.setVisibility(View.VISIBLE);
                 bio_card.setVisibility(View.VISIBLE);
             }
-        caregiverCard.setVisibility(View.VISIBLE);
+            else {
+                bio_lbl.setVisibility(View.GONE);
+                bio.setVisibility(View.GONE);
+                bio_card.setVisibility(View.GONE);
+            }
+            caregiverCard.setVisibility(View.VISIBLE);
         }
 
         //if(!user_id.equals(profile_id))
-            //fab.setVisibility(View.VISIBLE);
+        //fab.setVisibility(View.VISIBLE);
 
         progressView.stopAnimation();
         progressView.setVisibility(View.GONE);
@@ -421,29 +526,28 @@ public class Profile extends AppCompatActivity
 
     @Override
     public void done(boolean res, final MainUserRelationsMessage response) {
-        if(response != null) {
-            if(res) {
-                Log.d(TAG, "RESPONSE: "+ response);
-                if(response.getIsRelative())
+        if (response != null) {
+            if (res) {
+                Log.d(TAG, "RESPONSE: " + response);
+                if (response.getIsRelative())
                     fab_relatives.setEnabled(false);
                 else
                     fab_relatives.setOnClickListener(this);
-                if(response.getIsPcPhysician())
+                if (response.getIsPcPhysician())
                     fab_pc_physician.setEnabled(false);
                 else
                     fab_pc_physician.setOnClickListener(this);
-                if(response.getIsVisitingNurse())
+                if (response.getIsVisitingNurse())
                     fab_visiting_nurse.setEnabled(false);
                 else
                     fab_visiting_nurse.setOnClickListener(this);
-                if(response.getIsCaregiver())
+                if (response.getIsCaregiver())
                     fab_caregivers.setEnabled(false);
                 else
                     fab_caregivers.setOnClickListener(this);
-            }
-            else {
+            } else {
                 Snackbar snackbar = Snackbar
-                        .make(coordinatorLayout, "Operazione non riuscita: "+response.getResponse().getCode(), Snackbar.LENGTH_SHORT);
+                        .make(coordinatorLayout, "Operazione non riuscita: " + response.getResponse().getCode(), Snackbar.LENGTH_SHORT);
                 snackbar.show();
             }
         }
@@ -455,7 +559,7 @@ public class Profile extends AppCompatActivity
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
         editor.apply();
-        Log.d(TAG, "ACCOUNT NAME: "+ accountName);
+        Log.d(TAG, "ACCOUNT NAME: " + accountName);
         credential.setSelectedAccountName(accountName);
         this.accountName = accountName;
     }
@@ -465,7 +569,7 @@ public class Profile extends AppCompatActivity
         // Check if Internet present
         if (cd.isConnectingToInternet()) {
             return true;
-        }else{
+        } else {
             Snackbar snackbar = Snackbar
                     .make(coordinatorLayout, "Nessuna connesione a internet!", Snackbar.LENGTH_INDEFINITE)
                     .setAction("ESCI", new View.OnClickListener() {
@@ -487,7 +591,7 @@ public class Profile extends AppCompatActivity
         MainRequestSendMessage content = new MainRequestSendMessage();
         content.setSender(user_id);
         // TODO Aggiungere Dialog per inserimento messaggio
-        switch(v.getId()) {
+        switch (v.getId()) {
             case R.id.profile_fab_menu_item1:
                 content.setKind(AppConstants.FAMILIARE);
                 break;
@@ -508,27 +612,66 @@ public class Profile extends AppCompatActivity
         progressView.startAnimation();
         progressView.setVisibility(View.VISIBLE);
         RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-        if (checkNetwork()) new SendRequestAT(this, this, coordinatorLayout, profile_id, content, apiHandler).execute();
+        if (checkNetwork())
+            new SendRequestAT(this, this, coordinatorLayout, profile_id, content, apiHandler).execute();
 
     }
 
     @Override
     public void done(boolean resp, MainDefaultResponseMessage response) {
-        if(response != null) {
-            if(resp) {
+        if (response != null) {
+            if (resp) {
                 Snackbar snackbar = Snackbar
-                        .make(coordinatorLayout, "Richiesta inviata: "+response.getPayload(), Snackbar.LENGTH_SHORT);
+                        .make(coordinatorLayout, "Richiesta inviata: " + response.getPayload(), Snackbar.LENGTH_SHORT);
                 snackbar.show();
-            }
-            else {
+            } else {
                 Snackbar snackbar = Snackbar
-                        .make(coordinatorLayout, "Operazione non riuscita: "+response.getCode(), Snackbar.LENGTH_SHORT);
+                        .make(coordinatorLayout, "Operazione non riuscita: " + response.getCode(), Snackbar.LENGTH_SHORT);
                 snackbar.show();
             }
         }
         progressView.stopAnimation();
         progressView.setVisibility(View.INVISIBLE);
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.profile_user_edit) {
+            Intent intent = new Intent(Profile.this, UpdateProfile.class);
+            // User
+            // Required
+            intent.putExtra("userId", user_id);
+            intent.putExtra("userPic", user_pic);
+            intent.putExtra("userName", user_name);
+            intent.putExtra("userSurname", user_surname);
+            intent.putExtra("userEmail", user_email);
+            intent.putExtra("userBirth", user_birth);
+            intent.putExtra("userSex", user_sex);
+            // Not Required
+            if (user_city != null)
+                intent.putExtra("userCity", user_city);
+            if (user_address != null)
+                intent.putExtra("userAddress", user_address);
+            if (user_phone != null)
+                intent.putExtra("userPhone", user_phone);
+            // Caregiver
+            if (crgv_field != null) {
+                intent.putExtra("crgvField", crgv_field);
+                if (crgv_years_exp != null)
+                    intent.putExtra("crgvYears", crgv_years_exp);
+                if (crgv_place != null)
+                    intent.putExtra("crgvPlace", crgv_place);
+                if (crgv_available != null)
+                    intent.putExtra("crgvAvailable", crgv_available);
+                if (crgv_bio != null)
+                    intent.putExtra("crgvBio", crgv_bio);
+            }
+            this.startActivityForResult(intent, EDIT_PROFILE);
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     /*
     // A method to find height of the status bar
     public int getStatusBarHeight() {
