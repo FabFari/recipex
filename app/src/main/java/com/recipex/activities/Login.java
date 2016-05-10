@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.appspot.recipex_1281.recipexServerApi.model.MainUserPrescriptionsMessage;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -30,7 +31,9 @@ import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListe
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 import com.recipex.R;
+import com.recipex.asynctasks.GetTerapieUser;
 import com.recipex.asynctasks.Register;
+import com.recipex.taskcallbacks.TaskCallbackGetTerapie;
 import com.recipex.taskcallbacks.TaskCallbackLogin;
 
 
@@ -69,12 +72,14 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
         accedi.setOnClickListener(this);
         pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
-
+        editor.putLong("id", 5719238044024832L);
+        editor.commit();
 
         String e = pref.getString("email",null);
         String n=pref.getString("nome", null);
         String c=pref.getString("cognome", null);
         String f=pref.getString("foto", null);
+
 
         if(e!=null && n!=null && c!=null && f!=null)
             avviaHome();
@@ -333,15 +338,15 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
         editor.putString("nome", nome);
         editor.putString("cognome", cognome);
         editor.putString("foto", personPhotoUrl);
+        editor.putLong("id", 5719238044024832L);
 
         boolean utenteSemplice=pref.getBoolean("utenteSemplice", false);
         Log.d("UTENTESEMPLICE DONE", " "+utenteSemplice);
 
         editor.commit();
+        Intent i=new Intent(Login.this, Home.class);
+        startActivity(i);
 
-        Intent myIntent = new Intent(Login.this, Home.class);
-        this.startActivity(myIntent);
-        this.finish();
         /*}else{ //Login fallito perchè email non è registrata
             disconnetti();
             Toast.makeText(getApplicationContext(), "Login fallito! Devi registrarti!", Toast.LENGTH_LONG).show();

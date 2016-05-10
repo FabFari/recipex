@@ -5,11 +5,11 @@ package com.recipex.utilities;
  */
 public class Terapia {
     public String nome;
-    public int dose;
+    public long dose;
     public String tipo;
     public boolean ricetta;
 
-    public Terapia(String nome, int dose, String tipo, boolean ricetta){
+    public Terapia(String nome, long dose, String tipo, boolean ricetta){
         this.nome=nome;
         this.dose=dose;
         this.tipo=tipo;

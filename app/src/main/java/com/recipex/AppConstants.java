@@ -17,11 +17,18 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.provider.Settings;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 
 import javax.annotation.Nullable;
 
 
-public class AppConstants {
+public class AppConstants extends AppCompatActivity{
     /**
      * Your WEB CLIENT ID from the API Access screen of the Developer Console for your project. This
      * is NOT the Android client id from that screen.

@@ -27,13 +27,12 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
     String nome;
     long ingrediente;
     String tipo;
-    int dose;
+    long dose;
     String unità;
     int quantità;
     boolean ricetta;
     String foglioIllustrativo;
     int assistente;
-    int cadenza;
 
     GoogleAccountCredential credential;
     SharedPreferences settings;
@@ -44,8 +43,8 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
         mContext = context;
     }
 
-    public AggiungiTerapiaAT(Context context, String nome, long ingrediente, String tipo, int dose, String unità,
-                             int quantità, boolean ricetta, String foglioIllustrativo, int assistente, int cadenza,
+    public AggiungiTerapiaAT(Context context, String nome, long ingrediente, String tipo, long dose, String unità,
+                             int quantità, boolean ricetta, String foglioIllustrativo, int assistente,
                              TaskCallbackAggiungiTerapia mCallback) {
         mContext = context;
         this.mCallback = mCallback;
@@ -58,7 +57,6 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
         this.ricetta = ricetta;
         this.foglioIllustrativo = foglioIllustrativo;
         this.assistente = assistente;
-        this.cadenza = cadenza;
 
     }
 
@@ -89,7 +87,7 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
             reg.setName(nome);
             reg.setActiveIngredient(ingrediente);
             reg.setKind(tipo);
-            reg.setDose((long) dose);
+            reg.setDose(dose);
             reg.setUnits(unità);
             reg.setQuantity((long) quantità);
             reg.setRecipe(ricetta);
@@ -102,10 +100,6 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
             RecipexServerApi.Prescription.AddPrescription post = apiServiceHandle.prescription().addPrescription(5719238044024832L, reg);
 
             MainDefaultResponseMessage response = post.execute();
-
-            System.out.println("RESPONSE " + response.getMessage());
-            Log.d("RESPONSE ", response.getMessage());
-
             return response;
         } catch (IOException e) {
             Looper.prepare();

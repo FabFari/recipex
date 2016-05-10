@@ -31,15 +31,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.appspot.recipex_1281.recipexServerApi.model.MainUserPrescriptionsMessage;
 import com.recipex.CircleTransform;
 import com.recipex.R;
 import com.recipex.fragments.MisurazioniFragment;
 import com.recipex.fragments.TabFragment;
 import com.recipex.fragments.TerapieFragment;
+import com.recipex.utilities.Terapia;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 
 import java.io.InputStream;
+import java.util.List;
 
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
@@ -223,12 +226,12 @@ public class Home extends AppCompatActivity
             fragmentTransaction.replace(R.id.containerView,new TabFragment()).commit();
         } else if (id == R.id.nav_terapie) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-
-            //da usare se c'è una nuova terapia.
+            /*//da usare se c'è una nuova terapia.
             boolean nuovaTerapia=false;
             if(getIntent().getExtras()!=null)
                 nuovaTerapia=(boolean)getIntent().getExtras().get("nuovaTerapia");
             TerapieFragment t=new TerapieFragment();
+
             if(nuovaTerapia){
                 //ora lo posso rimuovere perchè sto prendendo i parametri della nuova terapia
                 getIntent().removeExtra("nuovaTerapia");
@@ -242,8 +245,8 @@ public class Home extends AppCompatActivity
                 bundle.putString("tipoTerapia", tipoTerapia);
                 bundle.putBoolean("ricettaTerapia", ricettaTerapia);
                 t.setArguments(bundle);
-            }
-            fragmentTransaction.replace(R.id.containerView,t).commit();
+            }*/
+            fragmentTransaction.replace(R.id.containerView,new TerapieFragment()).commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
