@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/user_search.cardview"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    card_view:cardCornerRadius="4dp"
+    card_view:cardElevation="2dp"
+    card_view:cardUseCompatPadding="true" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/spacing_ultra_low" >
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/user_search.user_pic"
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            android:src="@drawable/recipex_square_logo"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            app:border_color="@android:color/white"
+            app:border_width="2dp"
+            app:layout_behavior="com.recipex.utilities.AvatarImageBehavior" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/user_search.user_pic"
+            android:orientation="vertical"
+            android:layout_marginLeft="4dp">
+
+            <TextView
+                android:id="@+id/user_search.user_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="24sp"
+                android:text="Fabrizio Farinacci"
+                android:textColor="@color/colorPrimaryDark" />
+
+            <TextView
+                android:id="@+id/user_search.crgv_field"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Caregiver"
+                android:textColor="@color/colorPrimaryDark"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/user_search.crgv_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:src="@drawable/ic_caregiver_lp_acc"
+            android:visibility="gone"/>
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

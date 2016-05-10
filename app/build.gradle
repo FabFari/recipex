@@ -13,7 +13,7 @@ android {
     }
     defaultConfig {
         applicationId "com.recipex"
-        minSdkVersion 15
+        minSdkVersion 19
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -61,4 +61,5 @@ dependencies {
         exclude group: 'org.apache.httpcomponents'
     }
 
+    compile 'com.google.android.gms:play-services-appindexing:8.4.0'
 }

@@ -11,6 +11,10 @@
             android:icon="@drawable/nurse_icon"
             android:title="I tuoi infermieri domiciliari" />
         <item
+            android:id="@+id/nav_requests"
+            android:icon="@drawable/ic_requests"
+            android:title="Le tue richieste" />
+        <item
             android:id="@+id/nav_familiari"
             android:icon="@drawable/friend"
             android:title="I tuoi familiari" />

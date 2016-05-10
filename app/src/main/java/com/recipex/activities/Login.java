@@ -72,8 +72,9 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
         accedi.setOnClickListener(this);
         pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
-        editor.putLong("id", 5719238044024832L);
-        editor.commit();
+
+        // Change Fabrizio
+        Long id = pref.getLong("userId", 0L);
 
         String e = pref.getString("email",null);
         String n=pref.getString("nome", null);
