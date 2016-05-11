@@ -217,20 +217,48 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Ogni quanto"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:text="Notifiche (l'applicazione terrà un calendario su Google Calendar)"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
                     android:paddingLeft="10dp"
                     android:id="@+id/tempo"
                     android:layout_alignParentTop="true"
                     android:layout_centerHorizontal="true"/>
 
-                <EditText
-                    android:layout_width="fill_parent"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/insertTempo"
-                    android:paddingLeft="10dp"
-                    android:inputType="textCapSentences"
-                    android:imeOptions="actionNext"/>
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ogni"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:id="@+id/ogni"
+                        />
+                    <Spinner
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/numerocadenzaspin">
+                    </Spinner>
+                    <Spinner
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/cadenzaspin">
+                    </Spinner>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ora:"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:id="@+id/ore"
+                        />
+                    <Spinner
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/orespin">
+                    </Spinner>
+                </LinearLayout>
 
                 <!--data di inizio-->
                 <TextView

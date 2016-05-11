@@ -198,10 +198,6 @@ public class Home extends AppCompatActivity
             presentShowcaseView(350);
 
         }
-        else if(id==R.id.action_addprescription){
-            Intent i=new Intent(Home.this, AggiungiTerapia.class);
-            startActivity(i);
-        }
         return super.onOptionsItemSelected(item);
     }
 
