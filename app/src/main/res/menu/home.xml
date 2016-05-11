@@ -11,9 +11,4 @@
         android:orderInCategory="100"
         android:title="Tutorial"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/action_addprescription"
-        android:orderInCategory="100"
-        android:title="Add Prescription"
-        app:showAsAction="never" />
 </menu>

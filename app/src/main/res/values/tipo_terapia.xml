@@ -10,4 +10,10 @@
         <item>SI</item>
         <item>NO</item>
     </string-array>
+    <string-array name="cadenze">
+        <item>giorno</item>
+        <item>settimana</item>
+        <item>mese</item>
+        <item>anno</item>
+    </string-array>
 </resources>

@@ -85,13 +85,16 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
 
     Spinner spinner;
 
-    String nome, ingrediente, tipo, dose, unità, quantità, ricetta, foglio, caregiver, tempo, inizio;
+    String nome, ingrediente, tipo, dose, unità, quantità, ricetta, foglio, caregiver, numerocadenza, cadenza, ore, inizio;
 
     boolean recipe;
     long ingredienteID;
 
     EditText inserisciNome, inserisciDose, inserisciUnità, inserisciQuantità,
-            inserisciFoglio, inserisciCaregiver, inserisciTempo, inserisciInizio;
+            inserisciFoglio, inserisciCaregiver, inserisciInizio;
+
+    static final int MAXNUMEROCADENZA=30;
+    static final int ORE =24;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +102,33 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         setContentView(R.layout.activity_aggiungi_terapia);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Aggiungi Terapia");
+
+        Spinner numerocadenza=(Spinner)findViewById(R.id.numerocadenzaspin);
+        Spinner orespin=(Spinner)findViewById(R.id.orespin);
+
+        String[] np = new String[MAXNUMEROCADENZA];
+        for(int i=1;i<=MAXNUMEROCADENZA;i++){
+            np[i-1]=Integer.toString(i);
+        }
+
+        String[] np2 = new String[ORE];
+        for(int i=0;i<ORE;i++){
+            np2[i]=Integer.toString(i);
+        }
+        ArrayAdapter <String> _aa = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item,np);//array holding min and max pages
+        numerocadenza.setAdapter(_aa);
+
+        ArrayAdapter <String> _aa2 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item,np2);//array holding min and max pages
+        orespin.setAdapter(_aa2);
+
+        numerocadenza.setOnItemSelectedListener(this);
+        orespin.setOnItemSelectedListener(this);
+
+        Spinner cadenzaspin=(Spinner)findViewById(R.id.cadenzaspin);
+        ArrayAdapter<CharSequence> adapterc = ArrayAdapter.createFromResource(this,
+                R.array.cadenze, android.R.layout.simple_spinner_item);
+        cadenzaspin.setAdapter(adapterc);
+        cadenzaspin.setOnItemSelectedListener(this);
 
         Spinner tipi=(Spinner) findViewById(R.id.tipi);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
@@ -122,7 +152,6 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         inserisciQuantità=(EditText)findViewById(R.id.insertQuantità);
         inserisciFoglio=(EditText)findViewById(R.id.insertFoglio);
         inserisciCaregiver=(EditText)findViewById(R.id.insertAssistente);
-        inserisciTempo=(EditText)findViewById(R.id.insertTempo);
         inserisciInizio=(EditText)findViewById(R.id.insertInizio);
 
         if(checkNetwork()) new GetMainIngredientsAT(getApplicationContext(), this).execute();
@@ -147,8 +176,6 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                     inserisciDose.getText().length()>0 &&
                     inserisciUnità.getText().length()>1 && inserisciQuantità.getText().length()>0 ) {
 
-                fatto=false;
-
                 nome=inserisciNome.getText().toString();
 
                 dose = inserisciDose.getText().toString();
@@ -167,11 +194,10 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                 if(!caregiver.equals(""))
                     assistente=Integer.parseInt(caregiver);
 
-                tempo =inserisciTempo.getText().toString();
                 inizio=inserisciInizio.getText().toString();
 
                 Log.d("REGISTRAZIONE ", "Sono qui");
-                if (checkNetwork()) new AggiungiTerapiaAT(getApplicationContext(), nome, ingredienteID, AppConstants.PILLOLA, dose2, unità,
+                if (checkNetwork()) new AggiungiTerapiaAT(getApplicationContext(), nome, ingredienteID, tipo, dose2, unità,
                         quanto, recipe, foglio, assistente, this).execute();
 
             }
@@ -202,7 +228,6 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
             }
             else {
                 Toast.makeText(this, "Operazione non riuscita", Toast.LENGTH_LONG).show();
-
             }
         }
         else {
@@ -244,7 +269,9 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
 
         //mi serve per aspettare prima che l'utente mandi i dati
         fatto=true;
+        Log.d("FATTO", "fatto");
     }
+
 
     public void onItemSelected(AdapterView<?> parent, View view,
                                int pos, long id) {
@@ -263,6 +290,17 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
             ricetta=(String)parent.getItemAtPosition(pos);
             boolean recipe=(ricetta.equals("SI"))? true: false;
             Log.d("RICETTA ", " "+recipe);
+        }
+        else if(parent.getId()==R.id.numerocadenzaspin){
+            numerocadenza=(String)parent.getItemAtPosition(pos);
+        }
+        else if(parent.getId()==R.id.cadenzaspin){
+            cadenza=(String)parent.getItemAtPosition(pos);
+            Log.d("CADENZA", cadenza);
+        }
+        else if(parent.getId()==R.id.orespin){
+            ore=(String)parent.getItemAtPosition(pos);
+            Log.d("ORE", ore);
         }
     }
     public void onNothingSelected(AdapterView<?> parent) {
@@ -300,7 +338,8 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
             Toast.makeText(AggiungiTerapia.this, "No network connection available.", Toast.LENGTH_SHORT).show();
         } else {
             Log.d("CALENDARgetres", "task");
-            new AggiungiTerapiaCalendar(mCredential, getApplicationContext(), this, nome, tempo, inizio).execute();
+            new AggiungiTerapiaCalendar(mCredential, getApplicationContext(), this, nome, numerocadenza, cadenza,
+                    ore, inizio).execute();
         }
     }
     /**
@@ -496,14 +535,16 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         private Context context;
         private TaskCallbackCalendar mCallback;
         private String nome;
+        private String numerocadenza;
         private String cadenza;
+        private String ore;
         private String inizio;
 
         private com.google.api.services.calendar.Calendar mService = null;
         private Exception mLastError = null;
 
         public AggiungiTerapiaCalendar(GoogleAccountCredential credential, Context context, TaskCallbackCalendar c,
-                                       String nome, String cadenza, String inizio) {
+                                       String nome, String numerocadenza, String cadenza, String ore, String inizio) {
             HttpTransport transport = AndroidHttp.newCompatibleTransport();
             JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
             mService = new com.google.api.services.calendar.Calendar.Builder(
@@ -513,7 +554,9 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
             this.context=context;
             this.mCallback=c;
             this.nome=nome;
+            this.numerocadenza=numerocadenza;
             this.cadenza=cadenza;
+            this.ore=ore;
             this.inizio=inizio;
         }
 
@@ -546,8 +589,10 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                 Event event = new Event()
                         .setSummary(nome);
 
-                Log.d("STARTTIME ", inizio+"T21:00:00+02:00");
-                DateTime startDateTime = new DateTime(inizio+"T21:00:00+02:00");
+                if(Integer.parseInt(ore)<=9)
+                    ore="0"+ore;
+                Log.d("STARTTIME ", inizio+"T"+ore+":00:00+02:00");
+                DateTime startDateTime = new DateTime(inizio+"T"+ore+":00:00+02:00");
 
                 EventDateTime startEvento = new EventDateTime()
                         .setDateTime(startDateTime)
@@ -556,27 +601,33 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
 
                 //event.setEndTimeUnspecified(true);
 
-                String dataend=new StringBuilder(inizio).append("T22:00:00+02:00").toString();
-                Log.d("DATAEND", dataend);
+
+                int orepiùunoint = Integer.parseInt(ore) + 1;
+                String orepiùuno = Integer.toString(orepiùunoint);
+                if(Integer.parseInt(orepiùuno)<=9)
+                    orepiùuno="0"+orepiùuno;
+
+                DateTime endDateTime=new DateTime(inizio+"T"+orepiùuno+":00:00+02:00");
+                Log.d("DATAEND", inizio+"T"+orepiùuno+":00:00+02:00");
 
                 EventDateTime endEvento = new EventDateTime()
-                        .setDateTime(new DateTime(dataend))
+                        .setDateTime(endDateTime)
                         .setTimeZone("Europe/Rome");
                 event.setStart(startEvento);
                 event.setEnd(endEvento);
 
-                String[]rule=cadenza.split(" "); //rule[1] (giorno, settimana, mese), rule[0] è un intero
                 String ruledef="";
-                if(rule[1].equals("giorno"))
+                if(cadenza.equals("giorno"))
                     ruledef="DAILY";
-                else if(rule[1].equals("settimana"))
+                else if(cadenza.equals("settimana"))
                     ruledef="WEEKLY";
-                else if(rule[1].equals("mese"))
+                else if(cadenza.equals("mese"))
                     ruledef="MONTHLY";
-                else if(rule[1].equals("anno"))
+                else if(cadenza.equals("anno"))
                     ruledef="YEARLY";
 
-                String[] recurrence = new String[] {"RRULE:FREQ="+ruledef+";INTERVAL="+rule[0]};
+                String[] recurrence = new String[] {"RRULE:FREQ="+ruledef+";INTERVAL="+numerocadenza};
+
                 event.setRecurrence(Arrays.asList(recurrence));
                 Log.d("RECURRENCE ",recurrence[0]);
 
