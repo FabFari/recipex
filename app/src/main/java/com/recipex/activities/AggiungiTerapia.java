@@ -215,16 +215,20 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
     public void done(boolean b, MainDefaultResponseMessage response){
         if(response != null) {
             if(b) {
+
                 Toast.makeText(this, "Terapia inserita "+response.getMessage(), Toast.LENGTH_LONG).show();
                 //aggiungo al calendario
-                mProgress = new ProgressDialog(this);
-                mProgress.setMessage("Sto inserendo nel calendario...");
+                if(!inizio.equals("")) {
+                    mProgress = new ProgressDialog(this);
+                    mProgress.setMessage("Sto inserendo nel calendario...");
 
-                // Initialize credentials and service object.
-                mCredential = GoogleAccountCredential.usingOAuth2(
-                        getApplicationContext(), Arrays.asList(SCOPES))
-                        .setBackOff(new ExponentialBackOff());
-                getResultsFromApi();
+
+                    // Initialize credentials and service object.
+                    mCredential = GoogleAccountCredential.usingOAuth2(
+                            getApplicationContext(), Arrays.asList(SCOPES))
+                            .setBackOff(new ExponentialBackOff());
+                    getResultsFromApi();
+                }
             }
             else {
                 Toast.makeText(this, "Operazione non riuscita", Toast.LENGTH_LONG).show();

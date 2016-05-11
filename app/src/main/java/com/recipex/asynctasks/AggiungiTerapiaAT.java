@@ -97,7 +97,9 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
             if(assistente!=0)
                 reg.setCaregiver((long)assistente);
 
-            RecipexServerApi.Prescription.AddPrescription post = apiServiceHandle.prescription().addPrescription(5719238044024832L, reg);
+            long id=pref.getLong("userId", 0L);
+
+            RecipexServerApi.Prescription.AddPrescription post = apiServiceHandle.prescription().addPrescription(id, reg);
 
             MainDefaultResponseMessage response = post.execute();
             return response;

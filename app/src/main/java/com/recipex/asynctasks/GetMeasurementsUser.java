@@ -8,30 +8,29 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
-import com.appspot.recipex_1281.recipexServerApi.model.MainAddPrescriptionMessage;
-import com.appspot.recipex_1281.recipexServerApi.model.MainDefaultResponseMessage;
-import com.appspot.recipex_1281.recipexServerApi.model.MainUserInfoMessage;
+import com.appspot.recipex_1281.recipexServerApi.model.MainUserMeasurementsMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserPrescriptionsMessage;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.recipex.AppConstants;
+import com.recipex.taskcallbacks.TaskCallbackGetMeasurements;
 import com.recipex.taskcallbacks.TaskCallbackGetTerapie;
 
 import java.io.IOException;
 
 /**
- * Created by Sara on 08/05/2016.
+ * Created by Sara on 11/05/2016.
  */
-public class GetTerapieUser extends AsyncTask<Void, Void, MainUserPrescriptionsMessage> {
+public class GetMeasurementsUser extends AsyncTask<Void, Void, MainUserMeasurementsMessage> {
     long id;
     Context mContext;
-    TaskCallbackGetTerapie mCallback;
+    TaskCallbackGetMeasurements mCallback;
 
     GoogleAccountCredential credential;
     SharedPreferences settings;
     SharedPreferences pref;
 
 
-    public GetTerapieUser(long id, Context context, TaskCallbackGetTerapie t){
+    public GetMeasurementsUser(long id, Context context, TaskCallbackGetMeasurements t){
         this.id=id;
         mContext=context;
         mCallback=t;
@@ -46,7 +45,7 @@ public class GetTerapieUser extends AsyncTask<Void, Void, MainUserPrescriptionsM
         credential.setSelectedAccountName(accountName);
     }
 
-    protected MainUserPrescriptionsMessage doInBackground(Void... unused) {
+    protected MainUserMeasurementsMessage doInBackground(Void... unused) {
 
         // Retrieve service handle.
         credential = GoogleAccountCredential.usingAudience(mContext,
@@ -58,8 +57,8 @@ public class GetTerapieUser extends AsyncTask<Void, Void, MainUserPrescriptionsM
         RecipexServerApi apiServiceHandle = AppConstants.getApiServiceHandle(credential);
 
         try {
-            RecipexServerApi.User.GetPrescriptions get = apiServiceHandle.user().getPrescriptions(id);
-            MainUserPrescriptionsMessage response = get.execute();
+            RecipexServerApi.User.GetMeasurements get = apiServiceHandle.user().getMeasurements(id);
+            MainUserMeasurementsMessage response = get.execute();
 
             Log.d("RESPONSE TERAPIE", response.getResponse().getMessage());
             return response;
@@ -71,14 +70,14 @@ public class GetTerapieUser extends AsyncTask<Void, Void, MainUserPrescriptionsM
     }
 
 
-    protected void onPostExecute(MainUserPrescriptionsMessage response) {
+    protected void onPostExecute(MainUserMeasurementsMessage response) {
         if(response != null) {
             Log.d("RESPONSE TASK", "CIAO");
-            mCallback.done(true, response);
+            mCallback.done(response);
         }
         else{
             Log.d("RESPONSE TASK", "NONO");
-            mCallback.done(false, null);
+            mCallback.done(null);
         }
 
     }

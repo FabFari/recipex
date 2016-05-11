@@ -14,6 +14,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,7 +85,7 @@ public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie{
             }
         }*/
         SharedPreferences pref=getActivity().getSharedPreferences("MyPref", Context.MODE_PRIVATE);
-        long id=pref.getLong("id", 0);
+        long id=pref.getLong("userId", 0L);
 
         if(id!=0 && checkNetwork()) new GetTerapieUser(id, getContext(), this ).execute();
         else Toast.makeText(getActivity(), "Si è verificato un errore.", Toast.LENGTH_SHORT).show();
@@ -113,17 +114,26 @@ public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie{
 
     //callback from GetTerapieUser
     public void done(boolean b, MainUserPrescriptionsMessage response){
-        if(b) {
+        if(b==true) {
             List<Terapia> terapie=new LinkedList<>();
-            List<MainPrescriptionInfoMessage> lista=response.getPrescriptions();
-            Iterator<MainPrescriptionInfoMessage> i=lista.iterator();
-            while(i.hasNext()){
-                MainPrescriptionInfoMessage cur=i.next();
-                Terapia tcur=new Terapia(cur.getName(), cur.getDose(), cur.getKind(), cur.getRecipe());
-                terapie.add(tcur);
+            if(response.getPrescriptions()!=null){
+                List<MainPrescriptionInfoMessage> lista = response.getPrescriptions();
+                Iterator<MainPrescriptionInfoMessage> i = lista.iterator();
+                while (i.hasNext()) {
+                    MainPrescriptionInfoMessage cur = i.next();
+                    Terapia tcur = new Terapia(cur.getName(), cur.getDose(), cur.getKind(), cur.getRecipe(),
+                            cur.getActiveIngrName(), cur.getUnits(), cur.getQuantity(), cur.getPil());
+                    terapie.add(tcur);
+                    Log.d("TERAPIEFRAGMENT", cur.getActiveIngrName());
+                }
+                TerapieAdapter adapter = new TerapieAdapter(terapie);
+                Log.d("TERAPIEFRAGMENT", "size " + terapie.size());
+                curRecView.setAdapter(adapter);
             }
-            TerapieAdapter adapter=new TerapieAdapter(terapie);
-            curRecView.setAdapter(adapter);
+            else {
+                Toast.makeText(getActivity(), "You don't have prescriptions. Add one clicking on the button", Toast.LENGTH_LONG).show();
+
+            }
         }
         else{
             Toast.makeText(getActivity(), "Si è verificato un errore", Toast.LENGTH_SHORT).show();

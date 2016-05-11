@@ -64,6 +64,7 @@ public class Home extends AppCompatActivity
 
     //to use showcaseview
     private static final String SHOWCASE_ID_MAIN = "Showcase_single_use_main";
+    boolean utenteSemplice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +96,7 @@ public class Home extends AppCompatActivity
         mNavigationView.setNavigationItemSelectedListener(this);
 
         pref = getApplicationContext().getSharedPreferences("MyPref",MODE_PRIVATE);
-        boolean utenteSemplice=pref.getBoolean("utenteSemplice", false);
+        utenteSemplice=pref.getBoolean("utenteSemplice", false);
         Log.d("UTENTESEMPLICE ", " "+utenteSemplice);
         mFragmentManager = getSupportFragmentManager();
         mFragmentTransaction = mFragmentManager.beginTransaction();
@@ -211,44 +212,34 @@ public class Home extends AppCompatActivity
 
         if (id == R.id.home) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.containerView,new TabFragment()).commit();
+            if(utenteSemplice)
+                fragmentTransaction.replace(R.id.containerView, new MisurazioniFragment()).commit();
+            else fragmentTransaction.replace(R.id.containerView, new TabFragment()).commit();
         }
         //ora fanno tutti la stessa cosa poi cambio
         else if (id == R.id.nav_infermieri) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.containerView,new TabFragment()).commit();
+            if(utenteSemplice)
+                fragmentTransaction.replace(R.id.containerView, new MisurazioniFragment()).commit();
+            else fragmentTransaction.replace(R.id.containerView, new TabFragment()).commit();
         } else if (id == R.id.nav_familiari) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.containerView,new TabFragment()).commit();
+            if(utenteSemplice)
+                fragmentTransaction.replace(R.id.containerView, new MisurazioniFragment()).commit();
+            else fragmentTransaction.replace(R.id.containerView, new TabFragment()).commit();
         } else if (id == R.id.nav_aiuto) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.containerView,new TabFragment()).commit();
+            if(utenteSemplice)
+                fragmentTransaction.replace(R.id.containerView, new MisurazioniFragment()).commit();
+            else fragmentTransaction.replace(R.id.containerView, new TabFragment()).commit();
         } else if (id == R.id.nav_logout) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.containerView,new TabFragment()).commit();
+            if(utenteSemplice)
+                fragmentTransaction.replace(R.id.containerView, new MisurazioniFragment()).commit();
+            else fragmentTransaction.replace(R.id.containerView, new TabFragment()).commit();
         } else if (id == R.id.nav_terapie) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-            /*//da usare se c'è una nuova terapia.
-            boolean nuovaTerapia=false;
-            if(getIntent().getExtras()!=null)
-                nuovaTerapia=(boolean)getIntent().getExtras().get("nuovaTerapia");
-            TerapieFragment t=new TerapieFragment();
-
-            if(nuovaTerapia){
-                //ora lo posso rimuovere perchè sto prendendo i parametri della nuova terapia
-                getIntent().removeExtra("nuovaTerapia");
-                String nomeTerapia=(String)getIntent().getExtras().get("nomeTerapia");
-                int doseTerapia=Integer.parseInt((String)getIntent().getExtras().get("doseTerapia"));
-                String tipoTerapia=(String)getIntent().getExtras().get("tipoTerapia");
-                boolean ricettaTerapia=(boolean)getIntent().getExtras().get("ricettaTerapia");
-                Bundle bundle=new Bundle();
-                bundle.putString("nomeTerapia", nomeTerapia);
-                bundle.putInt("doseTerapia", doseTerapia);
-                bundle.putString("tipoTerapia", tipoTerapia);
-                bundle.putBoolean("ricettaTerapia", ricettaTerapia);
-                t.setArguments(bundle);
-            }*/
-            fragmentTransaction.replace(R.id.containerView,new TerapieFragment()).commit();
+            fragmentTransaction.replace(R.id.containerView, new TerapieFragment()).commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

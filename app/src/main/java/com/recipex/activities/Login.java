@@ -339,7 +339,7 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
         editor.putString("nome", nome);
         editor.putString("cognome", cognome);
         editor.putString("foto", personPhotoUrl);
-        editor.putLong("id", 5719238044024832L);
+        editor.putLong("userId", 5719238044024832L);
 
         boolean utenteSemplice=pref.getBoolean("utenteSemplice", false);
         Log.d("UTENTESEMPLICE DONE", " "+utenteSemplice);

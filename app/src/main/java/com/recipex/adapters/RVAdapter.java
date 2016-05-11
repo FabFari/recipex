@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.recipex.R;
+import com.recipex.utilities.Misurazione;
 
 import java.util.List;
 
@@ -16,10 +17,10 @@ import java.util.List;
  */
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.MyViewHolder>{
 
-    List<String> data;
+    List<Misurazione> misurazioni;
 
-    public RVAdapter(List<String> data){
-        this.data = data;
+    public RVAdapter(List<Misurazione> data){
+        misurazioni = data;
     }
 
     @Override
@@ -31,12 +32,13 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.MyViewHolder>{
 
     @Override
     public int getItemCount() {
-        return data.size();
+        return misurazioni.size();
     }
 
     @Override
     public void onBindViewHolder(RVAdapter.MyViewHolder personViewHolder, int i) {
-        personViewHolder.data.setText(data.get(i));
+        personViewHolder.data.setText(misurazioni.get(i).data);
+        personViewHolder.titolo.setText(misurazioni.get(i).tipo);
     }
 
     @Override
@@ -45,13 +47,13 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.MyViewHolder>{
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
-        CardView cv;
         TextView data;
+        TextView titolo;
 
         MyViewHolder(View itemView) {
             super(itemView);
-            cv = (CardView)itemView.findViewById(R.id.card_view);
             data = (TextView)itemView.findViewById(R.id.data);
+            titolo=(TextView)itemView.findViewById(R.id.titolo);
         }
     }
 
