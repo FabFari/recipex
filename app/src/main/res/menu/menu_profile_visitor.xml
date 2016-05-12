@@ -8,4 +8,11 @@
         android:title="@string/action_settings"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/profile.contact"
+        android:title="@string/edit"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_assistant"/>
+
 </menu>

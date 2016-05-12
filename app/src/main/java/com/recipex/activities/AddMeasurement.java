@@ -77,8 +77,8 @@ public class AddMeasurement extends AppCompatActivity
     // Long user_id = 5724160613416960L;
     private Long user_id;
     private SharedPreferences pref;
-    String measurement_kind = AppConstants.COLESTEROLO;
-
+    // String measurement_kind = AppConstants.COLESTEROLO;
+    private String measurement_kind;
     private NfcAdapter mNfcAdapter;
 
     @Override
@@ -89,22 +89,29 @@ public class AddMeasurement extends AppCompatActivity
         pref = getApplicationContext().getSharedPreferences("MyPref",MODE_PRIVATE);
         user_id = pref.getLong("userId", 0L);
 
-
+        Intent intent = getIntent();
+        measurement_kind = intent.getStringExtra("kind");
 
         bindActivity();
 
-        Intent intent = getIntent();
-        NdefMessage msgs[];
-        super.onResume();
+        //Intent intent = getIntent();
+        //NdefMessage msgs[];
+        //super.onResume();
+        /*
         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
+            Log.d(TAG, "Sono nell'OnCreate!!!");
             Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
             new NdefReaderTask(main_relative, this).execute(tag);
+            progressView.startAnimation();
+            progressView.setVisibility(View.VISIBLE);
         }
-
-        progressView.startAnimation();
-        progressView.setVisibility(View.VISIBLE);
-
-        //setupUI();
+        else {
+        */
+        if(measurement_kind != null) {
+            bind_specific();
+            setupUI(measurement_kind);
+        }
+        //}
 
         picker1.setOnValueChangeListener(new OnValueChangeListener() {
             @Override
@@ -177,14 +184,6 @@ public class AddMeasurement extends AppCompatActivity
         picker_res1 = (TextView) findViewById(R.id.measurement_number_picker_res1);
         picker_res2 = (TextView) findViewById(R.id.measurement_number_picker_res2);
         float_picker_res = (TextView) findViewById(R.id.measurement_number_float_picker);
-        if(measurement_kind.equals(AppConstants.SPO2))
-            float_picker = (ActualNumberPicker) findViewById(R.id.measurement_spo2_number_picker);
-        if(measurement_kind.equals(AppConstants.GLUCOSIO))
-            float_picker = (ActualNumberPicker) findViewById(R.id.measurement_hgt_number_picker);
-        if(measurement_kind.equals(AppConstants.TEMP_CORPOREA))
-            float_picker = (ActualNumberPicker) findViewById(R.id.measurement_temp_number_picker);
-        if(measurement_kind.equals(AppConstants.COLESTEROLO))
-            float_picker = (ActualNumberPicker) findViewById(R.id.measurement_chl_number_picker);
         icon = (ImageView) findViewById(R.id.measurement_icon);
         title = (TextView) findViewById(R.id.measurement_title);
         linearLayout = (LinearLayout) findViewById(R.id.measurement_linearlayout);
@@ -194,6 +193,17 @@ public class AddMeasurement extends AppCompatActivity
         progressView = (CircularProgressView) findViewById(R.id.measurement_progress_view);
         note = (EditText) findViewById((R.id.measurement_crgv_bio));
         main_relative = (RelativeLayout) findViewById(R.id.measurement_main_relative);
+    }
+
+    private void bind_specific() {
+        if(measurement_kind.equals(AppConstants.SPO2))
+            float_picker = (ActualNumberPicker) findViewById(R.id.measurement_spo2_number_picker);
+        if(measurement_kind.equals(AppConstants.GLUCOSIO))
+            float_picker = (ActualNumberPicker) findViewById(R.id.measurement_hgt_number_picker);
+        if(measurement_kind.equals(AppConstants.TEMP_CORPOREA))
+            float_picker = (ActualNumberPicker) findViewById(R.id.measurement_temp_number_picker);
+        if(measurement_kind.equals(AppConstants.COLESTEROLO))
+            float_picker = (ActualNumberPicker) findViewById(R.id.measurement_chl_number_picker);
     }
 
     private void setupUI(String measurement_kind) {
@@ -436,9 +446,10 @@ public class AddMeasurement extends AppCompatActivity
     @Override
     public void onResume() {
         Intent intent = getIntent();
-        NdefMessage msgs[];
+        //NdefMessage msgs[];
         super.onResume();
         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
+            Log.d(TAG, "Sono nell'OnResume!!!");
             Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
             new NdefReaderTask(main_relative, this).execute(tag);
             progressView.startAnimation();
@@ -448,8 +459,11 @@ public class AddMeasurement extends AppCompatActivity
 
     @Override
     public void done(String result) {
-        if(result != null)
-            setupUI(result);
+        if(result != null) {
+            measurement_kind = result;
+            bind_specific();
+            setupUI(measurement_kind);
+        }
 
         progressView.stopAnimation();
         progressView.setVisibility(View.GONE);

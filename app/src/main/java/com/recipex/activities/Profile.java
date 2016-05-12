@@ -15,14 +15,17 @@ import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.recipex.AppConstants;
 import com.recipex.AppConstants.*;
 import com.recipex.R;
+import com.recipex.adapters.ContactAdapter;
 import com.recipex.asynctasks.CheckUserRelationsAT;
 import com.recipex.asynctasks.GetUserAT;
 import com.recipex.asynctasks.SendRequestAT;
+import com.recipex.fragments.ContactFragment;
 import com.recipex.taskcallbacks.CheckUserRelationsTC;
 import com.recipex.taskcallbacks.GetUserTC;
 import com.recipex.taskcallbacks.SendRequestTC;
 import com.recipex.utilities.AlertDialogManager;
 import com.recipex.utilities.ConnectionDetector;
+import com.recipex.utilities.ContactItem;
 import com.squareup.picasso.Picasso;
 
 import android.accounts.AccountManager;
@@ -40,12 +43,17 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -57,6 +65,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -163,6 +173,9 @@ public class Profile extends AppCompatActivity
     private String crgv_phone;
     private String crgv_bio;
 
+    private FragmentManager mFragmentManager;
+    private FragmentTransaction mFragmentTransaction;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -173,8 +186,8 @@ public class Profile extends AppCompatActivity
         mAppBarLayout.addOnOffsetChangedListener(this);
 
         myPrefs = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
-        // user_id = myPrefs.getLong("userId", 0L);
-        user_id = 5705241014042624L;
+        user_id = myPrefs.getLong("userId", 0L);
+        //user_id = 5705241014042624L;
         //user_id = 5724160613416960L;
 
         Bundle extras = getIntent().getExtras();
@@ -263,7 +276,7 @@ public class Profile extends AppCompatActivity
         if (user_id.equals(profile_id))
             mToolbar.inflateMenu(R.menu.menu_profile);
         else
-            mToolbar.inflateMenu(R.menu.menu_profile_visitor);
+            mToolbar.inflateMenu(R.menu.menu_main);
         // getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -528,24 +541,41 @@ public class Profile extends AppCompatActivity
     public void done(boolean res, final MainUserRelationsMessage response) {
         if (response != null) {
             if (res) {
+                boolean can_contact = false;
                 Log.d(TAG, "RESPONSE: " + response);
-                if (response.getIsRelative())
+                if (response.getIsRelative()) {
                     fab_relatives.setEnabled(false);
+                    if (!response.getIsRelativeRequest())
+                        can_contact = true;
+                }
                 else
                     fab_relatives.setOnClickListener(this);
-                if (response.getIsPcPhysician())
+                if (response.getIsPcPhysician()) {
                     fab_pc_physician.setEnabled(false);
+                    if (!response.getIsPcPhysicianRequest())
+                        can_contact = true;
+                }
                 else
                     fab_pc_physician.setOnClickListener(this);
-                if (response.getIsVisitingNurse())
+                if (response.getIsVisitingNurse()) {
                     fab_visiting_nurse.setEnabled(false);
+                    if (!response.getIsVisitingNurseRequest())
+                        can_contact = true;
+                }
                 else
                     fab_visiting_nurse.setOnClickListener(this);
-                if (response.getIsCaregiver())
+                if (response.getIsCaregiver()) {
                     fab_caregivers.setEnabled(false);
+                    if (!response.getIsCaregiverRequest())
+                        can_contact = true;
+                }
                 else
                     fab_caregivers.setOnClickListener(this);
-            } else {
+
+                if (can_contact)
+                    mToolbar.inflateMenu(R.menu.menu_profile_visitor);
+            }
+            else {
                 Snackbar snackbar = Snackbar
                         .make(coordinatorLayout, "Operazione non riuscita: " + response.getResponse().getCode(), Snackbar.LENGTH_SHORT);
                 snackbar.show();
@@ -637,37 +667,78 @@ public class Profile extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.profile_user_edit) {
-            Intent intent = new Intent(Profile.this, UpdateProfile.class);
-            // User
-            // Required
-            intent.putExtra("userId", user_id);
-            intent.putExtra("userPic", user_pic);
-            intent.putExtra("userName", user_name);
-            intent.putExtra("userSurname", user_surname);
-            intent.putExtra("userEmail", user_email);
-            intent.putExtra("userBirth", user_birth);
-            intent.putExtra("userSex", user_sex);
-            // Not Required
-            if (user_city != null)
-                intent.putExtra("userCity", user_city);
-            if (user_address != null)
-                intent.putExtra("userAddress", user_address);
-            if (user_phone != null)
-                intent.putExtra("userPhone", user_phone);
-            // Caregiver
-            if (crgv_field != null) {
-                intent.putExtra("crgvField", crgv_field);
-                if (crgv_years_exp != null)
-                    intent.putExtra("crgvYears", crgv_years_exp);
-                if (crgv_place != null)
-                    intent.putExtra("crgvPlace", crgv_place);
-                if (crgv_available != null)
-                    intent.putExtra("crgvAvailable", crgv_available);
-                if (crgv_bio != null)
-                    intent.putExtra("crgvBio", crgv_bio);
-            }
-            this.startActivityForResult(intent, EDIT_PROFILE);
+        switch(id) {
+            case R.id.profile_user_edit:
+                Intent intent = new Intent(Profile.this, UpdateProfile.class);
+                // User
+                // Required
+                intent.putExtra("userId", user_id);
+                intent.putExtra("userPic", user_pic);
+                intent.putExtra("userName", user_name);
+                intent.putExtra("userSurname", user_surname);
+                intent.putExtra("userEmail", user_email);
+                intent.putExtra("userBirth", user_birth);
+                intent.putExtra("userSex", user_sex);
+                // Not Required
+                if (user_city != null)
+                    intent.putExtra("userCity", user_city);
+                if (user_address != null)
+                    intent.putExtra("userAddress", user_address);
+                if (user_phone != null)
+                    intent.putExtra("userPhone", user_phone);
+                // Caregiver
+                if (crgv_field != null) {
+                    intent.putExtra("crgvField", crgv_field);
+                    if (crgv_years_exp != null)
+                        intent.putExtra("crgvYears", crgv_years_exp);
+                    if (crgv_place != null)
+                        intent.putExtra("crgvPlace", crgv_place);
+                    if (crgv_available != null)
+                        intent.putExtra("crgvAvailable", crgv_available);
+                    if (crgv_bio != null)
+                        intent.putExtra("crgvBio", crgv_bio);
+                }
+                this.startActivityForResult(intent, EDIT_PROFILE);
+            break;
+            case R.id.profile_contact:
+                final AlertDialog.Builder contactDialog = new AlertDialog.Builder(Profile.this);
+                final LayoutInflater inflater = getLayoutInflater();
+                final View convertView = (View) inflater.inflate(R.layout.contact_dialog, null);
+                contactDialog.setView(convertView);
+
+                List<ContactItem> myList = new ArrayList<ContactItem>();
+                myList.add(new ContactItem(R.drawable.ic_email, "E-mail"));
+                if(user_phone != null || crgv_phone != null)
+                    myList.add(new ContactItem(R.drawable.ic_phone, "Telefono"));
+                else
+                    myList.add(new ContactItem(R.drawable.ic_phone_off, "Telefono"));
+                if(user_phone != null || crgv_phone != null)
+                    myList.add(new ContactItem(R.drawable.ic_sms, "SMS"));
+                else
+                    myList.add(new ContactItem(R.drawable.ic_sms_off, "SMS"));
+
+                final ContactAdapter contactAdapter = new ContactAdapter(myList, this, user_email, user_phone, crgv_phone);
+                final RecyclerView contactRecycler = (RecyclerView) convertView.findViewById(R.id.contact_recyclerview);
+                final RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+                contactRecycler.setLayoutManager(layoutManager);
+                contactRecycler.setHasFixedSize(true);
+                contactRecycler.setAdapter(contactAdapter);
+
+                contactDialog.create();
+                contactDialog.show();
+                /*
+                Bundle bundle = new Bundle();
+                bundle.putString("user_mail", user_email);
+                if(user_phone != null)
+                    bundle.putString("user_phone", user_phone);
+                if(crgv_phone != null)
+                    bundle.putString("crgv_phone", crgv_phone);
+                mFragmentManager = getSupportFragmentManager();
+                ContactFragment dialogFragment = new ContactFragment();
+                dialogFragment.setArguments(bundle);
+                dialogFragment.show(mFragmentManager, "Contact fragment");
+                break;
+                */
         }
         return super.onOptionsItemSelected(item);
     }
