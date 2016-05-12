@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="tipoterapia">
+        <item>PILL</item>
+        <item>BUSTINE</item>
+        <item>FIALA</item>
+        <item>ALTRO</item>
+    </string-array>
+    <string-array name="sino">
+        <item>SI</item>
+        <item>NO</item>
+    </string-array>
+    <string-array name="cadenze">
+        <item>giorno</item>
+        <item>settimana</item>
+        <item>mese</item>
+        <item>anno</item>
+    </string-array>
+</resources>

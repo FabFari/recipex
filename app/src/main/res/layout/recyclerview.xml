@@ -20,6 +20,16 @@
         android:layout_height="match_parent"
         android:paddingTop="?attr/actionBarSize"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+	
+	<android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabfragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@android:drawable/ic_input_add" />
+
+</android.support.design.widget.CoordinatorLayout>
 
     <!--
 	<android.support.design.widget.FloatingActionButton
@@ -158,5 +168,3 @@
     </com.github.clans.fab.FloatingActionMenu>
 
 </android.support.design.widget.CoordinatorLayout>
-
-
