@@ -154,9 +154,10 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
 
 
     protected void onPostExecute(MainRegisterUserMessage greeting) {
-        SharedPreferences pref=mContext.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+        SharedPreferences pref = mContext.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         // Change Fabrizio
+        Log.d("REGISTER_AT", "userId: " +userId);
         editor.putLong("userId", userId);
 
         if (greeting!=null) {

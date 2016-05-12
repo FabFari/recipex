@@ -1,5 +1,6 @@
 package com.recipex.activities;
 
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,32 +9,49 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.recipex.R;
 import com.recipex.asynctasks.Register;
 import com.recipex.taskcallbacks.TaskCallbackLogin;
+import com.recipex.utilities.PlacesAutoCompleteAdapter;
+import com.recipex.utilities.StreetAutoCompleteAdapter;
 import com.squareup.picasso.Picasso;
+
+import java.util.Calendar;
 
 /**
  * Created by Sara on 26/04/2016.
  */
-public class Registration extends ActionBarActivity implements TaskCallbackLogin {
+public class Registration extends ActionBarActivity implements TaskCallbackLogin, View.OnClickListener{
 
     ImageView immagine;
 
     String nome, cognome, foto, email, bio, data, sesso, città, indirizzo, numeri, campoSpecializzazione, anniEsperienza,
     postoLavoro,numeriBusiness, disponibilità;
-    EditText inserisciNome, inserisciCognome, inserisciEmail, inserisciBiografia, inserisciData, inserisciSesso, inserisciCittà,
-    inserisciIndirizzo, inserisciNumeri, inserisciSpecializzazione, inserisciAnni, inserisciPosto, inserisciNumeriBusiness,
+    EditText inserisciNome, inserisciCognome, inserisciEmail, inserisciBiografia, inserisciData, inserisciNumeri, inserisciSpecializzazione, inserisciAnni, inserisciPosto, inserisciNumeriBusiness,
     inserisciDisponibilità;
+
+    Spinner inserisciSesso;
+    AutoCompleteTextView inserisciCittà, inserisciIndirizzo;
+    ArrayAdapter<CharSequence> sex_adapter;
+    CoordinatorLayout coordinatorLayout;
+    int mDay, mMonth, mYear;
 
     SharedPreferences pref;
 
@@ -50,6 +68,7 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
         getSupportActionBar().setDisplayUseLogoEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
 
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.registration_coordinator);
 
         inserisciEmail = (EditText) findViewById(R.id.insertEmail);
         inserisciEmail.setFocusable(false);
@@ -59,9 +78,9 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
         inserisciCognome = (EditText)findViewById(R.id.insertCognome);
         inserisciBiografia = (EditText) findViewById(R.id.insertBiografia);
         inserisciData = (EditText) findViewById(R.id.insertDataNascita);
-        inserisciSesso = (EditText)findViewById(R.id.insertSesso);
-        inserisciCittà = (EditText)findViewById(R.id.insertCittà);
-        inserisciIndirizzo = (EditText)findViewById(R.id.insertIndirizzo);
+        inserisciSesso = (Spinner) findViewById(R.id.insertSesso);
+        inserisciCittà = (AutoCompleteTextView) findViewById(R.id.insertCittà);
+        inserisciIndirizzo = (AutoCompleteTextView) findViewById(R.id.insertIndirizzo);
         inserisciNumeri=(EditText)findViewById(R.id.insertNumeri);
 
         inserisciSpecializzazione = (EditText)findViewById(R.id.insertCampo);
@@ -70,6 +89,29 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
         inserisciNumeriBusiness=(EditText)findViewById(R.id.insertNumeriBusiness);
         inserisciDisponibilità = (EditText)findViewById(R.id.insertDisponibilità);
 
+        sex_adapter = ArrayAdapter.createFromResource(this,
+                R.array.sex_type, /*android.R.layout.simple_spinner_item*/ R.layout.list_item);
+        sex_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        inserisciSesso.setAdapter(sex_adapter);
+
+        inserisciCittà.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.list_item));
+        inserisciCittà.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String str = (String) parent.getItemAtPosition(position);
+            }
+        });
+
+        inserisciIndirizzo.setAdapter(new StreetAutoCompleteAdapter(this, R.layout.list_item));
+        inserisciIndirizzo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String str = (String) parent.getItemAtPosition(position);
+            }
+        });
+
+        inserisciData.setOnClickListener(this);
+
         //prendi i campi obbligatori passati dall'activity login
         Bundle extras = getIntent().getExtras();
         nome = extras.getString("nome");
@@ -77,13 +119,13 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
         foto = extras.getString("foto");
         email = extras.getString("email");
         data = extras.getString("data");
-        sesso=extras.getString("sesso");
+        // sesso=extras.getString("sesso");
 
         inserisciNome.setText(nome);
         inserisciCognome.setText(cognome);
         inserisciEmail.setText(email);
         inserisciData.setText(data);
-        inserisciSesso.setText(sesso);
+        // inserisciSesso.setText(sesso);
 
         Picasso.with(Registration.this).load(foto).into(immagine);
 
@@ -117,14 +159,34 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
         int id = item.getItemId();
 
         if (id == R.id.registrati) {
+            if(!inserisciIndirizzo.getText().toString().equals("")) {
+                if(inserisciCittà.getText().toString().equals("")) {
+                    Snackbar snackbar = Snackbar
+                            .make(coordinatorLayout, "Indirizzo inserito: inserire anche la città.", Snackbar.LENGTH_SHORT);
+                    snackbar.show();
+                    return super.onOptionsItemSelected(item);
+                }
+            }
+
+            if(!inserisciAnni.getText().toString().equals("") || !inserisciPosto.getText().toString().equals("") ||
+                    !inserisciNumeriBusiness.getText().toString().equals("") || !inserisciBiografia.getText().toString().equals("") ||
+                    !inserisciDisponibilità.getText().toString().equals("")) {
+                if(inserisciSpecializzazione.getText().toString().equals("")) {
+                    Snackbar snackbar = Snackbar
+                            .make(coordinatorLayout, "Attenzione! Campo obbligatorio \"Specializzazione\" vuoto!", Snackbar.LENGTH_SHORT);
+                    snackbar.show();
+                    return super.onOptionsItemSelected(item);
+                }
+            }
+
             if (inserisciNome.getText().length() > 1 && inserisciCognome.getText().length() > 1 &&
-                    inserisciData.getText().length()>1 && inserisciSesso.getText().length()>1) {
+                    inserisciData.getText().length()>1) {
 
                 nome=inserisciNome.getText().toString();
                 cognome=inserisciCognome.getText().toString();
                 email=inserisciEmail.getText().toString();
                 data = inserisciData.getText().toString();
-                sesso = inserisciSesso.getText().toString();
+                sesso = inserisciSesso.getSelectedItem().toString();
 
                 bio = inserisciBiografia.getText().toString();
                 città = inserisciCittà.getText().toString();
@@ -146,7 +208,10 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
 
             }
             else {
-                Toast.makeText(getApplicationContext(),"Compilare i campi obbligatori", Toast.LENGTH_LONG).show();
+                Snackbar snackbar = Snackbar
+                        .make(coordinatorLayout, "Attenzione! Uno o più campi obbligatori vuoti!", Snackbar.LENGTH_SHORT);
+                snackbar.show();
+                return super.onOptionsItemSelected(item);
             }
             return true;
         }
@@ -196,5 +261,42 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
             disconnetti();
             Toast.makeText(getApplicationContext(), "Login fallito! Devi registrarti!", Toast.LENGTH_LONG).show();
         }*/
+    }
+
+    @Override
+    public void onClick(View v) {
+        final Calendar c = Calendar.getInstance();
+        switch (v.getId()) {
+            case R.id.update_profile_user_birth:
+                mYear = c.get(Calendar.YEAR);
+                mMonth = c.get(Calendar.MONTH);
+                mDay = c.get(Calendar.DAY_OF_MONTH);
+
+                // Launch Date Picker Dialog
+                DatePickerDialog dpd = new DatePickerDialog(this,
+                        new DatePickerDialog.OnDateSetListener() {
+
+                            @Override
+                            public void onDateSet(DatePicker view, int year,
+                                                  int monthOfYear, int dayOfMonth) {
+                                // Display Selected date in textbox
+                                String dayOfMonthStr = null;
+                                if(dayOfMonth < 10)
+                                    dayOfMonthStr = "0" + dayOfMonth;
+                                else
+                                    dayOfMonthStr = "" + dayOfMonth;
+
+                                String monthOfYearStr = null;
+                                if(monthOfYear < 10)
+                                    monthOfYearStr = "0" + (monthOfYear + 1);
+                                else
+                                    monthOfYearStr = "" + (monthOfYear + 1);
+
+                                inserisciData.setText(year + "-" + monthOfYearStr + "-" + dayOfMonthStr);
+                            }
+                        }, mYear, mMonth, mDay);
+                dpd.show();
+                break;
+        }
     }
 }

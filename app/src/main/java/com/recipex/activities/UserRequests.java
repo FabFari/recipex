@@ -59,8 +59,9 @@ public class UserRequests extends AppCompatActivity implements GetUserRequestsTC
         setSupportActionBar(toolbar);
 
         myPrefs = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
-        // userId = myPrefs.getLong("userId", 0L);
-        userId = 5705241014042624L;
+        userId = myPrefs.getLong("userId", 0L);
+        //userId = 5705241014042624L;
+        Log.d(TAG, "userId: "+ userId);
 
         bindActivity();
 

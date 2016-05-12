@@ -28,10 +28,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.clans.fab.FloatingActionMenu;
+import com.recipex.AppConstants;
 import com.recipex.CircleTransform;
 import com.recipex.R;
 import com.recipex.fragments.MisurazioniFragment;
@@ -49,13 +52,15 @@ import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 public class Home extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private final static String TAG = "HOME";
+
     FragmentManager mFragmentManager;
     FragmentTransaction mFragmentTransaction;
     NavigationView mNavigationView;
     DrawerLayout mDrawerLayout;
 
     Toolbar toolbar;
-    FloatingActionButton fab;
+    FloatingActionMenu fab_menu;
 
     SharedPreferences pref;
 
@@ -70,6 +75,10 @@ public class Home extends AppCompatActivity
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // GET FABs
+        fab_menu = (FloatingActionMenu) findViewById(R.id.home_fab_menu_measurement);
+
+        /*
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,7 +90,7 @@ public class Home extends AppCompatActivity
                 activity.finish();
             }
         });
-
+        */
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -109,6 +118,7 @@ public class Home extends AppCompatActivity
 
         // Change Fabrizio
         Long userId=pref.getLong("userId", 0L);
+        Log.d("HOME", "userId: "+ userId);
         String nome=pref.getString("nome", "");
         String cognome=pref.getString("cognome", "");
         String email=pref.getString("email","");
@@ -195,6 +205,10 @@ public class Home extends AppCompatActivity
             presentShowcaseView(350);
 
         }
+        else if(id == R.id.home_search) {
+            Intent myIntent = new Intent(getApplicationContext(), UserSearch.class);
+            this.startActivity(myIntent);
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -217,6 +231,9 @@ public class Home extends AppCompatActivity
         } else if (id == R.id.nav_familiari) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.containerView,new TabFragment()).commit();
+        } else if (id == R.id.nav_requests) {
+            Intent myIntent = new Intent(getApplicationContext(), UserRequests.class);
+            startActivity(myIntent);
         } else if (id == R.id.nav_aiuto) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.containerView,new TabFragment()).commit();
@@ -271,7 +288,7 @@ public class Home extends AppCompatActivity
 
         sequence.addSequenceItem(
                 new MaterialShowcaseView.Builder(this)
-                        .setTarget(fab)
+                        .setTarget(fab_menu)
                         .setDismissText("HO CAPITO")
                         .setMaskColour(fetchPrimaryDarkColor())
                         .setDismissTextColor(fetchAccentColor())

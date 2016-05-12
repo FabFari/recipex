@@ -81,6 +81,7 @@
                 </android.support.design.widget.CollapsingToolbarLayout>
             </android.support.design.widget.AppBarLayout>
 
+            <!--
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/profile.fab"
                 android:layout_width="wrap_content"
@@ -92,6 +93,7 @@
                 android:layout_margin="30dp"
                 android:scaleType="center"
                 android:src="@drawable/ic_message" />
+            -->
 
             <include layout="@layout/content_profile"
                 android:id="@+id/profile.layout_nested_scrollview"/>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" >
+
+    <TextView
+        android:id="@+id/contact.title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="24sp"
+        android:text="Contatta..."
+        android:textStyle="bold"
+        android:layout_marginStart="@dimen/spacing_super_low"/>
+
+    <View
+        android:id="@+id/contact.separator"
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:background="@color/colorPrimary"
+        android:layout_below="@+id/contact.title"
+        android:layout_marginBottom="@dimen/spacing_super_low"
+        android:layout_marginTop="@dimen/spacing_ultra_low"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_below="@+id/contact.separator"
+        android:id="@+id/contact.recyclerview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:layout_marginBottom="@dimen/spacing_super_low"/>
+
+</RelativeLayout>
