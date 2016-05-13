@@ -785,7 +785,6 @@ public class Profile extends AppCompatActivity
                 contactRecycler.setLayoutManager(layoutManager);
                 contactRecycler.setHasFixedSize(true);
                 contactRecycler.setAdapter(contactAdapter);
-
                 contactDialog.create();
                 contactDialog.show();
                 /*
