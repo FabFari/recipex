@@ -14,6 +14,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -77,6 +79,8 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
     //IMPORTANTISSIMO!
     private static final String[] SCOPES = { CalendarScopes.CALENDAR };
 
+    private CoordinatorLayout coordinatorLayout;
+    private Long caregiverId;
 
     boolean fatto=false;
 
@@ -103,6 +107,10 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Aggiungi Terapia");
 
+        Intent intent = getIntent();
+        caregiverId = intent.getLongExtra("caregiverId", 0L);
+
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.lay_aggiungiterapia);
         Spinner numerocadenza=(Spinner)findViewById(R.id.numerocadenzaspin);
         Spinner orespin=(Spinner)findViewById(R.id.orespin);
 
@@ -190,15 +198,20 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                 foglio = inserisciFoglio.getText().toString();
                 caregiver = inserisciCaregiver.getText().toString();
 
-                int assistente=0;
-                if(!caregiver.equals(""))
-                    assistente=Integer.parseInt(caregiver);
 
                 inizio=inserisciInizio.getText().toString();
 
                 Log.d("REGISTRAZIONE ", "Sono qui");
-                if (checkNetwork()) new AggiungiTerapiaAT(getApplicationContext(), nome, ingredienteID, tipo, dose2, unità,
-                        quanto, recipe, foglio, assistente, this).execute();
+                if (checkNetwork()) {
+                    if(!caregiverId.equals(0L)) {
+                        new AggiungiTerapiaAT(getApplicationContext(), nome, ingredienteID, tipo, dose2, unità,
+                                quanto, recipe, foglio, caregiverId, this).execute();
+                    }
+                    else {
+                        new AggiungiTerapiaAT(getApplicationContext(), nome, ingredienteID, tipo, dose2, unità,
+                                quanto, recipe, foglio, null, this).execute();
+                    }
+                }
 
             }
             else {
@@ -215,7 +228,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
     public void done(boolean b, MainDefaultResponseMessage response){
         if(response != null) {
             if(b) {
-                Toast.makeText(this, "Terapia inserita "+response.getMessage(), Toast.LENGTH_LONG).show();
+                //Toast.makeText(this, "Terapia inserita "+response.getMessage(), Toast.LENGTH_LONG).show();
                 //aggiungo al calendario
                 mProgress = new ProgressDialog(this);
                 mProgress.setMessage("Sto inserendo nel calendario...");
@@ -227,11 +240,16 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                 getResultsFromApi();
             }
             else {
-                Toast.makeText(this, "Operazione non riuscita", Toast.LENGTH_LONG).show();
+                //Toast.makeText(this, "Operazione non riuscita", Toast.LENGTH_LONG).show();
+                Snackbar snackbar = Snackbar
+                        .make(coordinatorLayout, "Operazione non riuscita", Snackbar.LENGTH_SHORT);
+                snackbar.show();
             }
         }
         else {
-            Toast.makeText(this, "Operazione non riuscita", Toast.LENGTH_LONG).show();
+            Snackbar snackbar = Snackbar
+                    .make(coordinatorLayout, "Operazione non riuscita", Snackbar.LENGTH_SHORT);
+            snackbar.show();
 
         }
     }
@@ -240,6 +258,8 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
     public void done(boolean b){
         if(b){
             Intent i=new Intent(AggiungiTerapia.this, Home.class);
+            this.setResult(RESULT_OK);
+            this.finish();
             startActivity(i);
             finish();
         }

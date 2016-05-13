@@ -32,7 +32,7 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
     int quantità;
     boolean ricetta;
     String foglioIllustrativo;
-    int assistente;
+    Long assistente;
 
     GoogleAccountCredential credential;
     SharedPreferences settings;
@@ -44,7 +44,7 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
     }
 
     public AggiungiTerapiaAT(Context context, String nome, long ingrediente, String tipo, long dose, String unità,
-                             int quantità, boolean ricetta, String foglioIllustrativo, int assistente,
+                             int quantità, boolean ricetta, String foglioIllustrativo, Long assistente,
                              TaskCallbackAggiungiTerapia mCallback) {
         mContext = context;
         this.mCallback = mCallback;
@@ -94,8 +94,8 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
 
             //NON OBBLIGATORI
             reg.setPil(foglioIllustrativo);
-            if(assistente!=0)
-                reg.setCaregiver((long)assistente);
+            if(assistente != null)
+                reg.setCaregiver(assistente);
 
             RecipexServerApi.Prescription.AddPrescription post = apiServiceHandle.prescription().addPrescription(5719238044024832L, reg);
 

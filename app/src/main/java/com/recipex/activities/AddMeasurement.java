@@ -429,9 +429,13 @@ public class AddMeasurement extends AppCompatActivity
     public void done(boolean resp, MainDefaultResponseMessage response) {
         if(response != null) {
             if(resp) {
+                /*
                 Snackbar snackbar = Snackbar
                         .make(main_relative, "Misurazione inserita: "+response.getPayload(), Snackbar.LENGTH_SHORT);
                 snackbar.show();
+                */
+                this.setResult(RESULT_OK);
+                this.finish();
             }
             else {
                 Snackbar snackbar = Snackbar
