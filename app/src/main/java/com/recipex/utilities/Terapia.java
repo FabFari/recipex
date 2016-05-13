@@ -8,12 +8,24 @@ public class Terapia {
     public long dose;
     public String tipo;
     public boolean ricetta;
+    public String ingrediente;
+    public String unità;
+    public long quantità;
+    public String foglio;
+    public String caregiver;
 
-    public Terapia(String nome, long dose, String tipo, boolean ricetta){
+
+    public Terapia(String nome, long dose, String tipo, boolean ricetta, String ingrediente, String unità,
+                   long quantità, String foglio,String caregiver){
         this.nome=nome;
         this.dose=dose;
         this.tipo=tipo;
         this.ricetta=ricetta;
+        this.ingrediente=ingrediente;
+        this.quantità=quantità;
+        this.unità=unità;
+        this.foglio=foglio;
+        this.caregiver=caregiver;
     }
 
 }

@@ -55,9 +55,8 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
         this.unità = unità;
         this.quantità = quantità;
         this.ricetta = ricetta;
+        this.assistente=assistente;
         this.foglioIllustrativo = foglioIllustrativo;
-        this.assistente = assistente;
-
     }
 
     // setSelectedAccountName definition
@@ -94,10 +93,13 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
 
             //NON OBBLIGATORI
             reg.setPil(foglioIllustrativo);
+
             if(assistente != null)
                 reg.setCaregiver(assistente);
 
-            RecipexServerApi.Prescription.AddPrescription post = apiServiceHandle.prescription().addPrescription(5719238044024832L, reg);
+            long id=pref.getLong("userId", 0L);
+
+            RecipexServerApi.Prescription.AddPrescription post = apiServiceHandle.prescription().addPrescription(id, reg);
 
             MainDefaultResponseMessage response = post.execute();
             return response;

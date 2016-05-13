@@ -21,18 +21,22 @@
 
         <activity
             android:name=".activities.MainActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar" >
+        </activity>
 
 
         <activity
             android:name=".activities.Home"
+            android:screenOrientation="portrait"
             android:label="RecipeX"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         
         <activity
             android:name=".activities.AddMeasurement"
+            android:screenOrientation="portrait"
             android:label="Aggiungi misurazione"
             android:theme="@style/AppTheme">
             <intent-filter>
@@ -45,6 +49,7 @@
         </activity>
         <activity
             android:name=".activities.Login"
+            android:screenOrientation="portrait"
             android:label="RecipeX"
             android:theme="@style/AppTheme.NoActionBar.v2">
             <intent-filter>
@@ -55,26 +60,32 @@
         <activity
             android:name=".activities.Profile"
             android:label="@string/title_activity_profile"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
         <activity
             android:name=".activities.Registration"
+            android:screenOrientation="portrait"
             android:label="RecipeX" />
         <activity
             android:name=".activities.AggiungiTerapia"
-            android:label="@string/title_activity_aggiungi_terapia"></activity>
+            android:label="@string/title_activity_aggiungi_terapia"
+            android:screenOrientation="portrait"></activity>
         <activity
             android:name=".activities.UserRequests"
             android:label="@string/title_activity_user_requests"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".activities.UserSearch"
             android:label="@string/title_activity_user_search"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
             android:name=".activities.UpdateProfile"
             android:label="@string/title_activity_update_profile"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

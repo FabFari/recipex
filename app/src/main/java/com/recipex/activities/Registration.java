@@ -139,8 +139,6 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
     public void onBackPressed(){
         //do whatever you want the 'Back' button to do
         //as an example the 'Back' button is set to start a new Activity named 'NewActivity'
-
-        this.startActivity(new Intent(Registration.this,Login.class));
         pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         editor.putBoolean("token", true).commit();

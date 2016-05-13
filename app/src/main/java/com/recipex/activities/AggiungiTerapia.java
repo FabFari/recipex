@@ -95,7 +95,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
     long ingredienteID;
 
     EditText inserisciNome, inserisciDose, inserisciUnità, inserisciQuantità,
-            inserisciFoglio, inserisciCaregiver, inserisciInizio;
+            inserisciFoglio, inserisciInizio;
 
     static final int MAXNUMEROCADENZA=30;
     static final int ORE =24;
@@ -159,7 +159,6 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         inserisciUnità=(EditText)findViewById(R.id.insertUnità);
         inserisciQuantità=(EditText)findViewById(R.id.insertQuantità);
         inserisciFoglio=(EditText)findViewById(R.id.insertFoglio);
-        inserisciCaregiver=(EditText)findViewById(R.id.insertAssistente);
         inserisciInizio=(EditText)findViewById(R.id.insertInizio);
 
         if(checkNetwork()) new GetMainIngredientsAT(getApplicationContext(), this).execute();
@@ -198,10 +197,15 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                 foglio = inserisciFoglio.getText().toString();
                 caregiver = inserisciCaregiver.getText().toString();
 
-
                 inizio=inserisciInizio.getText().toString();
 
+                Bundle extras=getIntent().getExtras();
+                long idcaregiver=0;
+                if(extras!=null)
+                    idcaregiver=extras.getChar("idCaregiver");
+
                 Log.d("REGISTRAZIONE ", "Sono qui");
+
                 if (checkNetwork()) {
                     if(!caregiverId.equals(0L)) {
                         new AggiungiTerapiaAT(getApplicationContext(), nome, ingredienteID, tipo, dose2, unità,
@@ -212,6 +216,9 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                                 quanto, recipe, foglio, null, this).execute();
                     }
                 }
+
+                if (checkNetwork()) new AggiungiTerapiaAT(getApplicationContext(), nome, ingredienteID, tipo, dose2, unità,
+                        quanto, recipe, foglio, idcaregiver, this).execute();
 
             }
             else {
@@ -229,15 +236,19 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         if(response != null) {
             if(b) {
                 //Toast.makeText(this, "Terapia inserita "+response.getMessage(), Toast.LENGTH_LONG).show();
-                //aggiungo al calendario
-                mProgress = new ProgressDialog(this);
-                mProgress.setMessage("Sto inserendo nel calendario...");
 
-                // Initialize credentials and service object.
-                mCredential = GoogleAccountCredential.usingOAuth2(
-                        getApplicationContext(), Arrays.asList(SCOPES))
-                        .setBackOff(new ExponentialBackOff());
-                getResultsFromApi();
+                //aggiungo al calendario
+                if(!inizio.equals("")) {
+                    mProgress = new ProgressDialog(this);
+                    mProgress.setMessage("Sto inserendo nel calendario...");
+
+
+                    // Initialize credentials and service object.
+                    mCredential = GoogleAccountCredential.usingOAuth2(
+                            getApplicationContext(), Arrays.asList(SCOPES))
+                            .setBackOff(new ExponentialBackOff());
+                    getResultsFromApi();
+                }
             }
             else {
                 //Toast.makeText(this, "Operazione non riuscita", Toast.LENGTH_LONG).show();
