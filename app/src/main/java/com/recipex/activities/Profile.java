@@ -82,6 +82,8 @@ public class Profile extends AppCompatActivity
 
     private static final int EDIT_PROFILE = 1;
     private static final int REQUEST_ACCOUNT_PICKER = 2;
+    private static final int ADD_THERAPY = 3;
+
 
     private boolean mIsTheTitleVisible = false;
     private boolean mIsTheTitleContainerVisible = true;
@@ -109,6 +111,7 @@ public class Profile extends AppCompatActivity
 
     // As a visitor
     // TODO Aggiungere un fab per aggiungere paziente se caregiver
+    private FloatingActionMenu fab_menu;
     private com.github.clans.fab.FloatingActionButton fab_relatives;
     private com.github.clans.fab.FloatingActionButton fab_pc_physician;
     private com.github.clans.fab.FloatingActionButton fab_visiting_nurse;
@@ -173,8 +176,17 @@ public class Profile extends AppCompatActivity
     private String crgv_phone;
     private String crgv_bio;
 
+    private boolean relations_checked = false;
+    private boolean is_relative = false;
+    private boolean is_pc_physician = false;
+    private boolean is_visiting_nurse = false;
+    private boolean is_caregiver = false;
+
     private FragmentManager mFragmentManager;
     private FragmentTransaction mFragmentTransaction;
+
+    private int fabPressed;
+    private boolean utente_semplice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -187,6 +199,7 @@ public class Profile extends AppCompatActivity
 
         myPrefs = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
         user_id = myPrefs.getLong("userId", 0L);
+        utente_semplice = myPrefs.getBoolean("utenteSemplice", true);
         //user_id = 5705241014042624L;
         //user_id = 5724160613416960L;
 
@@ -194,6 +207,9 @@ public class Profile extends AppCompatActivity
         //profile_id = 5724160613416960L;
         profile_id = extras.getLong("profileId", 0L);
         Log.d(TAG, "profile_id: " + profile_id);
+
+        if(user_id.equals(profile_id))
+            fab_menu.setVisibility(View.GONE);
 
         //mToolbar.setPadding(0, getStatusBarHeight(), 0, 0);
 
@@ -260,10 +276,14 @@ public class Profile extends AppCompatActivity
         bio_card = (CardView) findViewById(R.id.profile_card_view_crgv_bio);
         bio = (TextView) findViewById(R.id.profile_crgv_bio);
         // VISITOR
+        fab_menu = (FloatingActionMenu) findViewById(R.id.profile_fab_menu_requests);
         fab_relatives = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.profile_fab_menu_item1);
         fab_pc_physician = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.profile_fab_menu_item2);
+        fab_pc_physician.setEnabled(false);
         fab_visiting_nurse = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.profile_fab_menu_item3);
+        fab_visiting_nurse.setEnabled(false);
         fab_caregivers = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.profile_fab_menu_item4);
+        fab_caregivers.setEnabled(false);
     }
 
     @Override
@@ -276,7 +296,7 @@ public class Profile extends AppCompatActivity
         if (user_id.equals(profile_id))
             mToolbar.inflateMenu(R.menu.menu_profile);
         else
-            mToolbar.inflateMenu(R.menu.menu_main);
+            mToolbar.inflateMenu(R.menu.menu_profile_visitor);
         // getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -379,7 +399,13 @@ public class Profile extends AppCompatActivity
                     }
                 }
                 break;
-
+            case ADD_THERAPY:
+                if(resultCode == RESULT_OK) {
+                    Snackbar snackbar = Snackbar
+                            .make(coordinatorLayout, "Terapia aggiunta con successo!", Snackbar.LENGTH_SHORT);
+                    snackbar.show();
+                }
+                break;
         }
     }
 
@@ -462,6 +488,19 @@ public class Profile extends AppCompatActivity
         // CAREGIVER
         // Required
         if (message.getField() != null) {
+            if(!relations_checked) {
+                fab_pc_physician.setEnabled(true);
+                fab_visiting_nurse.setEnabled(true);
+                fab_caregivers.setEnabled(true);
+            }
+            else {
+                if(!is_pc_physician)
+                    fab_pc_physician.setEnabled(true);
+                if(!is_visiting_nurse)
+                    fab_visiting_nurse.setEnabled(true);
+                if(!is_caregiver)
+                    fab_caregivers.setEnabled(true);
+            }
             crgv_field = message.getField();
             field.setText(message.getField());
             crgv_subtitle.setVisibility(View.VISIBLE);
@@ -542,38 +581,56 @@ public class Profile extends AppCompatActivity
         if (response != null) {
             if (res) {
                 boolean can_contact = false;
+                boolean can_add_therapy = false;
                 Log.d(TAG, "RESPONSE: " + response);
                 if (response.getIsRelative()) {
                     fab_relatives.setEnabled(false);
-                    if (!response.getIsRelativeRequest())
+                    if (!response.getIsRelativeRequest()) {
                         can_contact = true;
+                        is_relative = true;
+                    }
                 }
                 else
                     fab_relatives.setOnClickListener(this);
+
                 if (response.getIsPcPhysician()) {
                     fab_pc_physician.setEnabled(false);
-                    if (!response.getIsPcPhysicianRequest())
+                    if (!response.getIsPcPhysicianRequest()) {
                         can_contact = true;
+                        is_pc_physician = true;
+                        can_add_therapy = true;
+                    }
                 }
                 else
                     fab_pc_physician.setOnClickListener(this);
+
                 if (response.getIsVisitingNurse()) {
                     fab_visiting_nurse.setEnabled(false);
-                    if (!response.getIsVisitingNurseRequest())
+                    if (!response.getIsVisitingNurseRequest()) {
                         can_contact = true;
+                        is_visiting_nurse = true;
+                        can_add_therapy = true;
+                    }
                 }
                 else
                     fab_visiting_nurse.setOnClickListener(this);
+
                 if (response.getIsCaregiver()) {
                     fab_caregivers.setEnabled(false);
-                    if (!response.getIsCaregiverRequest())
+                    if (!response.getIsCaregiverRequest()) {
                         can_contact = true;
+                        is_caregiver = true;
+                        can_add_therapy = true;
+                    }
                 }
                 else
                     fab_caregivers.setOnClickListener(this);
 
                 if (can_contact)
-                    mToolbar.inflateMenu(R.menu.menu_profile_visitor);
+                    mToolbar.getMenu().findItem(R.id.profile_contact).setVisible(true);
+
+                if(can_add_therapy && !utente_semplice)
+                    mToolbar.getMenu().findItem(R.id.profile_add_therapy).setVisible(true);
             }
             else {
                 Snackbar snackbar = Snackbar
@@ -581,6 +638,7 @@ public class Profile extends AppCompatActivity
                 snackbar.show();
             }
         }
+        relations_checked = true;
     }
 
     // setSelectedAccountName definition
@@ -620,6 +678,7 @@ public class Profile extends AppCompatActivity
     public void onClick(View v) {
         MainRequestSendMessage content = new MainRequestSendMessage();
         content.setSender(user_id);
+        fabPressed = v.getId();
         // TODO Aggiungere Dialog per inserimento messaggio
         switch (v.getId()) {
             case R.id.profile_fab_menu_item1:
@@ -652,8 +711,11 @@ public class Profile extends AppCompatActivity
         if (response != null) {
             if (resp) {
                 Snackbar snackbar = Snackbar
-                        .make(coordinatorLayout, "Richiesta inviata: " + response.getPayload(), Snackbar.LENGTH_SHORT);
+                        .make(coordinatorLayout, "Richiesta inviata con successo!", Snackbar.LENGTH_SHORT);
                 snackbar.show();
+                com.github.clans.fab.FloatingActionButton fab_pressed = (com.github.clans.fab.FloatingActionButton)
+                        findViewById(fabPressed);
+                fab_pressed.setEnabled(false);
             } else {
                 Snackbar snackbar = Snackbar
                         .make(coordinatorLayout, "Operazione non riuscita: " + response.getCode(), Snackbar.LENGTH_SHORT);
@@ -739,6 +801,12 @@ public class Profile extends AppCompatActivity
                 dialogFragment.show(mFragmentManager, "Contact fragment");
                 break;
                 */
+                break;
+            case R.id.profile_add_therapy:
+                Intent addTerapyIntent = new Intent(Profile.this, AggiungiTerapia.class);
+                addTerapyIntent.putExtra("caregiverId", user_id);
+                this.startActivityForResult(addTerapyIntent, ADD_THERAPY);
+                break;
         }
         return super.onOptionsItemSelected(item);
     }

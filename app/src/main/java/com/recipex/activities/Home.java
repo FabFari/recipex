@@ -74,6 +74,31 @@ public class Home extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        Intent intent = getIntent();
+        boolean justRegistered = intent.getBooleanExtra("justRegistered", false);
+
+        pref = getApplicationContext().getSharedPreferences("MyPref",MODE_PRIVATE);
+        boolean alreadyLogged = pref.getBoolean("alreadyLogged", true);
+
+        if(justRegistered) {
+            Snackbar snackbar = Snackbar
+                    .make(mDrawerLayout, "Registrazione avvenuta con successo!", Snackbar.LENGTH_SHORT);
+            snackbar.show();
+        }
+        else {
+            if(!alreadyLogged) {
+                Snackbar snackbar = Snackbar
+                        .make(mDrawerLayout, "Login eseguito con successo!", Snackbar.LENGTH_SHORT);
+                snackbar.show();
+            }
+        }
+
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putBoolean("alreadyLogged", true);
+        editor.commit();
+
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -93,7 +118,6 @@ public class Home extends AppCompatActivity
             }
         });
         */
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.setDrawerListener(toggle);
@@ -102,7 +126,6 @@ public class Home extends AppCompatActivity
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
 
-        pref = getApplicationContext().getSharedPreferences("MyPref",MODE_PRIVATE);
         boolean utenteSemplice=pref.getBoolean("utenteSemplice", false);
         Log.d("UTENTESEMPLICE ", " "+utenteSemplice);
         mFragmentManager = getSupportFragmentManager();
@@ -193,10 +216,15 @@ public class Home extends AppCompatActivity
             //Login.signOutFromGplus();
             pref.edit().remove("email").commit();
             pref.edit().putBoolean("token", true).commit();
-
+            // Fabrizio Change
+            pref = getApplicationContext().getSharedPreferences("MyPref",MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putBoolean("alreadyLogged", false);
+            editor.commit();
             Intent i = new Intent(Home.this, Login.class);
+            i.putExtra("hasLogOut", true);
             this.startActivity(i);
-            Toast.makeText(getApplicationContext(), "Logout eseguito!", Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(), "Logout eseguito!", Toast.LENGTH_LONG).show();
             this.finish();
             return true;
         }

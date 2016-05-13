@@ -38,7 +38,7 @@
                 android:id="@+id/requests.sender_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="24sp"
+                android:textSize="20sp"
                 android:text="Fabrizio Farinacci"
                 android:textColor="@color/colorPrimaryDark" />
 
@@ -63,7 +63,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toStartOf="@+id/requests.decline"
-            android:layout_centerVertical="true"
+            android:layout_alignParentBottom="true"
             android:src="@drawable/ic_accept" />
 
         <ImageView
@@ -71,7 +71,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
+            android:layout_alignParentBottom="true"
             android:src="@drawable/ic_decline" />
 
         <TextView

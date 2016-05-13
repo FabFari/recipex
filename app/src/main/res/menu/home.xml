@@ -14,7 +14,7 @@
 
     <item
         android:id="@+id/home.search"
-        android:title="@string/edit"
+        android:title="Cerca utenti"
         android:orderInCategory="100"
         app:showAsAction="always"
         android:icon="@drawable/ic_search"/>

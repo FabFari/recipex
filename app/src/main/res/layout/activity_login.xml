@@ -1,46 +1,33 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:padding="16dp"
+    android:id="@+id/login.mainRelative"
     tools:context=".activities.Login"
-    android:background="@android:color/white"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical">
+    android:background="@color/colorPrimary"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
 
-    <ImageView
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:src ="@drawable/logo"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="25dp"
-        android:id="@+id/imageView"/>
-
-    <!--
-    <TextView
-        android:text="Benvenuto su Art Everywhere!"
-        android:layout_height="wrap_content"
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:id="@+id/Benvenuto"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:layout_centerHorizontal="true"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:layout_below="@+id/imageView"
-        android:layout_marginTop="5dp"/>
-    -->
+        android:layout_centerVertical="true">
 
+        <ImageView
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:src ="@drawable/recipex_logo_shape"
+            android:layout_gravity="center_horizontal"
+            android:id="@+id/imageView"/>
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingLeft="12dp"
-        android:paddingRight="12dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
-        android:id="@+id/rellay"
-        android:layout_below="@+id/imageView"
-        android:layout_marginTop="10dp">
-        <!--android:background="@layout/custom_border"-->
+        <ImageView
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:src ="@drawable/recipex_font_logo"
+            android:layout_gravity="center_horizontal"
+            android:id="@+id/imageView_font"/>
 
         <Button
             android:layout_width="310dp"
@@ -55,18 +42,48 @@
             android:textSize="@dimen/abc_text_size_medium_material"
             android:gravity="center"
             android:visibility="visible"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="83dp"/>
+            android:layout_marginTop="20dp"/>
+
+        <Button
+            android:layout_width="310dp"
+            android:layout_height="wrap_content"
+            android:text="Login"
+            android:id="@+id/login"
+            android:padding="4dp"
+            android:textAllCaps="false"
+            android:textColor="#ffffff"
+            android:background="@color/colorAccent"
+            android:layout_gravity="center_horizontal|bottom"
+            android:textSize="@dimen/abc_text_size_medium_material"
+            android:gravity="center"
+            android:visibility="visible"
+            android:layout_marginTop="20dp"/>
+        <!--
         <TextView
             android:text="Login"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
+            android:layout_width="310dp"
+            android:textAllCaps="false"
+            android:padding="4dp"
             android:id="@+id/login"
+            android:textColor="#ffffff"
+            android:gravity="center"
+            android:background="@color/colorAccent"
+            android:layout_gravity="center_horizontal|bottom"
             android:layout_marginTop="20dp"
-            android:layout_centerHorizontal="true"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_below ="@+id/sign_in_button"/>
+        -->
 
+    </LinearLayout>
 
-    </RelativeLayout>
+    <com.github.rahatarmanahmed.cpv.CircularProgressView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/login.progress_view"
+        android:layout_centerInParent="true"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:cpv_animAutostart="true"
+        app:cpv_indeterminate="true" />
+
 </RelativeLayout>

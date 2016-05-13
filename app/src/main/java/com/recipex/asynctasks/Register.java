@@ -75,7 +75,9 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
     private void setSelectedAccountName(String accountName) {
         settings=mContext.getSharedPreferences(AppConstants.PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString("account", accountName);
+        // Fabrizio Change
+        editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
+       // editor.putString("account", accountName);
         editor.commit();
         credential.setSelectedAccountName(accountName);
     }
@@ -159,6 +161,7 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
         // Change Fabrizio
         Log.d("REGISTER_AT", "userId: " +userId);
         editor.putLong("userId", userId);
+        editor.commit();
 
         if (greeting!=null) {
             Log.d("DEBUG","User è registrato");

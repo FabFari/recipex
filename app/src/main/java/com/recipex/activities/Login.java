@@ -12,6 +12,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -19,10 +20,12 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserPrescriptionsMessage;
+import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -49,6 +52,8 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
     private Button btnSignIn;
     private Button btnSignOut, btnRevokeAccess, btnContinua;
     private TextView accedi;
+    private CircularProgressView progressView;
+    private RelativeLayout mainRelative;
 
     String nome;
     String cognome;
@@ -65,13 +70,27 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        progressView = (CircularProgressView) findViewById(R.id.login_progress_view);
+        progressView.stopAnimation();
+        progressView.setVisibility(View.GONE);
         btnSignIn = (Button) findViewById(R.id.sign_in_button);
         accedi = (TextView) findViewById(R.id.login);
+        mainRelative = (RelativeLayout) findViewById(R.id.login_mainRelative);
 
         btnSignIn.setOnClickListener(this);
         accedi.setOnClickListener(this);
         pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
+
+        Intent i = getIntent();
+        boolean hasLogOut = i.getBooleanExtra("hasLogOut", false);
+
+        if(hasLogOut) {
+            Snackbar snackbar = Snackbar
+                    .make(mainRelative, "Logout eseguito con successo!", Snackbar.LENGTH_SHORT);
+            snackbar.show();
+        }
+
 
         // Change Fabrizio
         Long id = pref.getLong("userId", 0L);
@@ -103,6 +122,7 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
     private void avviaHome(){
         Intent myIntent = new Intent(Login.this, Home.class);
         this.startActivity(myIntent);
+        myIntent.putExtra("justRegistered", false);
         this.finish();
     }
 
@@ -189,6 +209,8 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
 
 
     private void getProfileInformation() {
+        progressView.startAnimation();
+        progressView.setVisibility(View.VISIBLE);
         try {
             if (Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null) {
                 Person currentPerson = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
@@ -321,16 +343,23 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
     }
 
 
-
+/*
     public void onBackPressed(){
-        System.exit(0);
-        return;
+        //System.exit(0);
+        //return;
+        if(progressView.getVisibility() == View.VISIBLE) {
+            progressView.stopAnimation();
+            progressView.setVisibility(View.GONE);
+        }
+        else
+            super.onBackPressed();
     }
+*/
 
     @Override
     public void done(boolean x, String email) {
         //if(x){ //Utente può accedere
-        Toast.makeText(getApplicationContext(), "Login eseguito con successo!", Toast.LENGTH_LONG).show();
+        //Toast.makeText(getApplicationContext(), "Login eseguito con successo!", Toast.LENGTH_LONG).show();
         System.out.println("DONE LOGIN");
         Log.d("LOGIN","done login");
         pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
@@ -344,9 +373,14 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
         boolean utenteSemplice=pref.getBoolean("utenteSemplice", false);
         Log.d("UTENTESEMPLICE DONE", " "+utenteSemplice);
 
+        progressView.stopAnimation();
+        progressView.setVisibility(View.GONE);
+
         editor.commit();
         Intent i=new Intent(Login.this, Home.class);
+        i.putExtra("justRegistered", false);
         startActivity(i);
+        this.finish();
 
         /*}else{ //Login fallito perchè email non è registrata
             disconnetti();

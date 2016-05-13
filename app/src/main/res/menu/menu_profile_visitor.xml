@@ -2,17 +2,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.recipex.activities.Profile">
-    <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
-        app:showAsAction="never" />
 
     <item
         android:id="@+id/profile.contact"
-        android:title="@string/edit"
-        android:orderInCategory="100"
+        android:title="Contatta"
+        android:orderInCategory="2"
         app:showAsAction="always"
-        android:icon="@drawable/ic_assistant"/>
+        android:icon="@drawable/ic_assistant"
+        android:visible="false" />
+
+    <item
+        android:id="@+id/profile.add_therapy"
+        android:title="Aggiungi terapia"
+        android:orderInCategory="1"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_add_terapy"
+        android:visible="false" />
 
 </menu>

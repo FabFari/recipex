@@ -26,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.recipex.R;
 import com.recipex.asynctasks.Register;
 import com.recipex.taskcallbacks.TaskCallbackLogin;
@@ -51,16 +52,19 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
     AutoCompleteTextView inserisciCittà, inserisciIndirizzo;
     ArrayAdapter<CharSequence> sex_adapter;
     CoordinatorLayout coordinatorLayout;
+    CircularProgressView progressView;
     int mDay, mMonth, mYear;
 
     SharedPreferences pref;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_registration);
+        setContentView(R.layout.activity_registration_v2);
 
         immagine = (ImageView) findViewById(R.id.immagine);
-
+        progressView = (CircularProgressView) findViewById(R.id.registration_progress_view);
+        progressView.stopAnimation();
+        progressView.setVisibility(View.GONE);
 
         /* VISUALIZZO ACTION BAR CON LOGO */
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -132,7 +136,6 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
 
     }
 
-
     public void onBackPressed(){
         //do whatever you want the 'Back' button to do
         //as an example the 'Back' button is set to start a new Activity named 'NewActivity'
@@ -141,7 +144,7 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
         pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         editor.putBoolean("token", true).commit();
-        return;
+        this.finish();
     }
 
     @Override
@@ -159,6 +162,8 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
         int id = item.getItemId();
 
         if (id == R.id.registrati) {
+            progressView.startAnimation();
+            progressView.setVisibility(View.VISIBLE);
             if(!inserisciIndirizzo.getText().toString().equals("")) {
                 if(inserisciCittà.getText().toString().equals("")) {
                     Snackbar snackbar = Snackbar
@@ -241,9 +246,12 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
     }
     public void done(boolean x, String email) {
         //if(x){ //Utente può accedere
-        Toast.makeText(getApplicationContext(), "Login eseguito con successo!", Toast.LENGTH_LONG).show();
+        // Toast.makeText(getApplicationContext(), "Login eseguito con successo!", Toast.LENGTH_LONG).show();
 
-        Log.d("LOGIN","done reg");
+        //Log.d("LOGIN","done reg");
+
+        progressView.stopAnimation();
+        progressView.setVisibility(View.GONE);
 
         pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
@@ -251,10 +259,15 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
         editor.putString("nome", nome);
         editor.putString("cognome", cognome);
         editor.putString("foto", foto);
+
+        if(campoSpecializzazione != null)
+            editor.putBoolean("caregiver", true);
+
         editor.commit();
 
         System.out.println(nome+" "+cognome);
         Intent myIntent = new Intent(Registration.this, Home.class);
+        myIntent.putExtra("justRegistered", true);
         this.startActivity(myIntent);
         this.finish();
         /*}else{ //Login fallito perchè email non è registrata
@@ -267,7 +280,7 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
     public void onClick(View v) {
         final Calendar c = Calendar.getInstance();
         switch (v.getId()) {
-            case R.id.update_profile_user_birth:
+            case R.id.insertDataNascita:
                 mYear = c.get(Calendar.YEAR);
                 mMonth = c.get(Calendar.MONTH);
                 mDay = c.get(Calendar.DAY_OF_MONTH);

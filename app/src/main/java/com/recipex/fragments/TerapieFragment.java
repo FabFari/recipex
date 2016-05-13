@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.appspot.recipex_1281.recipexServerApi.model.MainPrescriptionInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserPrescriptionsMessage;
+import com.github.clans.fab.FloatingActionMenu;
 import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.activities.AggiungiTerapia;
@@ -47,10 +48,12 @@ public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.recyclerview, container, false);
-        FloatingActionButton fab=(FloatingActionButton)getActivity().findViewById(R.id.fab);
+        FloatingActionMenu fab=(FloatingActionMenu) rootView.findViewById(R.id.home_fab_menu_measurement);
         fab.setVisibility(View.GONE);
 
         FloatingActionButton fabfragment=(FloatingActionButton)rootView.findViewById(R.id.fabfragment);
+        // Fabrizio Change
+        fabfragment.setVisibility(View.VISIBLE);
         fabfragment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

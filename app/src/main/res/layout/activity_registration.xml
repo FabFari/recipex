@@ -1,359 +1,367 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:paddingLeft="12dp"
-    android:paddingRight="12dp"
-    android:paddingTop="12dp"
-    android:paddingBottom="12dp"
-    android:background="#ffdcdee3"
-    tools:context="com.recipex.activities.Registration">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.recipex.activities.Registration" >
 
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Completa la registrazione"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textStyle="bold"/>
-    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/reg_utente"
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="4dp"
-        card_view:cardCornerRadius="4dp">
+        android:layout_height="fill_parent"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:background="#ffdcdee3" >
 
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:orientation="vertical"
-            android:id="@+id/linlay1"
-            android:layout_marginTop="10dp">
 
-            <ImageView
-                android:id="@+id/immagine"
-                android:layout_width="150dp"
-                android:layout_height="100dp"
-                android:src="@drawable/recipex_square_logo"
-                android:layout_marginTop="10dp"
-                android:layout_centerHorizontal="true"
-                android:layout_gravity="center"
-                android:layout_below="@+id/textView3"
-                android:elevation="6dp" />
-
-            <!--nome-->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Nome: *"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:paddingLeft="10dp"
-                android:id="@+id/nome"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"/>
-
-            <EditText
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/insertNome"
-                android:paddingLeft="10dp"
-                android:hint="Inserisci nome"
-                android:inputType="textCapSentences"
-                android:imeOptions="actionNext"/>
-
-            <!--cognome-->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Cognome: *"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:paddingLeft="10dp"
-                android:id="@+id/cognome"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"/>
-
-            <EditText
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/insertCognome"
-                android:paddingLeft="10dp"
-                android:hint="Inserisci cognome"
-                android:inputType="textCapSentences"
-                android:imeOptions="actionNext"/>
-
-            <!--email-->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Email: *"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:paddingLeft="10dp"
-                android:id="@+id/email"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"/>
-
-            <EditText
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/insertEmail"
-                android:paddingLeft="10dp"
-                android:hint="Inserisci email"
-                android:inputType="textCapSentences"
-                android:imeOptions="actionNext"/>
-
-            <!--data di nascita-->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Data di nascita: *"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:paddingLeft="10dp"
-                android:id="@+id/dataNascita"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"/>
-
-            <EditText
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/insertDataNascita"
-                android:paddingLeft="10dp"
-                android:hint="Formato: YYYY-MM-GG"
-                android:inputType="textCapSentences"
-                android:imeOptions="actionNext"/>
-
-            <!--sesso-->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Sesso: *"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:paddingLeft="10dp"
-                android:id="@+id/sesso"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"/>
-
-            <EditText
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/insertSesso"
-                android:paddingLeft="10dp"
-                android:hint="M/F"
-                android:inputType="textCapSentences"
-                android:imeOptions="actionNext"/>
-
-            <!--città-->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Città:"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:paddingLeft="10dp"
-                android:id="@+id/città"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"/>
-
-            <EditText
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/insertCittà"
-                android:paddingLeft="10dp"
-                android:hint="Inserisci città"
-                android:inputType="textCapSentences"
-                android:imeOptions="actionNext"/>
-
-            <!--indirizzo-->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Indirizzo:"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:paddingLeft="10dp"
-                android:id="@+id/indirizzo"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"/>
-
-            <EditText
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/insertIndirizzo"
-                android:paddingLeft="10dp"
-                android:hint="Inserisci indirizzo"
-                android:inputType="textCapSentences"
-                android:imeOptions="actionNext"/>
-
-            <!--numero-->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Numero di telefono:"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:paddingLeft="10dp"
-                android:id="@+id/numeri"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"/>
-
-            <EditText
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/insertNumeri"
-                android:paddingLeft="10dp"
-                android:inputType="textCapSentences"
-                android:imeOptions="actionNext"/>
-        </LinearLayout>
-    </android.support.v7.widget.CardView>
-
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Completa i seguenti campi solo se sei un medico o infermiere"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textStyle="bold"/>
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/reg_medico"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="4dp"
-        card_view:cardCornerRadius="4dp">
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:orientation="vertical"
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Completa la registrazione"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textStyle="bold"/>
+        <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/reg_utente"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="4dp"
+            card_view:cardCornerRadius="4dp">
 
-            android:background="@layout/custom_border"
-            android:gravity="fill_horizontal|fill_vertical"
-            android:id="@+id/lin">
-
-            <!--campo specializzazione-->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Campo di specializzazione: *"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:paddingLeft="10dp"
-                android:id="@+id/campo"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"/>
-
-            <EditText
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/insertCampo"
-                android:paddingLeft="10dp"
-                android:inputType="textCapSentences"
-                android:imeOptions="actionNext"/>
+                android:layout_height="fill_parent"
+                android:orientation="vertical"
+                android:id="@+id/linlay1"
+                android:layout_marginTop="10dp">
 
-            <!--anni esperienza-->
+                <ImageView
+                    android:id="@+id/immagine"
+                    android:layout_width="150dp"
+                    android:layout_height="100dp"
+                    android:src="@drawable/recipex_square_logo"
+                    android:layout_marginTop="10dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_gravity="center"
+                    android:layout_below="@+id/textView3"
+                    android:elevation="6dp" />
+
+                <!--nome-->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nome: *"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:paddingLeft="10dp"
+                    android:id="@+id/nome"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"/>
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/insertNome"
+                    android:paddingLeft="10dp"
+                    android:hint="Inserisci nome"
+                    android:inputType="textCapSentences"
+                    android:imeOptions="actionNext"/>
+
+                <!--cognome-->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cognome: *"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:paddingLeft="10dp"
+                    android:id="@+id/cognome"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"/>
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/insertCognome"
+                    android:paddingLeft="10dp"
+                    android:hint="Inserisci cognome"
+                    android:inputType="textCapSentences"
+                    android:imeOptions="actionNext"/>
+
+                <!--email-->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Email: *"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:paddingLeft="10dp"
+                    android:id="@+id/email"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"/>
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/insertEmail"
+                    android:paddingLeft="10dp"
+                    android:hint="Inserisci email"
+                    android:inputType="textCapSentences"
+                    android:imeOptions="actionNext"/>
+
+                <!--data di nascita-->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Data di nascita: *"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:paddingLeft="10dp"
+                    android:id="@+id/dataNascita"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"/>
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/insertDataNascita"
+                    android:paddingLeft="10dp"
+                    android:hint="Formato: YYYY-MM-GG"
+                    android:inputType="textCapSentences"
+                    android:imeOptions="actionNext"/>
+
+                <!--sesso-->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sesso: *"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:paddingLeft="10dp"
+                    android:id="@+id/sesso"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"/>
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/insertSesso"
+                    android:paddingLeft="10dp"
+                    android:hint="M/F"
+                    android:inputType="textCapSentences"
+                    android:imeOptions="actionNext"/>
+
+                <!--città-->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Città:"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:paddingLeft="10dp"
+                    android:id="@+id/città"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"/>
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/insertCittà"
+                    android:paddingLeft="10dp"
+                    android:hint="Inserisci città"
+                    android:inputType="textCapSentences"
+                    android:imeOptions="actionNext"/>
+
+                <!--indirizzo-->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Indirizzo:"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:paddingLeft="10dp"
+                    android:id="@+id/indirizzo"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"/>
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/insertIndirizzo"
+                    android:paddingLeft="10dp"
+                    android:hint="Inserisci indirizzo"
+                    android:inputType="textCapSentences"
+                    android:imeOptions="actionNext"/>
+
+                <!--numero-->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Numero di telefono:"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:paddingLeft="10dp"
+                    android:id="@+id/numeri"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"/>
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/insertNumeri"
+                    android:paddingLeft="10dp"
+                    android:inputType="textCapSentences"
+                    android:imeOptions="actionNext"/>
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Anni di esperienza:"
+                android:text="Completa i seguenti campi solo se sei un medico o infermiere"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:paddingLeft="10dp"
-                android:id="@+id/anni"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"/>
+                android:textStyle="bold"/>
 
-            <EditText
+        <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/reg_medico"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="4dp"
+            card_view:cardCornerRadius="4dp">
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:orientation="vertical"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/insertAnni"
-                android:paddingLeft="10dp"
-                android:inputType="textCapSentences"
-                android:imeOptions="actionNext"/>
+                android:layout_height="fill_parent"
 
-            <!--posto-->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Dove lavori:"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:paddingLeft="10dp"
-                android:id="@+id/posto"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"/>
+                android:background="@layout/custom_border"
+                android:gravity="fill_horizontal|fill_vertical"
+                android:id="@+id/lin">
 
-            <EditText
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/insertPosto"
-                android:paddingLeft="10dp"
-                android:hint="Inserisci dove lavori"
-                android:inputType="textCapSentences"
-                android:imeOptions="actionNext"/>
+                <!--campo specializzazione-->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Campo di specializzazione: *"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:paddingLeft="10dp"
+                    android:id="@+id/campo"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"/>
 
-            <!--numeriBusiness-->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Numero di telefono:"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:paddingLeft="10dp"
-                android:id="@+id/numeriBusiness"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"/>
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/insertCampo"
+                    android:paddingLeft="10dp"
+                    android:inputType="textCapSentences"
+                    android:imeOptions="actionNext"/>
 
-            <EditText
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/insertNumeriBusiness"
-                android:paddingLeft="10dp"
-                android:hint="Inserisci il numero del posto dove lavori"
-                android:inputType="textCapSentences"
-                android:imeOptions="actionNext"/>
+                <!--anni esperienza-->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Anni di esperienza:"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:paddingLeft="10dp"
+                    android:id="@+id/anni"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"/>
 
-            <!--bio-->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Biografia:"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:paddingLeft="10dp"
-                android:id="@+id/biografia"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"/>
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/insertAnni"
+                    android:paddingLeft="10dp"
+                    android:inputType="textCapSentences"
+                    android:imeOptions="actionNext"/>
 
-            <EditText
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/insertBiografia"
-                android:paddingLeft="10dp"
-                android:hint="Inserisci la tua biografia"
-                android:inputType="textCapSentences"
-                android:imeOptions="actionNext"/>
+                <!--posto-->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dove lavori:"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:paddingLeft="10dp"
+                    android:id="@+id/posto"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"/>
 
-            <!--disponibilità-->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Disponibilità:"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:paddingLeft="10dp"
-                android:id="@+id/disponibilità"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"/>
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/insertPosto"
+                    android:paddingLeft="10dp"
+                    android:hint="Inserisci dove lavori"
+                    android:inputType="textCapSentences"
+                    android:imeOptions="actionNext"/>
 
-            <EditText
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/insertDisponibilità"
-                android:paddingLeft="10dp"
-                android:hint="Inserisci i tuoi orari di lavoro"
-                android:inputType="textCapSentences"
-                android:imeOptions="actionNext"/>
+                <!--numeriBusiness-->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Numero di telefono:"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:paddingLeft="10dp"
+                    android:id="@+id/numeriBusiness"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"/>
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/insertNumeriBusiness"
+                    android:paddingLeft="10dp"
+                    android:hint="Inserisci il numero del posto dove lavori"
+                    android:inputType="textCapSentences"
+                    android:imeOptions="actionNext"/>
+
+                <!--bio-->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Biografia:"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:paddingLeft="10dp"
+                    android:id="@+id/biografia"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"/>
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/insertBiografia"
+                    android:paddingLeft="10dp"
+                    android:hint="Inserisci la tua biografia"
+                    android:inputType="textCapSentences"
+                    android:imeOptions="actionNext"/>
+
+                <!--disponibilità-->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Disponibilità:"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:paddingLeft="10dp"
+                    android:id="@+id/disponibilità"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"/>
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/insertDisponibilità"
+                    android:paddingLeft="10dp"
+                    android:hint="Inserisci i tuoi orari di lavoro"
+                    android:inputType="textCapSentences"
+                    android:imeOptions="actionNext"/>
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
         </LinearLayout>
-    </android.support.v7.widget.CardView>
-    </LinearLayout>
 
-</ScrollView>
+    </ScrollView>
+
+</RelativeLayout>
