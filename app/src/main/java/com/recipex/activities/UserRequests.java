@@ -15,12 +15,16 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.appspot.recipex_1281.recipexServerApi.model.MainDefaultResponseMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserRequestsMessage;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
+import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.calendar.model.AclRule;
 import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.adapters.RequestsAdapter;
@@ -169,6 +173,33 @@ public class UserRequests extends AppCompatActivity implements GetUserRequestsTC
                         .make(coordinator, "Risposta inviata con successo!", Snackbar.LENGTH_SHORT);
                 snackbar.show();
                 RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
+
+                SharedPreferences pref=getSharedPreferences("MyPref", MODE_PRIVATE);
+                if(pref.getString("email", "").equals("")) {
+
+                    // Dò accesso al calendario dell'utente
+                    com.google.api.services.calendar.Calendar mService = new com.google.api.services.calendar.Calendar.Builder(
+                            AndroidHttp.newCompatibleTransport(), JacksonFactory.getDefaultInstance(), credential)
+                            .setApplicationName("RecipeX")
+                            .build();
+                    AclRule rule = new AclRule();
+                    AclRule.Scope scope = new AclRule.Scope();
+                    scope.setType("user").setValue(pref.getString("email", ""));
+                    rule.setScope(scope).setRole("writer");
+
+                    try {
+                        // Insert new access rule
+                        AclRule createdRule = mService.acl().insert(response.getPayload(), rule).execute();
+                        System.out.println(createdRule.getId());
+                    }
+                    catch(Exception e){e.printStackTrace();}
+
+                }
+                else{
+                    Toast.makeText(UserRequests.this, "Si è verificato un errore nella condivisione del calendario dell'utente.",
+                            Toast.LENGTH_LONG).show();
+                }
+                
                 if(checkNetwork()) new GetUserRequestsAT(this, this, coordinator, userId, apiHandler).execute();
 
             } else {

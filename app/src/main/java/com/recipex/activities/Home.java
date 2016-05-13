@@ -129,7 +129,6 @@ public class Home extends AppCompatActivity
         emailuser.setText(email);
         Picasso.with(Home.this).load(photo).transform(new CircleTransform()).into(photouser);
 
-
     }
 
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {

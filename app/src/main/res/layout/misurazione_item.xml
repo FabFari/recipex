@@ -63,19 +63,10 @@
                     android:textAppearance="?android:attr/textAppearanceSmall" />
 
                 <TextView
-                    android:id="@+id/ora"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:text="Ora"
-                    android:textColor="@color/colorPrimary"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-                <TextView
                     android:id="@+id/dato1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:text="Dato1"
                     android:textColor="@color/colorPrimary"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
                 <TextView
@@ -83,7 +74,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:text="Dato2"
+                    android:textColor="@color/colorPrimary"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                <!--nota, campo opzionale-->
+                <TextView
+                    android:id="@+id/nota"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
                     android:textColor="@color/colorPrimary"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
 
@@ -113,7 +112,7 @@
                 android:layout_marginTop="5dp" />
             <ImageView
                 xmlns:app="http://schemas.android.com/apk/res-auto"
-                android:id="@+id/ic_feedback"
+                android:id="@+id/icon_misurazione"
                 android:src="@drawable/feedback"
                 android:layout_alignParentRight="true"
                 android:layout_width="30dp"

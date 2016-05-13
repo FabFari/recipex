@@ -12,10 +12,11 @@ public class Terapia {
     public String unità;
     public long quantità;
     public String foglio;
+    public String caregiver;
 
 
     public Terapia(String nome, long dose, String tipo, boolean ricetta, String ingrediente, String unità,
-                   long quantità, String foglio){
+                   long quantità, String foglio,String caregiver){
         this.nome=nome;
         this.dose=dose;
         this.tipo=tipo;
@@ -24,6 +25,7 @@ public class Terapia {
         this.quantità=quantità;
         this.unità=unità;
         this.foglio=foglio;
+        this.caregiver=caregiver;
     }
 
 }

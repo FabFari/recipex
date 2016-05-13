@@ -25,6 +25,7 @@ import com.appspot.recipex_1281.recipexServerApi.model.MainMeasurementInfoMessag
 import com.appspot.recipex_1281.recipexServerApi.model.MainPrescriptionInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserMeasurementsMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserPrescriptionsMessage;
+import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.activities.AddMeasurement;
 import com.recipex.activities.AggiungiTerapia;
@@ -106,7 +107,37 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
             Iterator<MainMeasurementInfoMessage> i = lista.iterator();
             while (i.hasNext()) {
                 MainMeasurementInfoMessage cur = i.next();
-                Misurazione mcur = new Misurazione(cur.getKind(), cur.getDateTime());
+                Misurazione mcur=new Misurazione();
+                switch (cur.getKind()) {
+                    case AppConstants.COLESTEROLO:
+                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getChlLevel()));
+                        break;
+                    case AppConstants.FREQ_CARDIACA:
+                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getBpm()), "", "");
+                        break;
+                    case AppConstants.PRESSIONE:
+                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getSystolic()),
+                                Long.toString(cur.getDiastolic()), "");
+                        break;
+                    case AppConstants.FREQ_RESPIRAZIONE:
+                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getRespirations()), "", "");
+                        break;
+                    case AppConstants.SPO2:
+                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getSpo2()));
+                        break;
+                    case AppConstants.GLUCOSIO:
+                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "","", Double.toString(cur.getHgt()));
+                        break;
+                    case AppConstants.TEMP_CORPOREA:
+                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(),"", "", Double.toString(cur.getDegrees()));
+                        break;
+                    case AppConstants.DOLORE:
+                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getNrs()), "", "");
+                        break;
+                }
+                if(cur.getNote()!=null)
+                    mcur.setNota(cur.getNote());
+
                 misurazioni.add(mcur);
             }
             RVAdapter adapter = new RVAdapter(misurazioni);

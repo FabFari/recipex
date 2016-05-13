@@ -195,23 +195,6 @@
                     android:paddingLeft="10dp"
                     android:inputType="textCapSentences"
                     android:imeOptions="actionNext"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Assistente"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:paddingLeft="10dp"
-                    android:id="@+id/assistente"
-                    android:layout_alignParentTop="true"
-                    android:layout_centerHorizontal="true"/>
-
-                <EditText
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/insertAssistente"
-                    android:paddingLeft="10dp"
-                    android:inputType="textCapSentences"
-                    android:imeOptions="actionNext"/>
 
                 <!--ogni quanto-->
                 <TextView

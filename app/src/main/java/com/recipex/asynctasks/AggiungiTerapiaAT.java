@@ -32,7 +32,7 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
     int quantità;
     boolean ricetta;
     String foglioIllustrativo;
-    int assistente;
+    long assistente;
 
     GoogleAccountCredential credential;
     SharedPreferences settings;
@@ -44,7 +44,7 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
     }
 
     public AggiungiTerapiaAT(Context context, String nome, long ingrediente, String tipo, long dose, String unità,
-                             int quantità, boolean ricetta, String foglioIllustrativo, int assistente,
+                             int quantità, boolean ricetta, String foglioIllustrativo, long assistente,
                              TaskCallbackAggiungiTerapia mCallback) {
         mContext = context;
         this.mCallback = mCallback;
@@ -55,9 +55,8 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
         this.unità = unità;
         this.quantità = quantità;
         this.ricetta = ricetta;
+        this.assistente=assistente;
         this.foglioIllustrativo = foglioIllustrativo;
-        this.assistente = assistente;
-
     }
 
     // setSelectedAccountName definition
@@ -95,7 +94,7 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
             //NON OBBLIGATORI
             reg.setPil(foglioIllustrativo);
             if(assistente!=0)
-                reg.setCaregiver((long)assistente);
+                reg.setCaregiver(assistente);
 
             long id=pref.getLong("userId", 0L);
 

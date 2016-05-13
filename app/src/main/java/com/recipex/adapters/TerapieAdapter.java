@@ -52,6 +52,9 @@ public class TerapieAdapter extends RecyclerView.Adapter<TerapieAdapter.MyViewHo
         if(!terapie.get(i).foglio.equals(""))
             personViewHolder.foglio.setText("Foglio "+terapie.get(i).foglio);
         else personViewHolder.foglio.setVisibility(View.INVISIBLE);
+        if(!terapie.get(i).caregiver.equals(""))
+            personViewHolder.foglio.setText("Caregiver "+terapie.get(i).caregiver);
+        else personViewHolder.foglio.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -68,6 +71,7 @@ public class TerapieAdapter extends RecyclerView.Adapter<TerapieAdapter.MyViewHo
         TextView quantità;
         TextView unità;
         TextView foglio;
+        TextView caregiver;
 
         MyViewHolder(View itemView) {
             super(itemView);
@@ -79,6 +83,7 @@ public class TerapieAdapter extends RecyclerView.Adapter<TerapieAdapter.MyViewHo
             unità=(TextView) itemView.findViewById(R.id.unitCard);
             quantità=(TextView)itemView.findViewById(R.id.quantCard);
             foglio=(TextView)itemView.findViewById(R.id.foglioCard);
+            caregiver=(TextView)itemView.findViewById(R.id.caregiverCard);
         }
     }
 

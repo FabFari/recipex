@@ -48,6 +48,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.calendar.CalendarScopes;
+import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
@@ -66,8 +67,10 @@ import com.recipex.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import me.angrybyte.numberpicker.view.ActualNumberPicker;
 import pub.devrel.easypermissions.AfterPermissionGranted;
@@ -118,7 +121,7 @@ public class AddMeasurement extends AppCompatActivity
     // Input
     // Long user_id = 5724160613416960L;
     private Long user_id;
-    private SharedPreferences pref;
+    public SharedPreferences pref;
     String measurement_kind = AppConstants.COLESTEROLO;
 
     private NfcAdapter mNfcAdapter;
@@ -742,10 +745,47 @@ public class AddMeasurement extends AppCompatActivity
 
                     // Insert the new calendar
                     Calendar createdCalendar = mService.calendars().insert(calendar).execute();
+                    idCalendar=createdCalendar.getId();
                     System.out.println("New Calendar "+createdCalendar.getId());
                     SharedPreferences.Editor editor=pref.edit();
                     editor.putString("calendar", createdCalendar.getId());
                     editor.commit();
+
+
+                    //se creo un nuovo calendario lo devo pubblicare a tutti i miei caregivers.
+                    if(pref.getStringSet("emailcaregivers",null)!=null) {
+                        Set<String> emailcaregivers = pref.getStringSet("emailcaregivers", null);
+
+                        Iterator<String> i = emailcaregivers.iterator();
+                        while (i.hasNext()) {
+                            String emailcur = (String) i.next();
+                            // Create access rule with associated scope
+                            AclRule rule = new AclRule();
+                            AclRule.Scope scope = new AclRule.Scope();
+                            scope.setType("user").setValue(emailcur);
+                            rule.setScope(scope).setRole("writer");
+
+                            // Insert new access rule
+                            AclRule createdRule = mService.acl().insert(idCalendar, rule).execute();
+                            System.out.println(createdRule.getId());
+                        }
+
+                    }
+                    //DEBUG
+                    /*else{
+                        Log.d("DEBUG", "rule");
+                        AclRule rule = new AclRule();
+                        AclRule.Scope scope = new AclRule.Scope();
+                        scope.setType("user").setValue("recipex.app@gmail.com");
+                        rule.setScope(scope).setRole("writer");
+
+                        // Insert new access rule
+                        try {
+                            AclRule createdRule = mService.acl().insert(idCalendar, rule).execute();
+                        }
+                        catch (Exception e){Log.d("TAG",e.getMessage());}
+                        Log.d("DEBUG", "rule EXEC");
+                    }*/
                 }
                 //aggiungo la terapia
                 System.out.println("arrivo");

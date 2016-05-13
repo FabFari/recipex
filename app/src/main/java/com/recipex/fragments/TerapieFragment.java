@@ -121,10 +121,19 @@ public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie{
                 Iterator<MainPrescriptionInfoMessage> i = lista.iterator();
                 while (i.hasNext()) {
                     MainPrescriptionInfoMessage cur = i.next();
-                    Terapia tcur = new Terapia(cur.getName(), cur.getDose(), cur.getKind(), cur.getRecipe(),
-                            cur.getActiveIngrName(), cur.getUnits(), cur.getQuantity(), cur.getPil());
+                    Terapia tcur;
+                    if(cur.getCaregiverName()==null) {
+                        Log.d("TERAPIEFRAGMENT", "caregiver null");
+                        tcur = new Terapia(cur.getName(), cur.getDose(), cur.getKind(), cur.getRecipe(),
+                                cur.getActiveIngrName(), cur.getUnits(), cur.getQuantity(), cur.getPil(), "");
+                    }
+                    else
+                        tcur = new Terapia(cur.getName(), cur.getDose(), cur.getKind(), cur.getRecipe(),
+                            cur.getActiveIngrName(), cur.getUnits(), cur.getQuantity(), cur.getPil(), cur.getCaregiverName());
                     terapie.add(tcur);
+
                     Log.d("TERAPIEFRAGMENT", cur.getActiveIngrName());
+
                 }
                 TerapieAdapter adapter = new TerapieAdapter(terapie);
                 Log.d("TERAPIEFRAGMENT", "size " + terapie.size());

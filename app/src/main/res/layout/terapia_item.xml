@@ -107,6 +107,13 @@
                 android:text="Tipo "
                 android:textColor="@color/colorPrimaryDark"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
+            <TextView
+                android:id="@+id/caregiverCard"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:textColor="@color/colorPrimaryDark"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
 
         </LinearLayout>
 

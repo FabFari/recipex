@@ -91,7 +91,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
     long ingredienteID;
 
     EditText inserisciNome, inserisciDose, inserisciUnità, inserisciQuantità,
-            inserisciFoglio, inserisciCaregiver, inserisciInizio;
+            inserisciFoglio, inserisciInizio;
 
     static final int MAXNUMEROCADENZA=30;
     static final int ORE =24;
@@ -151,7 +151,6 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         inserisciUnità=(EditText)findViewById(R.id.insertUnità);
         inserisciQuantità=(EditText)findViewById(R.id.insertQuantità);
         inserisciFoglio=(EditText)findViewById(R.id.insertFoglio);
-        inserisciCaregiver=(EditText)findViewById(R.id.insertAssistente);
         inserisciInizio=(EditText)findViewById(R.id.insertInizio);
 
         if(checkNetwork()) new GetMainIngredientsAT(getApplicationContext(), this).execute();
@@ -188,17 +187,17 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                 int quanto=Integer.parseInt(quantità);
 
                 foglio = inserisciFoglio.getText().toString();
-                caregiver = inserisciCaregiver.getText().toString();
-
-                int assistente=0;
-                if(!caregiver.equals(""))
-                    assistente=Integer.parseInt(caregiver);
 
                 inizio=inserisciInizio.getText().toString();
 
+                Bundle extras=getIntent().getExtras();
+                long idcaregiver=0;
+                if(extras!=null)
+                    idcaregiver=extras.getChar("idCaregiver");
+
                 Log.d("REGISTRAZIONE ", "Sono qui");
                 if (checkNetwork()) new AggiungiTerapiaAT(getApplicationContext(), nome, ingredienteID, tipo, dose2, unità,
-                        quanto, recipe, foglio, assistente, this).execute();
+                        quanto, recipe, foglio, idcaregiver, this).execute();
 
             }
             else {
