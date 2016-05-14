@@ -27,9 +27,9 @@
             android:icon="@drawable/ambulance"
             android:title="Chiedi aiuto" />
         <item
-            android:id="@+id/nav_logout"
-            android:icon="@drawable/logout"
-            android:title="Log Out"/>
+            android:id="@+id/nav_calendario"
+            android:icon="@drawable/calendar_icon"
+            android:title="Calendario"/>
     </group>
 
     <!--<item android:title="Communicate">

@@ -4,12 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -37,6 +39,8 @@ import com.recipex.AppConstants;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserPrescriptionsMessage;
 import com.recipex.CircleTransform;
 import com.recipex.R;
+import com.recipex.fragments.CaregiversFragment;
+import com.recipex.fragments.FamiliariFragment;
 import com.recipex.fragments.MisurazioniFragment;
 import com.recipex.fragments.TabFragment;
 import com.recipex.fragments.TerapieFragment;
@@ -127,7 +131,7 @@ public class Home extends AppCompatActivity
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
 
-        utenteSemplice=pref.getBoolean("utenteSemplice", false);
+        utenteSemplice=pref.getBoolean("utenteSemplice", true);
 
         Log.d("UTENTESEMPLICE ", " "+utenteSemplice);
         mFragmentManager = getSupportFragmentManager();
@@ -162,31 +166,6 @@ public class Home extends AppCompatActivity
         emailuser.setText(email);
         Picasso.with(Home.this).load(photo).transform(new CircleTransform()).into(photouser);
 
-    }
-
-    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-        ImageView bmImage;
-
-        public DownloadImageTask(ImageView bmImage) {
-            this.bmImage = bmImage;
-        }
-
-        protected Bitmap doInBackground(String... urls) {
-            String urldisplay = urls[0];
-            Bitmap mIcon11 = null;
-            try {
-                InputStream in = new java.net.URL(urldisplay).openStream();
-                mIcon11 = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                Log.e("Error", e.getMessage());
-                e.printStackTrace();
-            }
-            return mIcon11;
-        }
-
-        protected void onPostExecute(Bitmap result) {
-            bmImage.setImageBitmap(result);
-        }
     }
 
     @Override
@@ -260,12 +239,10 @@ public class Home extends AppCompatActivity
         //ora fanno tutti la stessa cosa poi cambio
         else if (id == R.id.nav_infermieri) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-            if(utenteSemplice)
-                fragmentTransaction.replace(R.id.containerView, new MisurazioniFragment()).commit();
-            else fragmentTransaction.replace(R.id.containerView, new TabFragment()).commit();
+            fragmentTransaction.replace(R.id.containerView, new CaregiversFragment()).commit();
         } else if (id == R.id.nav_familiari) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.containerView,new TabFragment()).commit();
+            fragmentTransaction.replace(R.id.containerView,new FamiliariFragment()).commit();
         } else if (id == R.id.nav_requests) {
             Intent myIntent = new Intent(getApplicationContext(), UserRequests.class);
             startActivity(myIntent);
@@ -275,11 +252,20 @@ public class Home extends AppCompatActivity
             if(utenteSemplice)
                 fragmentTransaction.replace(R.id.containerView, new MisurazioniFragment()).commit();
             else fragmentTransaction.replace(R.id.containerView, new TabFragment()).commit();
-        } else if (id == R.id.nav_logout) {
-            FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-            if(utenteSemplice)
-                fragmentTransaction.replace(R.id.containerView, new MisurazioniFragment()).commit();
-            else fragmentTransaction.replace(R.id.containerView, new TabFragment()).commit();
+        } else if (id == R.id.nav_calendario) {
+            PackageManager pm = getPackageManager();
+            try {
+                pm.getPackageInfo("com.google.android.calendar", PackageManager.GET_ACTIVITIES);
+                Intent intent = getPackageManager().getLaunchIntentForPackage("com.google.android.calendar");
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                startActivity(intent);
+            }
+            catch (PackageManager.NameNotFoundException e) {
+                Uri webpage = Uri.parse("https://calendar.google.com/calendar");
+                Intent webIntent = new Intent(Intent.ACTION_VIEW, webpage);
+                startActivity(webIntent);
+            }
         } else if (id == R.id.nav_terapie) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.containerView, new TerapieFragment()).commit();

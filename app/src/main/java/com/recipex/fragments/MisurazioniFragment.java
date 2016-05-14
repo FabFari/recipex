@@ -32,6 +32,8 @@ import com.google.android.gms.plus.model.people.Person;
 import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.activities.AddMeasurement;
+import com.recipex.activities.Home;
+import com.recipex.adapters.PazienteFamiliareAdapter;
 import com.recipex.adapters.RVAdapter;
 
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
@@ -234,7 +236,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
         }
     }
 
-    //callback from GetTerapieUser
+    //callback from GetMisurazioniUser
     public void done(MainUserMeasurementsMessage response){
         if(response!=null) {
             List<Misurazione> misurazioni=new LinkedList<>();
@@ -279,7 +281,8 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
             curRecView.setAdapter(adapter);
         }
         else {
-            Toast.makeText(getActivity(), "You don't have prescriptions. Add one clicking on the button", Toast.LENGTH_LONG).show();
+            RVAdapter adapter = new RVAdapter(null);
+            curRecView.setAdapter(adapter);
         }
     }
 

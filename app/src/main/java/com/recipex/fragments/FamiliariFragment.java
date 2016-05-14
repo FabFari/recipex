@@ -9,7 +9,6 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,34 +20,22 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
-import com.appspot.recipex_1281.recipexServerApi.model.MainMeasurementInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserMainInfoMessage;
-import com.appspot.recipex_1281.recipexServerApi.model.MainUserMeasurementsMessage;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.recipex.AppConstants;
 import com.recipex.R;
-import com.recipex.activities.AddMeasurement;
 import com.recipex.activities.Home;
-import com.recipex.adapters.CaregiverAdapter;
-import com.recipex.adapters.RVAdapter;
-import com.recipex.adapters.UsersAdapter;
-import com.recipex.asynctasks.CheckUserRelationsAT;
-import com.recipex.asynctasks.GetMeasurementsUser;
+import com.recipex.adapters.PazienteFamiliareAdapter;
 import com.recipex.asynctasks.GetUserAT;
 import com.recipex.taskcallbacks.GetUserTC;
-import com.recipex.utilities.Misurazione;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 /**
- * Created by Sara on 12/05/2016.
+ * Created by Sara on 14/05/2016.
  */
-public class CaregiversFragment extends Fragment implements GetUserTC{
+public class FamiliariFragment extends Fragment implements GetUserTC {
     static RecyclerView curRecView;
 
     private SharedPreferences settings;
@@ -57,7 +44,6 @@ public class CaregiversFragment extends Fragment implements GetUserTC{
     private String accountName;
 
     private static final int REQUEST_ACCOUNT_PICKER = 2;
-
 
     @Nullable
     @Override
@@ -119,33 +105,16 @@ public class CaregiversFragment extends Fragment implements GetUserTC{
 
     //callback from GetUser
     public void done(boolean res, final MainUserInfoMessage message) {
-        if(message!=null && message.getCaregivers()!=null && !message.getCaregivers().isEmpty()) {
-            List<MainUserMainInfoMessage> m=new LinkedList<>();
-            Set<String> emailcaregivers=new HashSet<>();
 
-            if(message.getPcPhysician()!=null) {
-                emailcaregivers.add(message.getPcPhysician().getEmail());
-            }
-            else if (message.getVisitingNurse()!=null) {
-                emailcaregivers.add(message.getVisitingNurse().getEmail());
-            }
-            m=message.getCaregivers();
+        //uso lo stesso adapter dei pazienti perchè ha tutti i campi che mi interessano
+        if(message!=null && message.getRelatives()!=null && !message.getRelatives().isEmpty()) {
+            List<MainUserMainInfoMessage> m=message.getRelatives();
 
-            Iterator<MainUserMainInfoMessage> i=m.iterator();
-            while(i.hasNext()){
-                MainUserMainInfoMessage cur=(MainUserMainInfoMessage) i.next();
-                emailcaregivers.add(cur.getEmail());
-            }
-
-            SharedPreferences.Editor editor=pref.edit();
-            editor.putStringSet("emailcaregivers", emailcaregivers);
-
-            CaregiverAdapter adapter = new CaregiverAdapter(message.getCaregivers(), message.getPcPhysician(),
-                    message.getVisitingNurse(),(Home)getActivity(), null);
+            PazienteFamiliareAdapter adapter = new PazienteFamiliareAdapter(message.getRelatives(), (Home)getActivity(), false);
             curRecView.setAdapter(adapter);
         }
         else {
-            CaregiverAdapter adapter = new CaregiverAdapter(null, null, null, (Home)getActivity(), null);
+            PazienteFamiliareAdapter adapter = new PazienteFamiliareAdapter(null, (Home)getActivity(), false);
             curRecView.setAdapter(adapter);
         }
     }
@@ -160,3 +129,4 @@ public class CaregiversFragment extends Fragment implements GetUserTC{
         this.accountName = accountName;
     }
 }
+

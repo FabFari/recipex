@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.appspot.recipex_1281.recipexServerApi.model.MainRequestInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserMainInfoMessage;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.recipex.R;
@@ -24,7 +25,7 @@ import java.util.Locale;
 /**
  * Created by Sara on 12/05/2016.
  */
-public class CaregiverAdapter extends RecyclerView.Adapter<CaregiverAdapter.UserViewHolder>{
+public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     public static class UserViewHolder extends RecyclerView.ViewHolder {
         CardView cardView;
         ImageView userPic;
@@ -41,58 +42,116 @@ public class CaregiverAdapter extends RecyclerView.Adapter<CaregiverAdapter.User
             crgvIcon = (ImageView)itemView.findViewById(R.id.user_search_crgv_icon);
         }
     }
+    public class EmptyViewHolder extends RecyclerView.ViewHolder {
+        public EmptyViewHolder(View itemView) {
+            super(itemView);
+        }
+    }
 
-    List<MainUserMainInfoMessage> users;
+    private static final int EMPTY_VIEW = 10;
+
+    List<MainUserMainInfoMessage> caregivers;
+    MainUserMainInfoMessage physician;
+    MainUserMainInfoMessage nurse;
     Home activity;
     CircularProgressView progressView;
 
-    public CaregiverAdapter(List<MainUserMainInfoMessage> users, Home activity,
+    public CaregiverAdapter(List<MainUserMainInfoMessage> users, MainUserMainInfoMessage physician,
+                            MainUserMainInfoMessage nurse, Home activity,
                         CircularProgressView progressView){
         if(users != null)
-            this.users = users;
+            this.caregivers = users;
         else
-            this.users = new ArrayList<MainUserMainInfoMessage>();
+            this.caregivers = new ArrayList<MainUserMainInfoMessage>();
         this.activity = activity;
         this.progressView = progressView;
+        if(physician!=null && nurse!=null){
+            caregivers.add(0, physician);
+            caregivers.add(1, nurse);
+        }
+        else if(physician!=null && nurse==null)
+            caregivers.add(0, physician);
+        else if(physician==null && nurse!=null)
+            caregivers.add(0, nurse);
+
+        this.physician=physician;
+        this.nurse=nurse;
     }
 
     @Override
     public int getItemCount() {
-        if(users != null && users.size() > 0)
-            return users.size();
+        if(caregivers != null && caregivers.size() > 0)
+            return caregivers.size();
         else
-            return 0;
+            return 1;
     }
-
     @Override
-    public UserViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.user_item, viewGroup, false);
-        UserViewHolder uvh = new UserViewHolder(v);
-        return uvh;
-    }
-
-    @Override
-    public void onBindViewHolder(final UserViewHolder userViewHolder, int i) {
-        final int pos = i;
-        userViewHolder.userName.setText(String.format(Locale.getDefault(), "%s %s",
-                users.get(i).getName(), users.get(i).getSurname()));
-        String field = users.get(i).getField();
-        if(field != null && field.length() > 0) {
-            userViewHolder.crgvField.setText(field);
-            userViewHolder.crgvField.setVisibility(View.VISIBLE);
-            userViewHolder.crgvIcon.setVisibility(View.VISIBLE);
+    public int getItemViewType(int position) {
+        if (caregivers == null || caregivers.size() == 0) {
+            return EMPTY_VIEW;
         }
-        Picasso.with(activity.getApplicationContext()).load(users.get(i).
-                getPic()).into(userViewHolder.userPic);
+        return super.getItemViewType(position);
+    }
 
-        userViewHolder.cardView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent myIntent = new Intent(activity.getApplicationContext(), Profile.class);
-                myIntent.putExtra("profileId", users.get(pos).getId());
-                activity.startActivity(myIntent);
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+        View v;
+
+        if (viewType == EMPTY_VIEW) {
+            v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.content_caregivers_empty, viewGroup, false);
+            EmptyViewHolder evh = new EmptyViewHolder(v);
+            return evh;
+        }
+
+        v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.request_item, viewGroup, false);
+        UserViewHolder rvh = new UserViewHolder(v);
+        return rvh;
+    }
+
+    @Override
+    public void onBindViewHolder(final RecyclerView.ViewHolder viewHolder, int i) {
+        final int pos = i;
+        if(viewHolder instanceof UserViewHolder) {
+            UserViewHolder userViewHolder=(UserViewHolder)viewHolder;
+            //significa che ho aggiunto il medico di base, quindi sarà sicuramente alla prima posizione
+            if(physician!=null){
+                if(i==0) {
+                    userViewHolder.crgvIcon.setImageResource(R.drawable.ic_pc_physician_accent);
+                    userViewHolder.crgvIcon.setVisibility(View.VISIBLE);
+                }
+                //se ho anche l'infermiera, sarà alla seconda posizione
+                else if(i==1 && nurse!=null){
+                    userViewHolder.crgvIcon.setImageResource(R.drawable.ic_visiting_nurse_accent);
+                    userViewHolder.crgvIcon.setVisibility(View.VISIBLE);
+                }
             }
-        });
+            //se ho solo l'infermiera sarà alla prima posizione
+            else if(physician==null && nurse!=null && i==0){
+                userViewHolder.crgvIcon.setImageResource(R.drawable.ic_visiting_nurse_accent);
+                userViewHolder.crgvIcon.setVisibility(View.VISIBLE);
+            }
+
+            userViewHolder.userName.setText(String.format(Locale.getDefault(), "%s %s",
+                    caregivers.get(i).getName(), caregivers.get(i).getSurname()));
+            String field = caregivers.get(i).getField();
+            if (field != null && field.length() > 0) {
+                userViewHolder.crgvField.setText(field);
+                userViewHolder.crgvField.setVisibility(View.VISIBLE);
+                userViewHolder.crgvIcon.setVisibility(View.VISIBLE);
+            }
+
+            Picasso.with(activity.getApplicationContext()).load(caregivers.get(i).
+                    getPic()).into(userViewHolder.userPic);
+
+            userViewHolder.cardView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent myIntent = new Intent(activity.getApplicationContext(), Profile.class);
+                    myIntent.putExtra("profileId", caregivers.get(pos).getId());
+                    activity.startActivity(myIntent);
+                }
+            });
+        }
     }
 
     @Override
@@ -101,7 +160,7 @@ public class CaregiverAdapter extends RecyclerView.Adapter<CaregiverAdapter.User
     }
 
     public void setDataset(List<MainUserMainInfoMessage> updatedUsers) {
-        this.users = updatedUsers;
+        this.caregivers = updatedUsers;
     }
 
 }
