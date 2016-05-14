@@ -1,6 +1,7 @@
 package com.recipex.fragments;
 
 
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.Context;
@@ -13,6 +14,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompatSideChannelService;
@@ -26,9 +28,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.clans.fab.FloatingActionMenu;
+import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.google.android.gms.plus.model.people.Person;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.activities.AddMeasurement;
@@ -51,6 +57,7 @@ import com.recipex.taskcallbacks.TaskCallbackGetMeasurements;
 import com.recipex.utilities.Misurazione;
 import com.recipex.utilities.Terapia;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -60,11 +67,20 @@ import java.util.List;
  */
 public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeasurements {
 
+    private final static String TAG = "MISURAZIONI_FRAGMENT";
     private final static int ADD_MEASUREMENT = 1;
+    private static final int REQUEST_ACCOUNT_PICKER = 2;
+    private static final int EMPTY_VIEW = 10;
+
+    private SharedPreferences settings;
+    private GoogleAccountCredential credential;
+    private String accountName;
+
 
     View mainView;
 
     List<String> date;
+    FloatingActionMenu fab_menu;
     com.github.clans.fab.FloatingActionButton fab_pressione;
     com.github.clans.fab.FloatingActionButton fab_freq_cardiaca;
     com.github.clans.fab.FloatingActionButton fab_freq_respiratoria;
@@ -73,6 +89,12 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
     com.github.clans.fab.FloatingActionButton fab_diabete;
     com.github.clans.fab.FloatingActionButton fab_dolore;
     com.github.clans.fab.FloatingActionButton fab_colesterolo;
+
+    private TextView emptyText;
+    private CircularProgressView progressView;
+    private CoordinatorLayout coordinatorLayout;
+
+    private Long userId;
 
     static RecyclerView curRecView;
 
@@ -101,21 +123,64 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
         switch (requestCode) {
             case ADD_MEASUREMENT:
                 if(resultCode == Activity.RESULT_OK) {
+                    Log.d(TAG, "ADD_MEASUREMENT: RESULT_OK");
                     Snackbar snackbar = Snackbar
-                            .make(mainView, "Misurazone aggiunta con successo!", Snackbar.LENGTH_SHORT);
+                            .make(getActivity().getWindow().getDecorView().getRootView(),
+                                    "Misurazone aggiunta con successo!", Snackbar.LENGTH_SHORT);
                     snackbar.show();
+
+                    credential = GoogleAccountCredential.usingAudience(getActivity(), AppConstants.AUDIENCE);
+                    setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+
+                    if (credential.getSelectedAccountName() == null) {
+                        Log.d(TAG, "AccountName == null: startActivityForResult.");
+                        startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
+                    }
+                    else {
+                        if(checkNetwork()) {
+                            RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
+                            new GetMeasurementsUser(userId, getContext(), this, apiHandler).execute();
+                            progressView.startAnimation();
+                            progressView.setVisibility(View.VISIBLE);
+                        }
+                    }
                 }
             break;
+            case REQUEST_ACCOUNT_PICKER:
+                Log.d(TAG, "Nell'if.");
+                if (data != null && data.getExtras() != null) {
+                    String accountName =
+                            data.getExtras().getString(
+                                    AccountManager.KEY_ACCOUNT_NAME);
+                    if (accountName != null) {
+                        setSelectedAccountName(accountName);
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
+                        editor.apply();
+                        // User is authorized
+                        RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
+                        if (checkNetwork()) {
+                            new GetMeasurementsUser(userId, getContext(), this, apiHandler).execute();
+                            progressView.startAnimation();
+                            progressView.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }
+                break;
         }
     }
 
     private void initUI(View rootView) {
+        progressView = (CircularProgressView) rootView.findViewById(R.id.home_progress_view);
+        coordinatorLayout = (CoordinatorLayout) rootView.findViewById(R.id.home_coordinator);
+        emptyText = (TextView) rootView.findViewById(R.id.home_empty_message);
         RecyclerView rv = (RecyclerView)rootView.findViewById(R.id.my_recyclerview);
         curRecView=rv;
         LinearLayoutManager llm = new LinearLayoutManager(getContext());
         rv.setLayoutManager(llm);
 
         // GET FABs
+        fab_menu = (FloatingActionMenu) rootView.findViewById(R.id.home_fab_menu_measurement);
         fab_pressione = (com.github.clans.fab.FloatingActionButton) rootView.findViewById(R.id.home_fab_menu_item1);
         fab_freq_cardiaca = (com.github.clans.fab.FloatingActionButton) rootView.findViewById(R.id.home_fab_menu_item2);
         fab_freq_respiratoria = (com.github.clans.fab.FloatingActionButton) rootView.findViewById(R.id.home_fab_menu_item3);
@@ -130,89 +195,118 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
             @Override
             public void onClick(View view) {
                 // Change Fabrizio
+                fab_menu.close(true);
                 Intent myIntent = new Intent(getActivity(), AddMeasurement.class);
                 myIntent.putExtra("kind", AppConstants.PRESSIONE);
                 Activity activity = (Activity) view.getContext();
-                activity.startActivityForResult(myIntent, ADD_MEASUREMENT);
+                startActivityForResult(myIntent, ADD_MEASUREMENT);
             }
         });
         fab_freq_cardiaca.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Change Fabrizio
+                fab_menu.close(true);
                 Intent myIntent = new Intent(getActivity(), AddMeasurement.class);
                 myIntent.putExtra("kind", AppConstants.FREQ_CARDIACA);
                 Activity activity = (Activity) view.getContext();
-                activity.startActivityForResult(myIntent, ADD_MEASUREMENT);
+                startActivityForResult(myIntent, ADD_MEASUREMENT);
             }
         });
         fab_freq_respiratoria.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Change Fabrizio
+                fab_menu.close(true);
                 Intent myIntent = new Intent(getActivity(), AddMeasurement.class);
                 myIntent.putExtra("kind", AppConstants.FREQ_RESPIRAZIONE);
                 Activity activity = (Activity) view.getContext();
-                activity.startActivityForResult(myIntent, ADD_MEASUREMENT);
+                startActivityForResult(myIntent, ADD_MEASUREMENT);
             }
         });
         fab_temperatura.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Change Fabrizio
+                fab_menu.close(true);
                 Intent myIntent = new Intent(getActivity(), AddMeasurement.class);
                 myIntent.putExtra("kind", AppConstants.TEMP_CORPOREA);
                 Activity activity = (Activity) view.getContext();
-                activity.startActivityForResult(myIntent, ADD_MEASUREMENT);
+                startActivityForResult(myIntent, ADD_MEASUREMENT);
             }
         });
         fab_spo2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Change Fabrizio
+                fab_menu.close(true);
                 Intent myIntent = new Intent(getActivity(), AddMeasurement.class);
                 myIntent.putExtra("kind", AppConstants.SPO2);
                 Activity activity = (Activity) view.getContext();
-                activity.startActivityForResult(myIntent, ADD_MEASUREMENT);
+                startActivityForResult(myIntent, ADD_MEASUREMENT);
             }
         });
         fab_diabete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Change Fabrizio
+                fab_menu.close(true);
                 Intent myIntent = new Intent(getActivity(), AddMeasurement.class);
                 myIntent.putExtra("kind", AppConstants.GLUCOSIO);
                 Activity activity = (Activity) view.getContext();
-                activity.startActivityForResult(myIntent, ADD_MEASUREMENT);
+                startActivityForResult(myIntent, ADD_MEASUREMENT);
             }
         });
         fab_dolore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Change Fabrizio
+                fab_menu.close(true);
                 Intent myIntent = new Intent(getActivity(), AddMeasurement.class);
                 myIntent.putExtra("kind", AppConstants.DOLORE);
                 Activity activity = (Activity) view.getContext();
-                activity.startActivityForResult(myIntent, ADD_MEASUREMENT);
+                startActivityForResult(myIntent, ADD_MEASUREMENT);
             }
         });
         fab_colesterolo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Change Fabrizio
+                fab_menu.close(true);
                 Intent myIntent = new Intent(getActivity(), AddMeasurement.class);
                 myIntent.putExtra("kind", AppConstants.COLESTEROLO);
                 Activity activity = (Activity) view.getContext();
-                activity.startActivityForResult(myIntent, ADD_MEASUREMENT);
+                startActivityForResult(myIntent, ADD_MEASUREMENT);
             }
         });
 
         SharedPreferences pref=getActivity().getSharedPreferences("MyPref", Context.MODE_PRIVATE);
-        long id=pref.getLong("userId", 0L);
+        userId = pref.getLong("userId", 0L);
 
-        if(id!=0 && checkNetwork()) new GetMeasurementsUser(id, getContext(), this ).execute();
-        else Toast.makeText(getActivity(), "Si è verificato un errore.", Toast.LENGTH_SHORT).show();
+        settings = getActivity().getSharedPreferences(AppConstants.PREFS_NAME, 0);
+        credential = GoogleAccountCredential.usingAudience(getActivity(), AppConstants.AUDIENCE);
+        Log.d(TAG, "Credential: " + credential);
+        setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+
+        if (credential.getSelectedAccountName() == null) {
+            Log.d(TAG, "AccountName == null: startActivityForResult.");
+            startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
+        }
+        else {
+            if (userId != 0 && checkNetwork()) {
+                RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
+                new GetMeasurementsUser(userId, getContext(), this, apiHandler).execute();
+                progressView.startAnimation();
+                progressView.setVisibility(View.VISIBLE);
+            } else {
+                Snackbar snackbar = Snackbar
+                        .make(getActivity().getWindow().getDecorView().getRootView(),
+                                "Operazione fallita! Si è verificato un errore imprevisto!", Snackbar.LENGTH_SHORT);
+                snackbar.show();
+            }
+        }
     }
+
     public boolean checkNetwork() {
         ConnectivityManager cm = (ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
@@ -238,7 +332,11 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
     public void done(MainUserMeasurementsMessage response){
         if(response!=null) {
             List<Misurazione> misurazioni=new LinkedList<>();
-            List<MainMeasurementInfoMessage> lista = response.getMeasurements();
+            List<MainMeasurementInfoMessage> lista;
+            if(response.getMeasurements() != null)
+                lista = response.getMeasurements();
+            else
+                lista = new ArrayList<MainMeasurementInfoMessage>();
             Iterator<MainMeasurementInfoMessage> i = lista.iterator();
             while (i.hasNext()) {
                 MainMeasurementInfoMessage cur = i.next();
@@ -277,10 +375,28 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
             }
             RVAdapter adapter = new RVAdapter(misurazioni);
             curRecView.setAdapter(adapter);
+            Log.d(TAG, "itemCount: "+ adapter.getItemCount());
+            progressView.stopAnimation();
+            progressView.setVisibility(View.GONE);
+            if(adapter.getItemViewType(0) == EMPTY_VIEW) {
+                Snackbar snackbar = Snackbar
+                        .make(getActivity().getWindow().getDecorView().getRootView(),
+                                "Ancora nessuna misurazione?\nAggiungine subito una cliccando il bottone!", Snackbar.LENGTH_SHORT);
+                snackbar.show();
+            }
         }
-        else {
-            Toast.makeText(getActivity(), "You don't have prescriptions. Add one clicking on the button", Toast.LENGTH_LONG).show();
-        }
+        //Toast.makeText(getActivity(), "You don't have prescriptions. Add one clicking on the button", Toast.LENGTH_LONG).show();
+    }
+
+    // setSelectedAccountName definition
+    private void setSelectedAccountName(String accountName) {
+        SharedPreferences settings = getActivity().getSharedPreferences(AppConstants.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
+        editor.apply();
+        Log.d(TAG, "ACCOUNT NAME: " + accountName);
+        credential.setSelectedAccountName(accountName);
+        this.accountName = accountName;
     }
 
 }

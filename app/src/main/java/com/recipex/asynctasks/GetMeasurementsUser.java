@@ -24,40 +24,20 @@ public class GetMeasurementsUser extends AsyncTask<Void, Void, MainUserMeasureme
     long id;
     Context mContext;
     TaskCallbackGetMeasurements mCallback;
-
-    GoogleAccountCredential credential;
-    SharedPreferences settings;
-    SharedPreferences pref;
+    RecipexServerApi apiHandler;
 
 
-    public GetMeasurementsUser(long id, Context context, TaskCallbackGetMeasurements t){
+    public GetMeasurementsUser(long id, Context context, TaskCallbackGetMeasurements t, RecipexServerApi handler){
         this.id=id;
         mContext=context;
         mCallback=t;
-    }
-
-    // setSelectedAccountName definition
-    private void setSelectedAccountName(String accountName) {
-        settings = mContext.getSharedPreferences(AppConstants.PREFS_NAME, 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString("account", accountName);
-        editor.commit();
-        credential.setSelectedAccountName(accountName);
+        apiHandler=handler;
     }
 
     protected MainUserMeasurementsMessage doInBackground(Void... unused) {
 
-        // Retrieve service handle.
-        credential = GoogleAccountCredential.usingAudience(mContext,
-                AppConstants.AUDIENCE);
-        pref = mContext.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
-        String email = pref.getString("email", "");
-        setSelectedAccountName(email);
-
-        RecipexServerApi apiServiceHandle = AppConstants.getApiServiceHandle(credential);
-
         try {
-            RecipexServerApi.User.GetMeasurements get = apiServiceHandle.user().getMeasurements(id);
+            RecipexServerApi.User.GetMeasurements get = apiHandler.user().getMeasurements(id);
             MainUserMeasurementsMessage response = get.execute();
 
             Log.d("RESPONSE TERAPIE", response.getResponse().getMessage());

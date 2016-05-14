@@ -1,108 +1,166 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_view"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    card_view:cardCornerRadius="4dp"
+    card_view:cardElevation="2dp"
+    card_view:cardUseCompatPadding="true" >
 
-    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/card_view"
-        android:layout_width="fill_parent"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="4dp"
-        card_view:cardCornerRadius="4dp">
+        android:padding="@dimen/spacing_ultra_low">
 
-       <!-- <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/linlaymain"
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:orientation="horizontal">-->
-
-
-            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="10dp"
-                android:orientation="vertical">
-
-                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:id="@+id/linlaymain"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
-                    <ImageView
-                        xmlns:app="http://schemas.android.com/apk/res-auto"
-                        android:id="@+id/tipo_mes"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_gravity="center_vertical"
-                        android:src="@drawable/ic_pressure_dark"/>
-
-                    <TextView
-                        android:id="@+id/titolo"
-                        android:text="Misurazione"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:textAppearance="?android:attr/textAppearanceLarge"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/data"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Data"
-                    android:textColor="@color/colorPrimary"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-
-                <TextView
-                    android:id="@+id/dato1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:textColor="@color/colorPrimary"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-                <TextView
-                    android:id="@+id/dato2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:textColor="@color/colorPrimary"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-
-                <!--nota, campo opzionale-->
-                <TextView
-                    android:id="@+id/nota"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:textColor="@color/colorPrimary"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-
-
-            </LinearLayout>
-
-
-
-        <!--</LinearLayout>-->
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/linlayimm"
+            android:id="@+id/linlaymain"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="right"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true">
 
             <ImageView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/tipo_mes"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_pressure_dark"/>
+
+            <TextView
+                android:id="@+id/titolo"
+                android:text="Misurazione"
+                android:textColor="@color/colorPrimaryDark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="@dimen/spacing_ultra_low"
+            android:background="@color/colorPrimary"
+            android:layout_alignBottom="@+id/linlaymain"/>
+
+        <TextView
+            android:id="@+id/data"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Data: "
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimaryDark"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_below="@id/divider"
+            android:layout_marginTop="@dimen/spacing_ultra_low"/>
+
+        <TextView
+            android:id="@+id/data_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimaryDark"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_alignTop="@+id/data"
+            android:layout_toEndOf="@+id/data"/>
+
+        <TextView
+            android:id="@+id/ora"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ora: "
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimaryDark"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_below="@+id/data"
+            android:layout_marginTop="@dimen/spacing_ultra_low"/>
+
+        <TextView
+            android:id="@+id/ora_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimaryDark"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_alignTop="@+id/ora"
+            android:layout_toEndOf="@+id/ora" />
+
+        <TextView
+            android:id="@+id/dato1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dato1: "
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimaryDark"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_below="@+id/ora"
+            android:layout_marginTop="@dimen/spacing_ultra_low"/>
+
+        <TextView
+            android:id="@+id/dato1_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimaryDark"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_alignTop="@+id/dato1"
+            android:layout_toEndOf="@+id/dato1" />
+
+        <TextView
+            android:id="@+id/dato2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dato2: "
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimaryDark"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_below="@+id/dato1"
+            android:layout_marginTop="@dimen/spacing_ultra_low"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/dato2_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimaryDark"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_alignTop="@+id/dato2"
+            android:layout_toEndOf="@+id/dato2"
+            android:visibility="gone"/>
+
+        <!--nota, campo opzionale-->
+        <TextView
+            android:id="@+id/nota"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="Note: "
+            android:textColor="@color/colorPrimaryDark"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_below="@+id/dato2"
+            android:layout_marginTop="@dimen/spacing_ultra_low"/>
+
+        <TextView
+            android:id="@+id/nota_value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimaryDark"
+            android:text="//"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_alignTop="@+id/nota"
+            android:layout_toEndOf="@+id/nota" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true">
+
+            <ImageView
                 android:src="@drawable/ic_edit"
                 android:id="@+id/ic_fill"
                 android:layout_alignParentRight="true"
@@ -111,7 +169,6 @@
                 android:layout_marginBottom="5dp"
                 android:layout_marginTop="5dp" />
             <ImageView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:id="@+id/icon_misurazione"
                 android:src="@drawable/feedback"
                 android:layout_alignParentRight="true"
@@ -131,7 +188,9 @@
                 android:layout_marginTop="5dp"
                 android:textAllCaps="true"
                 android:textStyle="bold" />
+
         </LinearLayout>
 
-    </android.support.v7.widget.CardView>
-</FrameLayout>
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

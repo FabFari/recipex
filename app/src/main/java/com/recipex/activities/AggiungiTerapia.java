@@ -195,7 +195,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                 int quanto=Integer.parseInt(quantità);
 
                 foglio = inserisciFoglio.getText().toString();
-                caregiver = inserisciCaregiver.getText().toString();
+                //caregiver = inserisciCaregiver.getText().toString();
 
                 inizio=inserisciInizio.getText().toString();
 
