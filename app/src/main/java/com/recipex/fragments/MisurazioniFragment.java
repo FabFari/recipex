@@ -238,7 +238,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
 
     //callback from GetMisurazioniUser
     public void done(MainUserMeasurementsMessage response){
-        if(response!=null) {
+        if(response!=null && response.getMeasurements()!=null) {
             List<Misurazione> misurazioni=new LinkedList<>();
             List<MainMeasurementInfoMessage> lista = response.getMeasurements();
             Iterator<MainMeasurementInfoMessage> i = lista.iterator();
