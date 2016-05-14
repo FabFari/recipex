@@ -82,7 +82,6 @@ public class AddMeasurement extends AppCompatActivity
 
     GoogleAccountCredential mCredential;
     private static final String PREF_ACCOUNT_NAME = "accountName";
-    public static ProgressDialog mProgress;
 
     public static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
@@ -121,6 +120,7 @@ public class AddMeasurement extends AppCompatActivity
     // Input
     // Long user_id = 5724160613416960L;
     private Long user_id;
+    private boolean has_change = false;
 
     private SharedPreferences pref;
     // String measurement_kind = AppConstants.COLESTEROLO;
@@ -203,6 +203,7 @@ public class AddMeasurement extends AppCompatActivity
 
     @Override
     public void onValueChanged(int oldValue, int newValue) {
+        has_change = true;
         if(measurement_kind.equals(AppConstants.SPO2)) {
             float_value = ((double) newValue / (double) (float_picker.getMaxValue() - float_picker.getMinValue()))*100.0;
             float_value = (double)Math.round(float_value * 10d) / 10d;
@@ -220,6 +221,29 @@ public class AddMeasurement extends AppCompatActivity
         }
         else {
             float_value = ((double) newValue / (double) (float_picker.getMaxValue() - float_picker.getMinValue()))*800.0;
+            float_value = (double)Math.round(float_value * 10d) / 10d;
+            float_picker_res.setText(String.format(Locale.getDefault(), "%.1f", float_value));
+        }
+    }
+
+    private void get_float_value() {
+        if(measurement_kind.equals(AppConstants.SPO2)) {
+            float_value = ((double) float_picker.getValue() / (double) (float_picker.getMaxValue() - float_picker.getMinValue()))*100.0;
+            float_value = (double)Math.round(float_value * 10d) / 10d;
+            float_picker_res.setText(String.format(Locale.getDefault(), "%.1f%%", float_value));
+        }
+        else if(measurement_kind.equals(AppConstants.GLUCOSIO)){
+            float_value = ((double) float_picker.getValue() / (double) (float_picker.getMaxValue() - float_picker.getMinValue()))*600.0;
+            float_value = (double)Math.round(float_value * 10d) / 10d;
+            float_picker_res.setText(String.format(Locale.getDefault(), "%.1f", float_value));
+        }
+        else if(measurement_kind.equals(AppConstants.TEMP_CORPOREA)){
+            float_value = ((double) float_picker.getValue() / (double) (float_picker.getMaxValue() - float_picker.getMinValue()))*15.0;
+            float_value = (double)Math.round(float_value * 10d) / 10d;
+            float_picker_res.setText(String.format(Locale.getDefault(), "%.1fC°", float_value));
+        }
+        else {
+            float_value = ((double) float_picker.getValue() / (double) (float_picker.getMaxValue() - float_picker.getMinValue()))*800.0;
             float_value = (double)Math.round(float_value * 10d) / 10d;
             float_picker_res.setText(String.format(Locale.getDefault(), "%.1f", float_value));
         }
@@ -270,7 +294,7 @@ public class AddMeasurement extends AppCompatActivity
             linearLayout.setVisibility(View.VISIBLE);
         }
         else if(measurement_kind.equals(AppConstants.FREQ_RESPIRAZIONE)) {
-            text_picker1.setText("Numero Battiti:");
+            text_picker1.setText("Numero Respiri:");
             picker1.setMinValue(0);
             picker1.setValue(16, true);
             picker1.setMaxValue(200);
@@ -293,7 +317,7 @@ public class AddMeasurement extends AppCompatActivity
             linearLayout.setVisibility(View.VISIBLE);
         }
         else if(measurement_kind.equals(AppConstants.GLUCOSIO)) {
-            text_picker1.setText("HGT");
+            text_picker1.setText("HGT:");
             picker1.setVisibility(View.INVISIBLE);
             picker_res1.setVisibility(View.INVISIBLE);
             float_picker.setVisibility(View.VISIBLE);
@@ -354,8 +378,10 @@ public class AddMeasurement extends AppCompatActivity
             credential = GoogleAccountCredential.usingAudience(this, AppConstants.AUDIENCE);
             setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
 
-            if(credential.getSelectedAccountName() == null)
+            if(credential.getSelectedAccountName() == null) {
+                Log.d(TAG, "AccountName == null: startActivityForResult.");
                 startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
+            }
             else {
                 RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
                 executeAddMeasurementAT(apiHandler);
@@ -425,9 +451,9 @@ public class AddMeasurement extends AppCompatActivity
                             data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
                     if (accountName != null) {
                         SharedPreferences settings =
-                                getPreferences(Context.MODE_PRIVATE);
+                                getSharedPreferences(AppConstants.PREFS_NAME, Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = settings.edit();
-                        editor.putString(PREF_ACCOUNT_NAME, accountName);
+                        editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
                         editor.apply();
                         mCredential.setSelectedAccountName(accountName);
                         Log.d("CALENDARres", accountName);
@@ -470,15 +496,21 @@ public class AddMeasurement extends AppCompatActivity
             case AppConstants.SPO2:
                 //String spo2 = float_picker_res.getText().toString();
                 //content.setSpo2(Double.parseDouble(spo2.substring(0,spo2.length()-1)));
+                if(!has_change)
+                    get_float_value();
                 content.setSpo2(float_value);
                 break;
             case AppConstants.GLUCOSIO:
                 //content.setHgt(Double.parseDouble(float_picker_res.getText().toString()));
+                if(!has_change)
+                    get_float_value();
                 content.setHgt(float_value);
                 break;
             case AppConstants.TEMP_CORPOREA:
                 //String temp = float_picker_res.getText().toString();
                 //content.setDegrees(Double.parseDouble(temp.substring(0,temp.length()-2)));
+                if(!has_change)
+                    get_float_value();
                 content.setDegrees(float_value);
                 break;
             case AppConstants.DOLORE:
@@ -486,6 +518,8 @@ public class AddMeasurement extends AppCompatActivity
                 break;
             case AppConstants.COLESTEROLO:
                 //content.setChlLevel(Double.parseDouble(float_picker_res.getText().toString()));
+                if(!has_change)
+                    get_float_value();
                 content.setChlLevel(float_value);
                 break;
             default:
@@ -539,10 +573,12 @@ public class AddMeasurement extends AppCompatActivity
     //callback from Calendar
     public void done(boolean b){
         if(b){
+            Log.d(TAG, "DONE_TASKCALLBACK_CALENDAR");
 			progressView.stopAnimation();
 			progressView.setVisibility(View.GONE);
-            Intent i=new Intent(AddMeasurement.this, Home.class);
-            startActivity(i);
+            //Intent i=new Intent(AddMeasurement.this, Home.class);
+            //startActivity(i);
+            this.setResult(RESULT_OK);
             finish();
         }
     }
@@ -602,8 +638,8 @@ public class AddMeasurement extends AppCompatActivity
         if (EasyPermissions.hasPermissions(
                 this, Manifest.permission.GET_ACCOUNTS)) {
 
-            String accountName = getPreferences(Context.MODE_PRIVATE)
-                    .getString(PREF_ACCOUNT_NAME, null);
+            String accountName = getSharedPreferences(AppConstants.PREFS_NAME, Context.MODE_PRIVATE)
+                    .getString(AppConstants.DEFAULT_ACCOUNT, null);
             if (accountName != null) {
                 Log.d("CALENDARcho", "account");
 
@@ -885,7 +921,7 @@ public class AddMeasurement extends AppCompatActivity
 
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.d("ECCEZIONE CALENDAR", e.getMessage());
+                Log.d("ECCEZIONE CALENDAR", e.getCause().toString());
                 mLastError = e;
                 cancel(true);
                 return false;
@@ -905,7 +941,6 @@ public class AddMeasurement extends AppCompatActivity
 
         @Override
         protected void onCancelled() {
-            AddMeasurement.mProgress.hide();
             if (mLastError != null) {
                 if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
                     showGooglePlayServicesAvailabilityErrorDialog(

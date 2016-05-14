@@ -629,6 +629,8 @@ public class Profile extends AppCompatActivity
                 if (can_contact)
                     mToolbar.getMenu().findItem(R.id.profile_contact).setVisible(true);
 
+                Log.d(TAG, "utente semplice: "+ utente_semplice);
+
                 if(can_add_therapy && !utente_semplice)
                     mToolbar.getMenu().findItem(R.id.profile_add_therapy).setVisible(true);
             }
