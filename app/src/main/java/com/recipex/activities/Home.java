@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -63,6 +64,7 @@ public class Home extends AppCompatActivity
 
     Toolbar toolbar;
     FloatingActionMenu fab_menu;
+    FloatingActionButton fab;
 
     SharedPreferences pref;
 
@@ -107,8 +109,9 @@ public class Home extends AppCompatActivity
         // GET FABs
         fab_menu = (FloatingActionMenu) findViewById(R.id.home_fab_menu_measurement);
 
+
+        fab = (FloatingActionButton) findViewById(R.id.fab_tutorial);
         /*
-        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -279,10 +282,9 @@ public class Home extends AppCompatActivity
             startActivity(myIntent);
 
         } else if (id == R.id.nav_aiuto) {
-            FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-            if(utenteSemplice)
-                fragmentTransaction.replace(R.id.containerView, new MisurazioniFragment()).commit();
-            else fragmentTransaction.replace(R.id.containerView, new TabFragment()).commit();
+            Intent phoneIntent = new Intent(Intent.ACTION_DIAL);
+            phoneIntent.setData(Uri.parse("tel:" + "112"));
+            startActivity(phoneIntent);
         } else if (id == R.id.nav_logout) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
             if(utenteSemplice)
@@ -336,7 +338,7 @@ public class Home extends AppCompatActivity
 
         sequence.addSequenceItem(
                 new MaterialShowcaseView.Builder(this)
-                        .setTarget(fab_menu)
+                        .setTarget(fab)
                         .setDismissText("HO CAPITO")
                         .setMaskColour(fetchPrimaryDarkColor())
                         .setDismissTextColor(fetchAccentColor())
@@ -344,6 +346,7 @@ public class Home extends AppCompatActivity
                         .withRectangleShape()
                         .build()
         );
+        /*
         sequence.addSequenceItem(
                 new MaterialShowcaseView.Builder(this)
                         .setTarget((TabLayout)findViewById(R.id.tabs))
@@ -354,7 +357,7 @@ public class Home extends AppCompatActivity
                         .withRectangleShape()
                         .build()
         );
-
+        */
         sequence.start();
 
     }
