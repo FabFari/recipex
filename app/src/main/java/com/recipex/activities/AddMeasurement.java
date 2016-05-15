@@ -294,7 +294,7 @@ public class AddMeasurement extends AppCompatActivity
             linearLayout.setVisibility(View.VISIBLE);
         }
         else if(measurement_kind.equals(AppConstants.FREQ_RESPIRAZIONE)) {
-            text_picker1.setText("Numero Respiri:");
+            text_picker1.setText("Atti Respiri:");
             picker1.setMinValue(0);
             picker1.setValue(16, true);
             picker1.setMaxValue(200);
@@ -352,7 +352,7 @@ public class AddMeasurement extends AppCompatActivity
             linearLayout.setVisibility(View.VISIBLE);
         }
         else {
-            text_picker1.setText("Colesterolo:");
+            text_picker1.setText("Colesterolo totale:");
             picker1.setVisibility(View.INVISIBLE);
             picker_res1.setVisibility(View.INVISIBLE);
             float_picker.setVisibility(View.VISIBLE);

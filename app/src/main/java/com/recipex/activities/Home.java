@@ -69,6 +69,7 @@ public class Home extends AppCompatActivity
     //to use showcaseview
     private static final String SHOWCASE_ID_MAIN = "Showcase_single_use_main";
     boolean utenteSemplice;
+    private SharedPreferences settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -220,7 +221,14 @@ public class Home extends AppCompatActivity
             // Fabrizio Change
             pref = getApplicationContext().getSharedPreferences("MyPref",MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
+            editor.putString("email", null);
+            editor.putString("nome", null);
+            editor.putString("cognome", null);
+            editor.putString("foto", null);
             editor.putBoolean("alreadyLogged", false);
+            editor.commit();
+            settings = getApplicationContext().getSharedPreferences(AppConstants.PREFS_NAME, 0);
+            editor.putString(AppConstants.DEFAULT_ACCOUNT, null);
             editor.commit();
             Intent i = new Intent(Home.this, Login.class);
             i.putExtra("hasLogOut", true);
