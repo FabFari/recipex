@@ -562,6 +562,7 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
             Log.d("UTENTESEMPLICE DONE", " "+utenteSemplice);
 
             editor.commit();
+            signOut();
             Intent i=new Intent(Login.this, Home.class);
             i.putExtra("justRegistered", false);
             startActivity(i);
@@ -632,6 +633,7 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
                     @Override
                     public void onResult(Status status) {
                         // [START_EXCLUDE]
+                        Log.e(TAG, "Signout eseguito!");
                         // [END_EXCLUDE]
                     }
                 });
