@@ -1,8 +1,10 @@
 package com.recipex.adapters;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,8 +71,10 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             caregivers.add(0, physician);
             caregivers.add(1, nurse);
         }
-        else if(physician!=null && nurse==null)
+        else if(physician!=null && nurse==null) {
+            Log.d("CaregiverAdapter", physician.getName());
             caregivers.add(0, physician);
+        }
         else if(physician==null && nurse!=null)
             caregivers.add(0, nurse);
 
@@ -103,7 +107,7 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             return evh;
         }
 
-        v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.request_item, viewGroup, false);
+        v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.user_item, viewGroup, false);
         UserViewHolder rvh = new UserViewHolder(v);
         return rvh;
     }
@@ -118,39 +122,92 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 if(i==0) {
                     userViewHolder.crgvIcon.setImageResource(R.drawable.ic_pc_physician_accent);
                     userViewHolder.crgvIcon.setVisibility(View.VISIBLE);
+                    userViewHolder.userName.setText(String.format(Locale.getDefault(), "%s %s",
+                            physician.getName(), physician.getSurname()));
+                    if (physician.getField() != null && physician.getField().length() > 0) {
+                        userViewHolder.crgvField.setText(physician.getField());
+                        userViewHolder.crgvField.setVisibility(View.VISIBLE);
+                    }
+                    Picasso.with(activity.getApplicationContext()).load(physician.
+                            getPic()).into(userViewHolder.userPic);
+
+                    userViewHolder.cardView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent myIntent = new Intent(activity.getApplicationContext(), Profile.class);
+                            myIntent.putExtra("profileId", physician.getId());
+                            activity.startActivity(myIntent);
+                        }
+                    });
                 }
                 //se ho anche l'infermiera, sarà alla seconda posizione
-                else if(i==1 && nurse!=null){
+                if(i==1 && nurse!=null){
                     userViewHolder.crgvIcon.setImageResource(R.drawable.ic_visiting_nurse_accent);
                     userViewHolder.crgvIcon.setVisibility(View.VISIBLE);
+                    userViewHolder.userName.setText(String.format(Locale.getDefault(), "%s %s",
+                            nurse.getName(), nurse.getSurname()));
+                    if (nurse.getField() != null && nurse.getField().length() > 0) {
+                        userViewHolder.crgvField.setText(nurse.getField());
+                        userViewHolder.crgvField.setVisibility(View.VISIBLE);
+                    }
+                    Picasso.with(activity.getApplicationContext()).load(nurse.
+                            getPic()).into(userViewHolder.userPic);
+
+                    userViewHolder.cardView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent myIntent = new Intent(activity.getApplicationContext(), Profile.class);
+                            myIntent.putExtra("profileId", nurse.getId());
+                            activity.startActivity(myIntent);
+                        }
+                    });
                 }
             }
             //se ho solo l'infermiera sarà alla prima posizione
             else if(physician==null && nurse!=null && i==0){
                 userViewHolder.crgvIcon.setImageResource(R.drawable.ic_visiting_nurse_accent);
                 userViewHolder.crgvIcon.setVisibility(View.VISIBLE);
-            }
-
-            userViewHolder.userName.setText(String.format(Locale.getDefault(), "%s %s",
-                    caregivers.get(i).getName(), caregivers.get(i).getSurname()));
-            String field = caregivers.get(i).getField();
-            if (field != null && field.length() > 0) {
-                userViewHolder.crgvField.setText(field);
-                userViewHolder.crgvField.setVisibility(View.VISIBLE);
-                userViewHolder.crgvIcon.setVisibility(View.VISIBLE);
-            }
-
-            Picasso.with(activity.getApplicationContext()).load(caregivers.get(i).
-                    getPic()).into(userViewHolder.userPic);
-
-            userViewHolder.cardView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent myIntent = new Intent(activity.getApplicationContext(), Profile.class);
-                    myIntent.putExtra("profileId", caregivers.get(pos).getId());
-                    activity.startActivity(myIntent);
+                userViewHolder.userName.setText(String.format(Locale.getDefault(), "%s %s",
+                        nurse.getName(), nurse.getSurname()));
+                if (nurse.getField() != null && nurse.getField().length() > 0) {
+                    userViewHolder.crgvField.setText(nurse.getField());
+                    userViewHolder.crgvField.setVisibility(View.VISIBLE);
                 }
-            });
+                Picasso.with(activity.getApplicationContext()).load(nurse.
+                        getPic()).into(userViewHolder.userPic);
+
+                userViewHolder.cardView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent myIntent = new Intent(activity.getApplicationContext(), Profile.class);
+                        myIntent.putExtra("profileId", nurse.getId());
+                        activity.startActivity(myIntent);
+                    }
+                });
+            }
+
+            else {
+                userViewHolder.userName.setText(String.format(Locale.getDefault(), "%s %s",
+                        caregivers.get(i).getName(), caregivers.get(i).getSurname()));
+                String field = caregivers.get(i).getField();
+                if (field != null && field.length() > 0) {
+                    userViewHolder.crgvField.setText(field);
+                    userViewHolder.crgvField.setVisibility(View.VISIBLE);
+                    userViewHolder.crgvIcon.setVisibility(View.VISIBLE);
+                }
+
+                Picasso.with(activity.getApplicationContext()).load(caregivers.get(i).
+                        getPic()).into(userViewHolder.userPic);
+
+                userViewHolder.cardView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent myIntent = new Intent(activity.getApplicationContext(), Profile.class);
+                        myIntent.putExtra("profileId", caregivers.get(pos).getId());
+                        activity.startActivity(myIntent);
+                    }
+                });
+            }
         }
     }
 

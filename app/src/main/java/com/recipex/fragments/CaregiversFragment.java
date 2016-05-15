@@ -126,7 +126,10 @@ public class CaregiversFragment extends Fragment implements GetUserTC{
 
     //callback from GetUser
     public void done(boolean res, final MainUserInfoMessage message) {
-        if(message!=null && message.getCaregivers()!=null && !message.getCaregivers().isEmpty()) {
+        if(message!=null && ((message.getCaregivers()!=null && !message.getCaregivers().isEmpty()) || message.getPcPhysician()!=null
+        || message.getVisitingNurse()!=null)) {
+            Log.d("CaregiversFragment", "setto adapter");
+
             List<MainUserMainInfoMessage> m=new LinkedList<>();
             Set<String> emailcaregivers=new HashSet<>();
 
@@ -138,17 +141,19 @@ public class CaregiversFragment extends Fragment implements GetUserTC{
             }
             m=message.getCaregivers();
 
-            Iterator<MainUserMainInfoMessage> i=m.iterator();
-            while(i.hasNext()){
-                MainUserMainInfoMessage cur=(MainUserMainInfoMessage) i.next();
-                emailcaregivers.add(cur.getEmail());
+            if(m!=null && !m.isEmpty()) {
+                Iterator<MainUserMainInfoMessage> i = m.iterator();
+                while (i.hasNext()) {
+                    MainUserMainInfoMessage cur = (MainUserMainInfoMessage) i.next();
+                    emailcaregivers.add(cur.getEmail());
+                }
+
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putStringSet("emailcaregivers", emailcaregivers);
             }
 
-            SharedPreferences.Editor editor=pref.edit();
-            editor.putStringSet("emailcaregivers", emailcaregivers);
-
             CaregiverAdapter adapter = new CaregiverAdapter(message.getCaregivers(), message.getPcPhysician(),
-                    message.getVisitingNurse(),(Home)getActivity(), null);
+                    message.getVisitingNurse(), (Home) getActivity(), null);
             curRecView.setAdapter(adapter);
         }
         else {
