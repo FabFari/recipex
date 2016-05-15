@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,12 +13,15 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -29,6 +33,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -38,6 +43,8 @@ import com.recipex.AppConstants;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserPrescriptionsMessage;
 import com.recipex.CircleTransform;
 import com.recipex.R;
+import com.recipex.fragments.CaregiversFragment;
+import com.recipex.fragments.FamiliariFragment;
 import com.recipex.fragments.MisurazioniFragment;
 import com.recipex.fragments.TabFragment;
 import com.recipex.fragments.TerapieFragment;
@@ -76,7 +83,12 @@ public class Home extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            // only for lollipop and newer versions
+            setContentView(R.layout.activity_home);
+        else
+            setContentView(R.layout.activity_home2);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
@@ -102,6 +114,8 @@ public class Home extends AppCompatActivity
         SharedPreferences.Editor editor = pref.edit();
         editor.putBoolean("alreadyLogged", true);
         editor.commit();
+
+
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -131,7 +145,7 @@ public class Home extends AppCompatActivity
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
 
-        utenteSemplice=pref.getBoolean("utenteSemplice", false);
+        utenteSemplice=pref.getBoolean("utenteSemplice", true);
 
         Log.d("UTENTESEMPLICE ", " "+utenteSemplice);
         mFragmentManager = getSupportFragmentManager();
@@ -148,7 +162,7 @@ public class Home extends AppCompatActivity
         System.out.println(photo);*/
 
         // Change Fabrizio
-        Long userId=pref.getLong("userId", 0L);
+        final Long userId=pref.getLong("userId", 0L);
         Log.d("HOME", "userId: "+ userId);
         String nome=pref.getString("nome", "");
         String cognome=pref.getString("cognome", "");
@@ -166,31 +180,14 @@ public class Home extends AppCompatActivity
         emailuser.setText(email);
         Picasso.with(Home.this).load(photo).transform(new CircleTransform()).into(photouser);
 
-    }
-
-    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-        ImageView bmImage;
-
-        public DownloadImageTask(ImageView bmImage) {
-            this.bmImage = bmImage;
-        }
-
-        protected Bitmap doInBackground(String... urls) {
-            String urldisplay = urls[0];
-            Bitmap mIcon11 = null;
-            try {
-                InputStream in = new java.net.URL(urldisplay).openStream();
-                mIcon11 = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                Log.e("Error", e.getMessage());
-                e.printStackTrace();
+        photouser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i=new Intent(Home.this, Profile.class);
+                i.putExtra("profileId", userId);
+                startActivity(i);
             }
-            return mIcon11;
-        }
-
-        protected void onPostExecute(Bitmap result) {
-            bmImage.setImageBitmap(result);
-        }
+        });
     }
 
     @Override
@@ -206,6 +203,8 @@ public class Home extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+        Log.d(TAG, "MENUCREATE");
+
         getMenuInflater().inflate(R.menu.home, menu);
         return true;
     }
@@ -217,6 +216,7 @@ public class Home extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        Log.d(TAG, "MENU");
         if (id == R.id.action_logout) {
             //Login.signOutFromGplus();
             pref.edit().remove("email").commit();
@@ -271,12 +271,10 @@ public class Home extends AppCompatActivity
         //ora fanno tutti la stessa cosa poi cambio
         else if (id == R.id.nav_infermieri) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-            if(utenteSemplice)
-                fragmentTransaction.replace(R.id.containerView, new MisurazioniFragment()).commit();
-            else fragmentTransaction.replace(R.id.containerView, new TabFragment()).commit();
+            fragmentTransaction.replace(R.id.containerView, new CaregiversFragment()).commit();
         } else if (id == R.id.nav_familiari) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.containerView,new TabFragment()).commit();
+            fragmentTransaction.replace(R.id.containerView,new FamiliariFragment()).commit();
         } else if (id == R.id.nav_requests) {
             Intent myIntent = new Intent(getApplicationContext(), UserRequests.class);
             startActivity(myIntent);
@@ -285,11 +283,22 @@ public class Home extends AppCompatActivity
             Intent phoneIntent = new Intent(Intent.ACTION_DIAL);
             phoneIntent.setData(Uri.parse("tel:" + "112"));
             startActivity(phoneIntent);
-        } else if (id == R.id.nav_logout) {
-            FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-            if(utenteSemplice)
-                fragmentTransaction.replace(R.id.containerView, new MisurazioniFragment()).commit();
-            else fragmentTransaction.replace(R.id.containerView, new TabFragment()).commit();
+        
+		} else if (id == R.id.nav_calendario) {
+            PackageManager pm = getPackageManager();
+            try {
+                pm.getPackageInfo("com.google.android.calendar", PackageManager.GET_ACTIVITIES);
+                Intent intent = getPackageManager().getLaunchIntentForPackage("com.google.android.calendar");
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                startActivity(intent);
+            }
+            catch (PackageManager.NameNotFoundException e) {
+                Uri webpage = Uri.parse("https://calendar.google.com/calendar");
+                Intent webIntent = new Intent(Intent.ACTION_VIEW, webpage);
+                startActivity(webIntent);
+            }
+
         } else if (id == R.id.nav_terapie) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.containerView, new TerapieFragment()).commit();

@@ -443,6 +443,7 @@ public class AddMeasurement extends AppCompatActivity
                 }
                 break;
             case REQUEST_ACCOUNT_CALENDAR:
+                Log.d(TAG, "Request account calendar");
                 if (resultCode == RESULT_OK && data != null &&
                         data.getExtras() != null) {
                     Log.d("CALENDARres", "entro in res");
@@ -459,6 +460,9 @@ public class AddMeasurement extends AppCompatActivity
                         Log.d("CALENDARres", accountName);
                         getResultsFromApi();
                     }
+                }
+                else{
+                    Log.d("CALENDARres", "errore");
                 }
                 break;
             case REQUEST_AUTHORIZATION:
@@ -558,6 +562,7 @@ public class AddMeasurement extends AppCompatActivity
                 mCredential = GoogleAccountCredential.usingOAuth2(
                         getApplicationContext(), Arrays.asList(SCOPES))
                         .setBackOff(new ExponentialBackOff());
+                Log.d(TAG, "Inizio calendario");
                 getResultsFromApi();
             }
             else {
@@ -587,8 +592,10 @@ public class AddMeasurement extends AppCompatActivity
         if (! isGooglePlayServicesAvailable()) {
             acquireGooglePlayServices();
         } else if (mCredential.getSelectedAccountName() == null) {
+            mCredential.setSelectedAccountName(getSharedPreferences("MyPref", MODE_PRIVATE).getString("email", ""));
             Log.d("CALENDARgetres", "account");
-            chooseAccount();
+            new AggiungiMisurazioneCalendar(mCredential, getApplicationContext(), this, measurement_kind).execute();
+            //chooseAccount();
         } else if (! isDeviceOnline()) {
             Toast.makeText(AddMeasurement.this, "No network connection available.", Toast.LENGTH_SHORT).show();
         } else {
@@ -651,8 +658,7 @@ public class AddMeasurement extends AppCompatActivity
                 // Start a dialog from which the user can choose an account
                 startActivityForResult(
                         mCredential.newChooseAccountIntent(),
-                        REQUEST_ACCOUNT_CALENDAR
-                );
+                        REQUEST_ACCOUNT_CALENDAR);
             }
         } else {
             Log.d("CALENDARcho", "noperm");
@@ -914,6 +920,7 @@ public class AddMeasurement extends AppCompatActivity
                         .setUseDefault(false)
                         .setOverrides(Arrays.asList(reminderOverrides));
                 event.setReminders(reminders);
+
 
                 event = mService.events().insert(idCalendar, event).execute();
                 System.out.printf("Event created: %s\n", event.getHtmlLink());

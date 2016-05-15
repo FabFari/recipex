@@ -31,7 +31,7 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         View v;
 
         if (viewType == EMPTY_VIEW) {
-            v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.content_user_requests_empty, viewGroup, false);
+            v=LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.content_misurazione_empty, viewGroup, false);
             EmptyViewHolder evh = new EmptyViewHolder(v);
             return evh;
         }
@@ -43,15 +43,16 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     @Override
     public int getItemCount() {
-        if(misurazioni.size() > 0)
+        if(misurazioni != null && misurazioni.size() > 0)
             return misurazioni.size();
         else
             return 1;
     }
 
+
     @Override
     public int getItemViewType(int position) {
-        if (misurazioni.size() == 0) {
+        if (misurazioni == null || misurazioni.size() == 0) {
             return EMPTY_VIEW;
         }
         return super.getItemViewType(position);
@@ -116,9 +117,7 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                     personViewHolder.icon.setImageResource(R.drawable.ic_pain_dark);
                     personViewHolder.titolo.setText("Dolore");
                     personViewHolder.dato1_lbl.setText("Dolore: ");
-                    personViewHolder.dato1.setText(m.dato1long);
-                    break;
-            }
+
             if (m.nota != null)
                 personViewHolder.nota.setText(m.nota);
         }
@@ -130,7 +129,9 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         super.onAttachedToRecyclerView(recyclerView);
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
+
         TextView data;
         TextView ora;
         TextView titolo;

@@ -1,8 +1,5 @@
 package com.recipex.fragments;
 
-/**
- * Created by Sara on 24/04/2016.
- */
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -30,20 +27,16 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.activities.Home;
-import com.recipex.adapters.CaregiverAdapter;
 import com.recipex.adapters.PazienteFamiliareAdapter;
 import com.recipex.asynctasks.GetUserAT;
 import com.recipex.taskcallbacks.GetUserTC;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
-
-
-public class PazientiFragment extends Fragment implements GetUserTC {
+/**
+ * Created by Sara on 14/05/2016.
+ */
+public class FamiliariFragment extends Fragment implements GetUserTC {
     static RecyclerView curRecView;
 
     private SharedPreferences settings;
@@ -119,14 +112,16 @@ public class PazientiFragment extends Fragment implements GetUserTC {
 
     //callback from GetUser
     public void done(boolean res, final MainUserInfoMessage message) {
-        if(message!=null && message.getPatients()!=null && !message.getPatients().isEmpty()) {
-            List<MainUserMainInfoMessage> m=message.getPatients();
 
-            PazienteFamiliareAdapter adapter = new PazienteFamiliareAdapter(message.getPatients(), (Home)getActivity(), true);
+        //uso lo stesso adapter dei pazienti perchè ha tutti i campi che mi interessano
+        if(message!=null && message.getRelatives()!=null && !message.getRelatives().isEmpty()) {
+            List<MainUserMainInfoMessage> m=message.getRelatives();
+
+            PazienteFamiliareAdapter adapter = new PazienteFamiliareAdapter(message.getRelatives(), (Home)getActivity(), false);
             curRecView.setAdapter(adapter);
         }
         else {
-            PazienteFamiliareAdapter adapter = new PazienteFamiliareAdapter(null, (Home)getActivity(), true);
+            PazienteFamiliareAdapter adapter = new PazienteFamiliareAdapter(null, (Home)getActivity(), false);
             curRecView.setAdapter(adapter);
         }
     }
@@ -141,3 +136,4 @@ public class PazientiFragment extends Fragment implements GetUserTC {
         this.accountName = accountName;
     }
 }
+

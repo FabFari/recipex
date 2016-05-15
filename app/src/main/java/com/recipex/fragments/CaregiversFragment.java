@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
@@ -62,7 +63,13 @@ public class CaregiversFragment extends Fragment implements GetUserTC{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.recyclerview, container, false);
+        View rootView;
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            // only for lollipop and newer versions
+            rootView = inflater.inflate(R.layout.recyclerview, container, false);
+        else
+            rootView = inflater.inflate(R.layout.recyclerview2, container, false);
+
         initUI(rootView);
 
         return rootView;
@@ -119,23 +126,39 @@ public class CaregiversFragment extends Fragment implements GetUserTC{
 
     //callback from GetUser
     public void done(boolean res, final MainUserInfoMessage message) {
-        if(res) {
-            List<MainUserMainInfoMessage> m=message.getCaregivers();
+        if(message!=null && ((message.getCaregivers()!=null && !message.getCaregivers().isEmpty()) || message.getPcPhysician()!=null
+        || message.getVisitingNurse()!=null)) {
+            Log.d("CaregiversFragment", "setto adapter");
+
+            List<MainUserMainInfoMessage> m=new LinkedList<>();
             Set<String> emailcaregivers=new HashSet<>();
 
-            Iterator<MainUserMainInfoMessage> i=m.iterator();
-            while(i.hasNext()){
-                MainUserMainInfoMessage cur=(MainUserMainInfoMessage) i.next();
-                emailcaregivers.add(cur.getEmail());
+            if(message.getPcPhysician()!=null) {
+                emailcaregivers.add(message.getPcPhysician().getEmail());
             }
-            SharedPreferences.Editor editor=pref.edit();
-            editor.putStringSet("emailcaregivers", emailcaregivers);
+            else if (message.getVisitingNurse()!=null) {
+                emailcaregivers.add(message.getVisitingNurse().getEmail());
+            }
+            m=message.getCaregivers();
 
-            CaregiverAdapter adapter = new CaregiverAdapter(message.getCaregivers(), (Home)getActivity(), null);
+            if(m!=null && !m.isEmpty()) {
+                Iterator<MainUserMainInfoMessage> i = m.iterator();
+                while (i.hasNext()) {
+                    MainUserMainInfoMessage cur = (MainUserMainInfoMessage) i.next();
+                    emailcaregivers.add(cur.getEmail());
+                }
+
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putStringSet("emailcaregivers", emailcaregivers);
+            }
+
+            CaregiverAdapter adapter = new CaregiverAdapter(message.getCaregivers(), message.getPcPhysician(),
+                    message.getVisitingNurse(), (Home) getActivity(), null);
             curRecView.setAdapter(adapter);
         }
         else {
-            Toast.makeText(getActivity(), "You don't have caregivers.", Toast.LENGTH_LONG).show();
+            CaregiverAdapter adapter = new CaregiverAdapter(null, null, null, (Home)getActivity(), null);
+            curRecView.setAdapter(adapter);
         }
     }
     // setSelectedAccountName definition

@@ -7,15 +7,18 @@ import android.content.Intent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.res.TypedArray;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompatSideChannelService;
 
@@ -24,8 +27,11 @@ import android.support.v7.app.AlertDialog;
 
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -38,6 +44,10 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.activities.AddMeasurement;
+import com.recipex.activities.Home;
+import com.recipex.activities.Login;
+import com.recipex.activities.UserSearch;
+import com.recipex.adapters.PazienteFamiliareAdapter;
 import com.recipex.adapters.RVAdapter;
 
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
@@ -62,10 +72,14 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
+import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
+
 /**
  * Created by Sara on 02/05/2016.
  */
-public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeasurements {
+public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeasurements/*, Toolbar.OnMenuItemClickListener*/ {
 
     private final static String TAG = "MISURAZIONI_FRAGMENT";
     private final static int ADD_MEASUREMENT = 1;
@@ -78,6 +92,8 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
 
 
     View mainView;
+
+    private static final String SHOWCASE_ID_MAIN = "Showcase_single_use_main";
 
     List<String> date;
     FloatingActionMenu fab_menu;
@@ -101,7 +117,13 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.recyclerview, container, false);
+        View rootView;
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            // only for lollipop and newer versions
+            rootView = inflater.inflate(R.layout.recyclerview, container, false);
+        else
+            rootView = inflater.inflate(R.layout.recyclerview2, container, false);
+
         FloatingActionButton fabfragment=(FloatingActionButton)rootView.findViewById(R.id.fabfragment);
         fabfragment.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -111,11 +133,23 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
                 getActivity().finish();
             }
         });
+
         initUI(rootView);
         mainView = rootView;
 
         return rootView;
     }
+
+    /*@Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Home activity = (Home ) getActivity();
+        Toolbar toolbar=(Toolbar)getActivity().findViewById(R.id.toolbar);
+        activity.setSupportActionBar(toolbar);
+        toolbar.inflateMenu(R.menu.home);
+        toolbar.setOnMenuItemClickListener(this);
+
+    }*/
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -328,9 +362,9 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
         }
     }
 
-    //callback from GetTerapieUser
+    //callback from GetMisurazioniUser
     public void done(MainUserMeasurementsMessage response){
-        if(response!=null) {
+        if(response!=null && response.getMeasurements()!=null) {
             List<Misurazione> misurazioni=new LinkedList<>();
             List<MainMeasurementInfoMessage> lista;
             if(response.getMeasurements() != null)
@@ -385,6 +419,10 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
                 snackbar.show();
             }
         }
+		else {
+            RVAdapter adapter = new RVAdapter(null);
+            curRecView.setAdapter(adapter);
+        }
         //Toast.makeText(getActivity(), "You don't have prescriptions. Add one clicking on the button", Toast.LENGTH_LONG).show();
     }
 
@@ -396,7 +434,166 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
         editor.apply();
         Log.d(TAG, "ACCOUNT NAME: " + accountName);
         credential.setSelectedAccountName(accountName);
-        this.accountName = accountName;
+        this.accountName = accountName;        
     }
+
+   /* @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        SharedPreferences pref=getActivity().getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+
+        Log.d("Misurazioni", "MENU");
+        if (id == R.id.action_logout) {
+            //Login.signOutFromGplus();
+            pref.edit().remove("email").commit();
+            pref.edit().putBoolean("token", true).commit();
+            // Fabrizio Change
+            pref = getActivity().getSharedPreferences("MyPref",Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putBoolean("alreadyLogged", false);
+            editor.commit();
+            Intent i = new Intent(getActivity(), Login.class);
+            i.putExtra("hasLogOut", true);
+            this.startActivity(i);
+            //Toast.makeText(getApplicationContext(), "Logout eseguito!", Toast.LENGTH_LONG).show();
+            getActivity().finish();
+            return true;
+        }
+        else if(id == R.id.action_tutorial){
+
+            MaterialShowcaseView.resetAll(getActivity());
+            Toast.makeText(getActivity(), "All Showcases reset", Toast.LENGTH_SHORT).show();
+            presentShowcaseView(350);
+
+        }
+        else if(id == R.id.home_search) {
+            Intent myIntent = new Intent(getActivity(), UserSearch.class);
+            this.startActivity(myIntent);
+        }
+        return super.onOptionsItemSelected(item);
+    }*/
+
+    /*@Override
+    public boolean onMenuItemClick(MenuItem menuItem) {
+        int id = menuItem.getItemId();
+
+        SharedPreferences pref=getActivity().getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+        Log.d("Misurazioni", "MENU");
+        if (id == R.id.action_logout) {
+            //Login.signOutFromGplus();
+            pref.edit().remove("email").commit();
+            pref.edit().putBoolean("token", true).commit();
+            // Fabrizio Change
+            pref = getActivity().getSharedPreferences("MyPref",Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putBoolean("alreadyLogged", false);
+            editor.commit();
+            Intent i = new Intent(getActivity(), Login.class);
+            i.putExtra("hasLogOut", true);
+            this.startActivity(i);
+            //Toast.makeText(getApplicationContext(), "Logout eseguito!", Toast.LENGTH_LONG).show();
+            getActivity().finish();
+            return true;
+        }
+        else if(id == R.id.action_tutorial){
+
+            MaterialShowcaseView.resetAll(getActivity());
+            Toast.makeText(getActivity(), "All Showcases reset", Toast.LENGTH_SHORT).show();
+            presentShowcaseView(350);
+            return true;
+        }
+        else if(id == R.id.home_search) {
+            Intent myIntent = new Intent(getActivity(), UserSearch.class);
+            this.startActivity(myIntent);
+            return true;
+        }
+        return false;
+    }*/
+
+    private void presentShowcaseView(int withDelay){
+//        new MaterialShowcaseView.Builder(this)
+//                .setTarget(mSlidingTabLayoutTabs)
+//                .setTitleText("Hello")
+//                .setDismissText("Ho Capito")
+//                .setContentText("Queste solo ne zezioni thell'applicazione! \n Geeftory è la sezione in cui puoi trovare le sotrie degli oggetti \n Geeft è dove puoi vedere gli oggeti presenti su geeft e prenotare quello a cui sei interessato!")
+//                .setDelay(withDelay) // optional but starting animations immediately in onCreate can make them choppy
+//                .singleUse(SHOWCASE_ID_MAIN) // provide a unique ID used to ensure it is only shown once
+//                .show();
+
+
+
+        ShowcaseConfig config = new ShowcaseConfig();
+        config.setDelay(withDelay); // half second between each showcase view
+
+        MaterialShowcaseSequence sequence = new MaterialShowcaseSequence(getActivity(), SHOWCASE_ID_MAIN);
+
+//        sequence.setOnItemShownListener(new MaterialShowcaseSequence.OnSequenceItemShownListener() {
+//            @Override
+//            public void onShow(MaterialShowcaseView itemView, int position) {
+//                Toast.makeText(itemView.getContext(), "Item #" + position, Toast.LENGTH_SHORT).show();
+//            }
+//        });
+
+        sequence.setConfig(config);
+
+        sequence.addSequenceItem(
+                new MaterialShowcaseView.Builder(getActivity())
+                        .setTarget(getActivity().findViewById(R.id.toolbar))
+                        .setDismissText("OK")
+                        .setMaskColour(fetchPrimaryDarkColor())
+                        .setDismissTextColor(fetchAccentColor())
+                        .setContentText("Scorrendo da sinistra a destra, troverai informazioni su di te")
+                        .build()
+        );
+
+        sequence.addSequenceItem(
+                new MaterialShowcaseView.Builder(getActivity())
+                        .setTarget(getActivity().findViewById(R.id.home_fab_menu_measurement))
+                        .setDismissText("HO CAPITO")
+                        .setMaskColour(fetchPrimaryDarkColor())
+                        .setDismissTextColor(fetchAccentColor())
+                        .setContentText("Cliccando qui puoi aggiungere un tuo assistito, una tua misurazione o un tuo bisogno")
+                        .withRectangleShape()
+                        .build()
+        );
+        sequence.addSequenceItem(
+                new MaterialShowcaseView.Builder(getActivity())
+                        .setTarget((TabLayout)getActivity().findViewById(R.id.tabs))
+                        .setDismissText("HO CAPITO")
+                        .setMaskColour(fetchPrimaryDarkColor())
+                        .setDismissTextColor(fetchAccentColor())
+                        .setContentText("Qui puoi vedere i tuoi assistiti, le tue misurazioni e i tuoi bisogni")
+                        .withRectangleShape()
+                        .build()
+        );
+
+        sequence.start();
+
+    }
+    private int fetchAccentColor() {
+        TypedValue typedValue = new TypedValue();
+
+        TypedArray a = getActivity().obtainStyledAttributes(typedValue.data, new int[] { R.attr.colorAccent });
+        int color = a.getColor(0, 0);
+
+        a.recycle();
+
+        return color;
+    }
+    private int fetchPrimaryDarkColor() {
+        TypedValue typedValue = new TypedValue();
+
+        TypedArray a = getActivity().obtainStyledAttributes(typedValue.data, new int[] { R.attr.colorPrimaryDark });
+        int color = a.getColor(0, 0);
+
+        a.recycle();
+
+        return color;
+    }
+
 
 }

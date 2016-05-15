@@ -199,11 +199,6 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
 
                 inizio=inserisciInizio.getText().toString();
 
-                Bundle extras=getIntent().getExtras();
-                long idcaregiver=0;
-                if(extras!=null)
-                    idcaregiver=extras.getChar("idCaregiver");
-
                 Log.d("REGISTRAZIONE ", "Sono qui");
 
                 if (checkNetwork()) {
@@ -216,9 +211,6 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                                 quanto, recipe, foglio, null, this).execute();
                     }
                 }
-
-                if (checkNetwork()) new AggiungiTerapiaAT(getApplicationContext(), nome, ingredienteID, tipo, dose2, unità,
-                        quanto, recipe, foglio, idcaregiver, this).execute();
 
             }
             else {
