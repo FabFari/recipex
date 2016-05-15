@@ -1,5 +1,6 @@
 package com.recipex.activities;
 
+import android.accounts.AccountManager;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -26,7 +27,10 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.asynctasks.Register;
 import com.recipex.taskcallbacks.TaskCallbackLogin;
@@ -41,9 +45,12 @@ import java.util.Calendar;
  */
 public class Registration extends ActionBarActivity implements TaskCallbackLogin, View.OnClickListener{
 
+    private final static String TAG = "REGISTRATION";
+    private static final int REQUEST_ACCOUNT_PICKER = 2;
+
     ImageView immagine;
 
-    String nome, cognome, foto, email, bio, data, sesso, città, indirizzo, numeri, campoSpecializzazione, anniEsperienza,
+    String nome, cognome, foto, email, bio, birth, sesso, città, indirizzo, numeri, campoSpecializzazione, anniEsperienza,
     postoLavoro,numeriBusiness, disponibilità;
     EditText inserisciNome, inserisciCognome, inserisciEmail, inserisciBiografia, inserisciData, inserisciNumeri, inserisciSpecializzazione, inserisciAnni, inserisciPosto, inserisciNumeriBusiness,
     inserisciDisponibilità;
@@ -54,6 +61,10 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
     CoordinatorLayout coordinatorLayout;
     CircularProgressView progressView;
     int mDay, mMonth, mYear;
+
+    private SharedPreferences settings;
+    private GoogleAccountCredential credential;
+    private String accountName;
 
     SharedPreferences pref;
 
@@ -122,13 +133,13 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
         cognome = extras.getString("cognome");
         foto = extras.getString("foto");
         email = extras.getString("email");
-        data = extras.getString("data");
+        birth = extras.getString("data");
         // sesso=extras.getString("sesso");
 
         inserisciNome.setText(nome);
         inserisciCognome.setText(cognome);
         inserisciEmail.setText(email);
-        inserisciData.setText(data);
+        inserisciData.setText(birth);
         // inserisciSesso.setText(sesso);
 
         Picasso.with(Registration.this).load(foto).into(immagine);
@@ -142,6 +153,8 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
         pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         editor.putBoolean("token", true).commit();
+        Intent intent = new Intent(getApplicationContext(), Login.class);
+        this.startActivity(intent);
         this.finish();
     }
 
@@ -188,7 +201,7 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
                 nome=inserisciNome.getText().toString();
                 cognome=inserisciCognome.getText().toString();
                 email=inserisciEmail.getText().toString();
-                data = inserisciData.getText().toString();
+                birth = inserisciData.getText().toString();
                 sesso = inserisciSesso.getSelectedItem().toString();
 
                 bio = inserisciBiografia.getText().toString();
@@ -205,10 +218,24 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
                 Log.d("CAMPI ", campoSpecializzazione+"-"+anniEsperienza+"-"+postoLavoro+"-"+bio+"-"+disponibilità);
 
                 Log.d("REGISTRAZIONE ", "Sono qui");
-                if (checkNetwork()) new Register(getApplicationContext(), email, nome, cognome, foto,bio, data, sesso,
-                        città, indirizzo, numeri, campoSpecializzazione, Long.parseLong(anniEsperienza), postoLavoro, numeriBusiness,
-                        disponibilità, this).execute();
 
+                settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
+                credential = GoogleAccountCredential.usingAudience(this, AppConstants.AUDIENCE);
+                Log.d(TAG, "Credential: " + credential);
+                setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+
+                if (credential.getSelectedAccountName() == null) {
+                    Log.d(TAG, "AccountName == null: startActivityForResult.");
+                    startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
+                } else {
+                    progressView.startAnimation();
+                    RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
+                    if (checkNetwork()) {
+                        new Register(getApplicationContext(), email, nome, cognome, foto, bio, birth, sesso,
+                                città, indirizzo, numeri, campoSpecializzazione, Long.parseLong(anniEsperienza), postoLavoro, numeriBusiness,
+                                disponibilità, this, apiHandler, true).execute();
+                    }
+                }
             }
             else {
                 Snackbar snackbar = Snackbar
@@ -242,7 +269,7 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
             return false;
         }
     }
-    public void done(boolean x, String email) {
+    public void done(boolean registered, String email) {
         //if(x){ //Utente può accedere
         // Toast.makeText(getApplicationContext(), "Login eseguito con successo!", Toast.LENGTH_LONG).show();
 
@@ -251,27 +278,58 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
         progressView.stopAnimation();
         progressView.setVisibility(View.GONE);
 
-        pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putString("email", email);
-        editor.putString("nome", nome);
-        editor.putString("cognome", cognome);
-        editor.putString("foto", foto);
+        if(registered) {
+            pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString("email", email);
+            editor.putString("nome", nome);
+            editor.putString("cognome", cognome);
+            editor.putString("foto", foto);
 
-        if(campoSpecializzazione != null)
-            editor.putBoolean("caregiver", true);
+            if(campoSpecializzazione != null)
+                editor.putBoolean("caregiver", true);
 
-        editor.commit();
+            editor.commit();
 
-        System.out.println(nome+" "+cognome);
-        Intent myIntent = new Intent(Registration.this, Home.class);
-        myIntent.putExtra("justRegistered", true);
-        this.startActivity(myIntent);
-        this.finish();
-        /*}else{ //Login fallito perchè email non è registrata
-            disconnetti();
-            Toast.makeText(getApplicationContext(), "Login fallito! Devi registrarti!", Toast.LENGTH_LONG).show();
-        }*/
+            System.out.println(nome+" "+cognome);
+            Intent myIntent = new Intent(Registration.this, Home.class);
+            myIntent.putExtra("justRegistered", true);
+            this.startActivity(myIntent);
+            this.finish();
+        }
+        else{ //Login fallito perchè email non è registrata
+            Snackbar snackbar = Snackbar
+                    .make(coordinatorLayout, "Registrazione fallita! Utente già registrato!", Snackbar.LENGTH_SHORT);
+            snackbar.show();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case REQUEST_ACCOUNT_PICKER:
+                Log.d(TAG, "Nell'if.");
+                if (data != null && data.getExtras() != null) {
+                    String accountName =
+                            data.getExtras().getString(
+                                    AccountManager.KEY_ACCOUNT_NAME);
+                    if (accountName != null) {
+                        setSelectedAccountName(accountName);
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
+                        editor.apply();
+                        // User is authorized
+                        RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
+                        if (checkNetwork()) {
+                            new Register(getApplicationContext(), email, nome, cognome, foto, bio, birth, sesso,
+                                    città, indirizzo, numeri, campoSpecializzazione, Long.parseLong(anniEsperienza), postoLavoro, numeriBusiness,
+                                    disponibilità, this, apiHandler, true).execute();
+                        }
+                    }
+                }
+                break;
+        }
     }
 
     @Override
@@ -310,4 +368,16 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
                 break;
         }
     }
+
+    // setSelectedAccountName definition
+    private void setSelectedAccountName(String accountName) {
+        SharedPreferences settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
+        editor.apply();
+        Log.d(TAG, "ACCOUNT NAME: " + accountName);
+        credential.setSelectedAccountName(accountName);
+        this.accountName = accountName;
+    }
+
 }

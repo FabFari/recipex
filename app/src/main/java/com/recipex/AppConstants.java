@@ -37,6 +37,8 @@ public class AppConstants extends AppCompatActivity{
      */
     public static final String WEB_CLIENT_ID = "1077668244667-v42n91q6av4tlub6rh3dffbdqa0pncj0.apps.googleusercontent.com";
 
+    public static final String GOOGLE_SIGN_WEB_CLIENT = "1077668244667-ffc86ise0qgj4ogq4m2ev68cqjsqpqan.apps.googleusercontent.com";
+
     /**
      * The audience is defined by the web client id, not the Android client id.
      */

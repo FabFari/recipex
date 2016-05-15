@@ -18,7 +18,7 @@ import java.io.IOException;
 /**
  * Created by Sara on 26/04/2016.
  */
-public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
+public class Register extends AsyncTask<Void, Void, MainDefaultResponseMessage> {
     Context mContext;
     TaskCallbackLogin mCallback;
     String email;
@@ -37,6 +37,9 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
     String numeriBusiness;
     String disponibilità;
     Long userId;
+    Boolean wantToRegister;
+
+    RecipexServerApi apiHandler;
 
     GoogleAccountCredential credential;
 
@@ -51,7 +54,7 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
     public Register(Context context, String email, String nome, String cognome, String photo, String bio, String birth,
                      String sesso, String città, String indirizzo, String numeri, String campoSpecializzazione,
                     Long anniEsperienza, String postoLavoro,String numeriBusiness, String disponibilità,
-                    TaskCallbackLogin mCallback) {
+                    TaskCallbackLogin mCallback, RecipexServerApi apiHandler, boolean wantToRegister) {
         mContext = context;
         this.mCallback = mCallback;
         this.email = email;
@@ -69,81 +72,75 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
         this.postoLavoro = postoLavoro;
         this.numeriBusiness = numeriBusiness;
         this.disponibilità = disponibilità;
+        this.apiHandler = apiHandler;
+        this.wantToRegister = wantToRegister;
     }
 
-    // setSelectedAccountName definition
-    private void setSelectedAccountName(String accountName) {
-        settings=mContext.getSharedPreferences(AppConstants.PREFS_NAME, 0);
-        SharedPreferences.Editor editor = settings.edit();
-        // Fabrizio Change
-        editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
-       // editor.putString("account", accountName);
-        editor.commit();
-        credential.setSelectedAccountName(accountName);
-    }
-    protected MainRegisterUserMessage doInBackground(Void... unused) {
-
-        // Retrieve service handle.
-        credential = GoogleAccountCredential.usingAudience(mContext,
-                AppConstants.AUDIENCE);
-        setSelectedAccountName(email);
-
-        RecipexServerApi apiServiceHandle = AppConstants.getApiServiceHandle(credential);
-
+    protected MainDefaultResponseMessage doInBackground(Void... unused) {
         try {
             MainRegisterUserMessage reg = new MainRegisterUserMessage();
 
             //CAMPI OBBLIGATORI
             reg.setEmail(email);
+            Log.d("EMAIL ", email);
             reg.setBirth(birth);
             Log.d("DATA ", birth);
             reg.setName(nome);
+            Log.d("NAME ", reg.getName());
+            Log.d("NAME ", nome);
             reg.setSurname(cognome);
+            Log.d("COGNOME ", cognome);
             reg.setSex(sesso);
             Log.d("SESSO ", sesso);
             reg.setPic(photo);
+            Log.d("PIC ", photo);
 
             //CAMPI FACOLTATIVI USER: potrebbero essere vuoti
             reg.setAddress(indirizzo);
             reg.setPersonalNum(numeri);
             reg.setCity(città);
 
-            pref=mContext.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = pref.edit();
+            /*
+            SharedPreferences pref = mContext.getSharedPreferences(MyPrefs, Context.MODE_PRIVATE);
+            SharedPreferences.Editor ed=pref.edit();
+            */
 
-            if(anniEsperienza!=0) {
+            if(!campoSpecializzazione.equals("")) {
                 reg.setBusinessNum(numeriBusiness);
                 reg.setAvailable(disponibilità);
                 reg.setPlace(postoLavoro);
                 reg.setField(campoSpecializzazione);
                 reg.setYearsExp(anniEsperienza);
                 reg.setBio(bio);
-                editor.putBoolean("utenteSemplice", false);
-                editor.commit();
-            }
-            else{
-                editor.putBoolean("utenteSemplice", true);
-                editor.commit();
+                //ed.putBoolean("utenteSemplice", false);
+                //ed.commit();
             }
 
-            System.out.println("CAMPO SPEC 2 "+campoSpecializzazione);
 
-            RecipexServerApi.User.RegisterUser post = apiServiceHandle.user().registerUser(reg);
+            if(!wantToRegister)
+                reg.setPlace("Voglio loggarmi");
+
+            // System.out.println("CAMPO SPEC 2 "+campoSpecializzazione);
+
+            RecipexServerApi.User.RegisterUser post = apiHandler.user().registerUser(reg);
+
 
             MainDefaultResponseMessage response = post.execute();
 
-            System.out.println("RESPONSE " + response.getMessage());
+            // System.out.println("RESPONSE " + response.getMessage());
             Log.d("RESPONSE ", response.getMessage());
 
+            /*
             // Change Fabrizio
             if(response.getPayload() != null)
                 userId = Long.parseLong(response.getPayload());
 
-            if(response.getMessage().equals("User already existent.")){
-                return reg;
-            }else{
+            if(response.getMessage().equals("User already existent."))
+                return response;
+            else
                 return null;
-            }
+            */
+            return response;
 
         } catch (IOException e) {
             Looper.prepare();
@@ -155,33 +152,69 @@ public class Register extends AsyncTask<Void, Void, MainRegisterUserMessage> {
     }
 
 
-    protected void onPostExecute(MainRegisterUserMessage greeting) {
+    protected void onPostExecute(MainDefaultResponseMessage response) {
         SharedPreferences pref = mContext.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
-        // Change Fabrizio
-        Log.d("REGISTER_AT", "userId: " +userId);
-        editor.putLong("userId", userId);
-        editor.commit();
 
-        if (greeting!=null) {
-            Log.d("DEBUG","User è registrato");
-            if(greeting.getField()==null){
-                Log.d("FIELD ", "field null");
-                editor.putBoolean("utenteSemplice", true);
-                editor.commit();
-                Log.d("UTENTESEMPLICE REGISTER", " "+pref.getBoolean("utenteSemplice", false));
-                mCallback.done(true, greeting.get("email").toString());
-            }
-            else{
-                editor.putBoolean("utenteSemplice", false);
-                editor.commit();
-                mCallback.done(true, greeting.get("email").toString());
-            }
+        if(response != null) {
 
-        }else{
-            Log.d("DEBUG","User NON era REGISTRATO!");
-            System.out.println(email);
-            mCallback.done(false, email.toString());
+            /*
+            // Change Fabrizio
+            if (response.getPayload() != null) {
+                // Registrazione Avvenuta
+                userId = Long.parseLong(response.getPayload());
+                Log.d("REGISTER_AT", "userId: " + userId);
+                editor.putLong("userId", userId);
+                editor.apply();
+            }
+            */
+
+            if(!wantToRegister) {
+                // Vuole loggarsi
+                Log.d("DEBUG", "User è registrato");
+                if (response.getUser() != null) {
+                    // Utente registrato -> OK
+                    userId = Long.parseLong(response.getPayload());
+                    editor.putLong("userId", userId);
+                    editor.apply();
+                    MainRegisterUserMessage utente = response.getUser();
+                    if (utente.getField() == null) {
+                        Log.d("FIELD ", "field null");
+                        editor.putBoolean("utenteSemplice", true);
+                        editor.apply();
+                        Log.d("UTENTESEMPLICE REGISTER", " " + pref.getBoolean("utenteSemplice", false));
+                        mCallback.done(true, utente.get("email").toString());
+                    } else {
+                        editor.putBoolean("utenteSemplice", false);
+                        editor.apply();
+                        mCallback.done(true, utente.get("email").toString());
+                    }
+                } else {
+                    Log.d("DEBUG", "User NON era REGISTRATO!");
+                    // System.out.println(email);
+                    mCallback.done(false, email);
+                }
+            }
+            else {
+                // Vuole Registrarsi
+                if(!response.getMessage().equals("User already existent.")) {
+                    userId = Long.parseLong(response.getPayload());
+                    editor.putLong("userId", userId);
+                    editor.apply();
+                    if (campoSpecializzazione.equals("")) {
+                        editor.putBoolean("utenteSemplice", true);
+                        editor.apply();
+                        Log.d("UTENTESEMPLICE REGISTER", " " + pref.getBoolean("utenteSemplice", false));
+                        mCallback.done(true, email);
+                    } else {
+                        editor.putBoolean("utenteSemplice", false);
+                        editor.apply();
+                        mCallback.done(true, email);
+                    }
+                }
+                else
+                    mCallback.done(false, email);
+            }
         }
     }
 
