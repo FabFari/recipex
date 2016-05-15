@@ -23,12 +23,12 @@
 
     <!--<include layout="@layout/content_home" />-->
 
-   <FrameLayout
-        android:orientation="vertical"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:id="@+id/containerView">
-   </FrameLayout>
+    <!--<FrameLayout
+         android:orientation="vertical"
+         android:layout_height="match_parent"
+         android:layout_width="match_parent"
+         android:id="@+id/containerView">
+    </FrameLayout>-->
 
     <!--
     <android.support.design.widget.FloatingActionButton

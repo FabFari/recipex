@@ -34,17 +34,17 @@
     </LinearLayout>-->
 
     <include
-        layout="@layout/app_bar_home"
+        layout="@layout/app_bar_home2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <!--<FrameLayout
+    <FrameLayout
         android:orientation="vertical"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:layout_marginTop="?attr/actionBarSize"
         android:id="@+id/containerView">
-    </FrameLayout>-->
+    </FrameLayout>
 
     <android.support.design.widget.NavigationView
         android:id="@+id/nav_view"

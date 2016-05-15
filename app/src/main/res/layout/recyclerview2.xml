@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:id="@+id/fragment_recyclerview"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">-->
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,41 +12,24 @@
     android:fitsSystemWindows="true"
     tools:context=".activities.Home">
 
-    <android.support.design.widget.AppBarLayout
+
+    <android.support.v7.widget.RecyclerView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/my_recyclerview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay"/>
-
-    </android.support.design.widget.AppBarLayout>
-
-    <!--<include layout="@layout/content_home" />-->
-
-   <FrameLayout
-        android:orientation="vertical"
         android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:id="@+id/containerView">
-   </FrameLayout>
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-    <!--
+    <!-- Fabrizio change -->
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+        android:id="@+id/fabfragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:src="@drawable/ic_add"
-        android:clickable="true"/>
-    -->
+        android:visibility="gone"/>
 
-    <!--
     <com.github.clans.fab.FloatingActionMenu
         xmlns:fab="http://schemas.android.com/apk/res-auto"
         android:id="@+id/home.fab_menu_measurement"
@@ -77,7 +65,7 @@
         fab:menu_labels_position="left"
         fab:menu_openDirection="up"
         fab:menu_backgroundColor="@android:color/transparent"
-        fab:menu_fab_label="Aggiungi come">
+        fab:menu_fab_label="Aggiungi misurazione">
 
         <com.github.clans.fab.FloatingActionButton
             android:id="@+id/home.fab_menu_item8"
@@ -167,6 +155,5 @@
             fab:fab_size="mini"
             fab:fab_label="Pressione" />
     </com.github.clans.fab.FloatingActionMenu>
-    -->
 
 </android.support.design.widget.CoordinatorLayout>

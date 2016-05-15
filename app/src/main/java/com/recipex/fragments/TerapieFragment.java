@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
@@ -48,7 +49,13 @@ public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.recyclerview, container, false);
+        View rootView;
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            // only for lollipop and newer versions
+            rootView = inflater.inflate(R.layout.recyclerview, container, false);
+        else
+            rootView = inflater.inflate(R.layout.recyclerview2, container, false);
+
         FloatingActionMenu fab=(FloatingActionMenu) rootView.findViewById(R.id.home_fab_menu_measurement);
         fab.setVisibility(View.GONE);
 

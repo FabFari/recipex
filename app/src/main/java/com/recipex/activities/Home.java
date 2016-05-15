@@ -13,12 +13,15 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -30,6 +33,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -77,7 +81,12 @@ public class Home extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            // only for lollipop and newer versions
+            setContentView(R.layout.activity_home);
+        else
+            setContentView(R.layout.activity_home2);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
@@ -103,6 +112,8 @@ public class Home extends AppCompatActivity
         SharedPreferences.Editor editor = pref.edit();
         editor.putBoolean("alreadyLogged", true);
         editor.commit();
+
+
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -181,6 +192,8 @@ public class Home extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+        Log.d(TAG, "MENUCREATE");
+
         getMenuInflater().inflate(R.menu.home, menu);
         return true;
     }
@@ -192,6 +205,7 @@ public class Home extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        Log.d(TAG, "MENU");
         if (id == R.id.action_logout) {
             //Login.signOutFromGplus();
             pref.edit().remove("email").commit();
