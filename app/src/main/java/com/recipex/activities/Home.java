@@ -159,7 +159,7 @@ public class Home extends AppCompatActivity
         System.out.println(photo);*/
 
         // Change Fabrizio
-        Long userId=pref.getLong("userId", 0L);
+        final Long userId=pref.getLong("userId", 0L);
         Log.d("HOME", "userId: "+ userId);
         String nome=pref.getString("nome", "");
         String cognome=pref.getString("cognome", "");
@@ -177,6 +177,14 @@ public class Home extends AppCompatActivity
         emailuser.setText(email);
         Picasso.with(Home.this).load(photo).transform(new CircleTransform()).into(photouser);
 
+        photouser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i=new Intent(Home.this, Profile.class);
+                i.putExtra("profileId", userId);
+                startActivity(i);
+            }
+        });
     }
 
     @Override
