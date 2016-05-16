@@ -25,6 +25,7 @@ import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserMainInfoMessage;
 import com.github.clans.fab.FloatingActionMenu;
+import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.recipex.AppConstants;
 import com.recipex.R;
@@ -33,6 +34,7 @@ import com.recipex.adapters.PazienteFamiliareAdapter;
 import com.recipex.asynctasks.GetUserAT;
 import com.recipex.taskcallbacks.GetUserTC;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,6 +49,8 @@ public class FamiliariFragment extends Fragment implements GetUserTC {
     private String accountName;
 
     private static final int REQUEST_ACCOUNT_PICKER = 2;
+
+    private CircularProgressView progressView;
 
     @Nullable
     @Override
@@ -69,7 +73,7 @@ public class FamiliariFragment extends Fragment implements GetUserTC {
 
         FloatingActionMenu fabhome=(FloatingActionMenu) rootView.findViewById(R.id.home_fab_menu_measurement);
         fabhome.setVisibility(View.GONE);
-
+        progressView = (CircularProgressView) rootView.findViewById(R.id.home_progress_view);
         RecyclerView rv = (RecyclerView)rootView.findViewById(R.id.my_recyclerview);
         curRecView=rv;
         LinearLayoutManager llm = new LinearLayoutManager(getContext());
@@ -123,15 +127,17 @@ public class FamiliariFragment extends Fragment implements GetUserTC {
 
         //uso lo stesso adapter dei pazienti perchè ha tutti i campi che mi interessano
         if(message!=null && message.getRelatives()!=null && !message.getRelatives().isEmpty()) {
-            List<MainUserMainInfoMessage> m=message.getRelatives();
+            List<MainUserMainInfoMessage> m = message.getRelatives();
 
             PazienteFamiliareAdapter adapter = new PazienteFamiliareAdapter(message.getRelatives(), (Home)getActivity(), false);
             curRecView.setAdapter(adapter);
         }
         else {
-            PazienteFamiliareAdapter adapter = new PazienteFamiliareAdapter(null, (Home)getActivity(), false);
+            PazienteFamiliareAdapter adapter = new PazienteFamiliareAdapter(new ArrayList<MainUserMainInfoMessage>(), (Home)getActivity(), false);
             curRecView.setAdapter(adapter);
         }
+        progressView.stopAnimation();
+        progressView.setVisibility(View.GONE);
     }
     // setSelectedAccountName definition
     private void setSelectedAccountName(String accountName) {

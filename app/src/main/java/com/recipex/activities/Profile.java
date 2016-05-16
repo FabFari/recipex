@@ -502,136 +502,141 @@ public class Profile extends AppCompatActivity
 
         // USER
         // Required
-        user_pic = message.getPic();
-        Picasso.with(this).load(message.getPic()).into(pic);
-        pic.setVisibility(View.VISIBLE);
-        tolbar_usr_name.setText(String.format("%s %s", message.getName(), message.getSurname()));
-        tolbar_usr_name.setVisibility(View.VISIBLE);
-        mTitle.setText(String.format("%s %s", message.getName(), message.getSurname()));
-        mTitle.setVisibility(View.VISIBLE);
-        user_name = message.getName();
-        name.setText(message.getName());
-        user_surname = message.getSurname();
-        surname.setText(message.getSurname());
-        user_email = message.getEmail();
-        email.setText(message.getEmail());
-        user_birth = message.getBirth();
-        birth.setText(message.getBirth());
-        user_sex = message.getSex();
-        sex.setText(message.getSex());
-        // Not Required
-        if (message.getCity() != null) {
-            user_city = message.getCity();
-            city.setText(message.getCity());
-            city_lbl.setVisibility(View.VISIBLE);
-            city.setVisibility(View.VISIBLE);
-        }
-        else {
-            city_lbl.setVisibility(View.GONE);
-            city.setVisibility(View.GONE);
-        }
-        if (message.getAddress() != null) {
-            user_address = message.getAddress();
-            address.setText(message.getAddress());
-            address_lbl.setVisibility(View.VISIBLE);
-            address.setVisibility(View.VISIBLE);
-        }
-        else {
-            address_lbl.setVisibility(View.GONE);
-            address.setVisibility(View.GONE);
-        }
-        if (message.getPersonalNum() != null) {
-            user_phone = message.getPersonalNum();
-            personal_num.setText(message.getPersonalNum());
-            personal_num_lbl.setVisibility(View.VISIBLE);
-            personal_num.setVisibility(View.VISIBLE);
-        }
-        else {
-            personal_num_lbl.setVisibility(View.GONE);
-            personal_num.setVisibility(View.GONE);
-        }
-        userCard.setVisibility(View.VISIBLE);
-        // CAREGIVER
-        // Required
-        if (message.getField() != null) {
-            if(!relations_checked) {
-                fab_pc_physician.setEnabled(true);
-                fab_visiting_nurse.setEnabled(true);
-                fab_caregivers.setEnabled(true);
-            }
-            else {
-                if(!is_pc_physician)
-                    fab_pc_physician.setEnabled(true);
-                if(!is_visiting_nurse)
-                    fab_visiting_nurse.setEnabled(true);
-                if(!is_caregiver)
-                    fab_caregivers.setEnabled(true);
-            }
-            crgv_field = message.getField();
-            field.setText(message.getField());
-            crgv_subtitle.setVisibility(View.VISIBLE);
+        if(res) {
+            if(message != null) {
+                user_pic = message.getPic();
+                Picasso.with(this).load(message.getPic()).into(pic);
+                pic.setVisibility(View.VISIBLE);
+                tolbar_usr_name.setText(String.format("%s %s", message.getName(), message.getSurname()));
+                tolbar_usr_name.setVisibility(View.VISIBLE);
+                mTitle.setText(String.format("%s %s", message.getName(), message.getSurname()));
+                mTitle.setVisibility(View.VISIBLE);
+                user_name = message.getName();
+                name.setText(message.getName());
+                user_surname = message.getSurname();
+                surname.setText(message.getSurname());
+                user_email = message.getEmail();
+                email.setText(message.getEmail());
+                user_birth = message.getBirth();
+                birth.setText(message.getBirth());
+                user_sex = message.getSex();
+                sex.setText(message.getSex());
+                // Not Required
+                if (message.getCity() != null && !message.getCity().equals("")) {
+                    user_city = message.getCity();
+                    city.setText(message.getCity());
+                    city_lbl.setVisibility(View.VISIBLE);
+                    city.setVisibility(View.VISIBLE);
+                } else {
+                    city_lbl.setVisibility(View.GONE);
+                    city.setVisibility(View.GONE);
+                }
+                if (message.getAddress() != null && !message.getAddress().equals("")) {
+                    user_address = message.getAddress();
+                    address.setText(message.getAddress());
+                    address_lbl.setVisibility(View.VISIBLE);
+                    address.setVisibility(View.VISIBLE);
+                } else {
+                    address_lbl.setVisibility(View.GONE);
+                    address.setVisibility(View.GONE);
+                }
+                if (message.getPersonalNum() != null && !message.getPersonalNum().equals("")) {
+                    user_phone = message.getPersonalNum();
+                    personal_num.setText(message.getPersonalNum());
+                    personal_num_lbl.setVisibility(View.VISIBLE);
+                    personal_num.setVisibility(View.VISIBLE);
+                } else {
+                    personal_num_lbl.setVisibility(View.GONE);
+                    personal_num.setVisibility(View.GONE);
+                }
+                userCard.setVisibility(View.VISIBLE);
+                // CAREGIVER
+                // Required
+                if (message.getField() != null) {
+                    if (!relations_checked) {
+                        fab_pc_physician.setEnabled(true);
+                        fab_visiting_nurse.setEnabled(true);
+                        fab_caregivers.setEnabled(true);
+                    } else {
+                        if (!is_pc_physician)
+                            fab_pc_physician.setEnabled(true);
+                        if (!is_visiting_nurse)
+                            fab_visiting_nurse.setEnabled(true);
+                        if (!is_caregiver)
+                            fab_caregivers.setEnabled(true);
+                    }
+                    crgv_field = message.getField();
+                    field.setText(message.getField());
+                    crgv_subtitle.setVisibility(View.VISIBLE);
 
-            if (message.getYearsExp() != null) {
-                crgv_years_exp = message.getYearsExp();
-                // years_exp.setText(String.format(Locale.getDefault(), "%d", message.getYearsExp()));
-                if (message.getYearsExp() > 20)
-                    years_exp.setText("Più di 20 anni");
-                else if (message.getYearsExp() > 10)
-                    years_exp.setText("Trai 10 e i 20 anni");
-                else if (message.getYearsExp() > 5)
-                    years_exp.setText("Trai 5 e i 10 anni");
-                else
-                    years_exp.setText("Meno di 5 anni");
-                years_exp_lbl.setVisibility(View.VISIBLE);
-                years_exp.setVisibility(View.VISIBLE);
+                    if (message.getYearsExp() != null) {
+                        crgv_years_exp = message.getYearsExp();
+                        // years_exp.setText(String.format(Locale.getDefault(), "%d", message.getYearsExp()));
+                        if (message.getYearsExp() > 20)
+                            years_exp.setText("Più di 20 anni");
+                        else if (message.getYearsExp() > 10)
+                            years_exp.setText("Trai 10 e i 20 anni");
+                        else if (message.getYearsExp() > 5)
+                            years_exp.setText("Trai 5 e i 10 anni");
+                        else
+                            years_exp.setText("Meno di 5 anni");
+                        years_exp_lbl.setVisibility(View.VISIBLE);
+                        years_exp.setVisibility(View.VISIBLE);
+                    } else {
+                        years_exp_lbl.setVisibility(View.GONE);
+                        years_exp.setVisibility(View.GONE);
+                    }
+                    if (message.getPlace() != null && !message.getPlace().equals("")) {
+                        crgv_place = message.getPlace();
+                        place.setText(message.getPlace());
+                        place_lbl.setVisibility(View.VISIBLE);
+                        place.setVisibility(View.VISIBLE);
+                    } else {
+                        place_lbl.setVisibility(View.GONE);
+                        place.setVisibility(View.GONE);
+                    }
+                    if (message.getAvailable() != null && !message.getAvailable().equals("")) {
+                        crgv_available = message.getAvailable();
+                        available.setText(message.getAvailable());
+                        available_lbl.setVisibility(View.VISIBLE);
+                        available.setVisibility(View.VISIBLE);
+                    } else {
+                        available_lbl.setVisibility(View.GONE);
+                        available.setVisibility(View.GONE);
+                    }
+                    if (message.getBusinessNum() != null && !message.getBusinessNum().equals("")) {
+                        crgv_phone = message.getBusinessNum();
+                        business_num.setText(message.getBusinessNum());
+                        business_num_lbl.setVisibility(View.VISIBLE);
+                        business_num.setVisibility(View.VISIBLE);
+                    } else {
+                        business_num_lbl.setVisibility(View.GONE);
+                        business_num.setVisibility(View.GONE);
+                    }
+                    if (message.getBio() != null && !message.getBio().equals("")) {
+                        crgv_bio = message.getBio();
+                        bio.setText(message.getBio());
+                        bio_lbl.setVisibility(View.VISIBLE);
+                        bio.setVisibility(View.VISIBLE);
+                        bio_card.setVisibility(View.VISIBLE);
+                    } else {
+                        bio_lbl.setVisibility(View.GONE);
+                        bio.setVisibility(View.GONE);
+                        bio_card.setVisibility(View.GONE);
+                    }
+                    caregiverCard.setVisibility(View.VISIBLE);
+                }
             }
             else {
-                years_exp_lbl.setVisibility(View.GONE);
-                years_exp.setVisibility(View.GONE);
+                Snackbar snackbar = Snackbar
+                        .make(coordinatorLayout, "Operazione non riuscita: " + message.getResponse().getCode(), Snackbar.LENGTH_SHORT);
+                snackbar.show();
             }
-            if (message.getPlace() != null) {
-                crgv_place = message.getPlace();
-                place.setText(message.getPlace());
-                place_lbl.setVisibility(View.VISIBLE);
-                place.setVisibility(View.VISIBLE);
-            }
-            else {
-                place_lbl.setVisibility(View.GONE);
-                place.setVisibility(View.GONE);
-            }
-            if (message.getAvailable() != null) {
-                crgv_available = message.getAvailable();
-                available.setText(message.getAvailable());
-                available_lbl.setVisibility(View.VISIBLE);
-                available.setVisibility(View.VISIBLE);
-            }
-            else {
-                available_lbl.setVisibility(View.GONE);
-                available.setVisibility(View.GONE);
-            }
-            if (message.getBusinessNum() != null) {
-                crgv_phone = message.getBusinessNum();
-                business_num.setText(message.getBusinessNum());
-                business_num_lbl.setVisibility(View.VISIBLE);
-                business_num.setVisibility(View.VISIBLE);
-            }
-            else {
-                business_num_lbl.setVisibility(View.GONE);
-                business_num.setVisibility(View.GONE);
-            }
-            if (message.getBio() != null) {
-                crgv_bio = message.getBio();
-                bio.setText(message.getBio());
-                bio_lbl.setVisibility(View.VISIBLE);
-                bio.setVisibility(View.VISIBLE);
-                bio_card.setVisibility(View.VISIBLE);
-            }
-            else {
-                bio_lbl.setVisibility(View.GONE);
-                bio.setVisibility(View.GONE);
-                bio_card.setVisibility(View.GONE);
-            }
-            caregiverCard.setVisibility(View.VISIBLE);
+        }
+        else {
+            Snackbar snackbar = Snackbar
+                    .make(coordinatorLayout, "Operazione non riuscita1!", Snackbar.LENGTH_SHORT);
+            snackbar.show();
         }
 
         //if(!user_id.equals(profile_id))
@@ -697,8 +702,10 @@ public class Profile extends AppCompatActivity
 
                 Log.d(TAG, "utente semplice: "+ utente_semplice);
 
-                if(can_add_therapy && !utente_semplice)
+                if(can_add_therapy && !utente_semplice) {
                     mToolbar.getMenu().findItem(R.id.profile_add_therapy).setVisible(true);
+                    mToolbar.getMenu().findItem(R.id.profile_user_measurements).setVisible(true);
+                }
             }
             else {
                 Snackbar snackbar = Snackbar
@@ -884,7 +891,13 @@ public class Profile extends AppCompatActivity
             case R.id.profile_add_therapy:
                 Intent addTerapyIntent = new Intent(Profile.this, AggiungiTerapia.class);
                 addTerapyIntent.putExtra("caregiverId", user_id);
+                addTerapyIntent.putExtra("patientId", profile_id);
                 this.startActivityForResult(addTerapyIntent, ADD_THERAPY);
+                break;
+            case R.id.profile_user_measurements:
+                Intent intentMeasurements = new Intent(getApplicationContext(), UserMeasurementsActivity.class);
+                intentMeasurements.putExtra("profileId", profile_id);
+                this.startActivity(intentMeasurements);
                 break;
         }
         return super.onOptionsItemSelected(item);

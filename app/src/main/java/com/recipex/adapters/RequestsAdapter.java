@@ -22,6 +22,7 @@ import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.activities.Profile;
 import com.recipex.activities.UserRequests;
+import com.recipex.fragments.UserRequestFragment;
 import com.recipex.utilities.ConnectionDetector;
 import com.squareup.picasso.Picasso;
 
@@ -61,17 +62,18 @@ public class RequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     List<MainRequestInfoMessage> requests;
-    UserRequests activity;
+    //Activity activity;
+    UserRequestFragment fragment;
     CircularProgressView progressView;
     private static final int EMPTY_VIEW = 10;
 
-    public RequestsAdapter(List<MainRequestInfoMessage> requests, UserRequests activity,
+    public RequestsAdapter(List<MainRequestInfoMessage> requests, UserRequestFragment fragment,
                            CircularProgressView progressView){
         if(requests != null)
             this.requests = requests;
         else
             this.requests = new ArrayList<MainRequestInfoMessage>();
-        this.activity = activity;
+        this.fragment = fragment;
         this.progressView = progressView;
     }
 
@@ -124,7 +126,7 @@ public class RequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             else
                 requestViewHolder.requestKind.setText("Caregiver");
 
-            Picasso.with(activity.getApplicationContext()).load(requests.get(i).
+            Picasso.with(fragment.getActivity().getApplicationContext()).load(requests.get(i).
                     getSenderPic()).into(requestViewHolder.senderPic);
             boolean isNew = requests.get(i).getPending();
 
@@ -136,7 +138,7 @@ public class RequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 public void onClick(View view) {
                     progressView.startAnimation();
                     progressView.setVisibility(View.VISIBLE);
-                    activity.executeAsyncTask(requests.get(pos).getId(), true);
+                    fragment.executeAsyncTask(requests.get(pos).getId(), true);
                 }
             });
             requestViewHolder.requestDecline.setOnClickListener(new View.OnClickListener() {
@@ -144,16 +146,16 @@ public class RequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 public void onClick(View view) {
                     progressView.startAnimation();
                     progressView.setVisibility(View.VISIBLE);
-                    activity.executeAsyncTask(requests.get(pos).getId(), false);
+                    fragment.executeAsyncTask(requests.get(pos).getId(), false);
                 }
             });
 
             requestViewHolder.cardView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent myIntent = new Intent(activity.getApplicationContext(), Profile.class);
+                    Intent myIntent = new Intent(fragment.getActivity().getApplicationContext(), Profile.class);
                     myIntent.putExtra("profileId", requests.get(pos).getSender());
-                    activity.startActivity(myIntent);
+                    fragment.startActivity(myIntent);
                 }
             });
         }

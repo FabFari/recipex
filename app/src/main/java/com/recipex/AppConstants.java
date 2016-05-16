@@ -79,6 +79,7 @@ public class AppConstants extends AppCompatActivity{
     public static final String PILLOLA = "PILL";
     public static final String BUSTINE = "SACHET";
     public static final String FIALA = "VIAL";
+    public static final String CREMA = "CREAM";
     public static final String ALTRO = "OTHER";
 
     /**

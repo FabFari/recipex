@@ -173,8 +173,6 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
         int id = item.getItemId();
 
         if (id == R.id.registrati) {
-            progressView.startAnimation();
-            progressView.setVisibility(View.VISIBLE);
             if(!inserisciIndirizzo.getText().toString().equals("")) {
                 if(inserisciCittà.getText().toString().equals("")) {
                     Snackbar snackbar = Snackbar
@@ -228,9 +226,10 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
                     Log.d(TAG, "AccountName == null: startActivityForResult.");
                     startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
                 } else {
-                    progressView.startAnimation();
                     RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
                     if (checkNetwork()) {
+                        progressView.startAnimation();
+                        progressView.setVisibility(View.VISIBLE);
                         new Register(getApplicationContext(), email, nome, cognome, foto, bio, birth, sesso,
                                 città, indirizzo, numeri, campoSpecializzazione, Long.parseLong(anniEsperienza), postoLavoro, numeriBusiness,
                                 disponibilità, this, apiHandler, true).execute();
@@ -326,6 +325,8 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
                         // User is authorized
                         RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
                         if (checkNetwork()) {
+                            progressView.startAnimation();
+                            progressView.setVisibility(View.VISIBLE);
                             new Register(getApplicationContext(), email, nome, cognome, foto, bio, birth, sesso,
                                     città, indirizzo, numeri, campoSpecializzazione, Long.parseLong(anniEsperienza), postoLavoro, numeriBusiness,
                                     disponibilità, this, apiHandler, true).execute();

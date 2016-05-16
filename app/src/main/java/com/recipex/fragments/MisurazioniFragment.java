@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
@@ -64,6 +65,7 @@ import com.recipex.adapters.TerapieAdapter;
 import com.recipex.asynctasks.GetMeasurementsUser;
 import com.recipex.asynctasks.GetTerapieUser;
 import com.recipex.taskcallbacks.TaskCallbackGetMeasurements;
+import com.recipex.utilities.ConnectionDetector;
 import com.recipex.utilities.Misurazione;
 import com.recipex.utilities.Terapia;
 
@@ -89,6 +91,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
     private SharedPreferences settings;
     private GoogleAccountCredential credential;
     private String accountName;
+    private ConnectionDetector cd;
 
     private final int scrollnum=6;
 
@@ -402,29 +405,33 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
     }
 
     public boolean checkNetwork() {
-        ConnectivityManager cm = (ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        boolean isOnline = (netInfo != null && netInfo.isConnectedOrConnecting());
-        if(isOnline) {
+        cd = new ConnectionDetector(getActivity().getApplicationContext());
+        // Check if Internet present
+        if (cd.isConnectingToInternet()) {
             return true;
         }else{
-            new AlertDialog.Builder(getActivity())
-                    .setTitle("Ops..qualcosa è andato storto!")
-                    .setMessage("Sembra che tu non sia collegato ad internet! ")
-                    .setPositiveButton("Impostazioni", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            // continue with delete
-                            Intent callGPSSettingIntent = new Intent(Settings.ACTION_SETTINGS);
-                            startActivityForResult(callGPSSettingIntent,0);
+            Snackbar snackbar = Snackbar
+                    .make(getActivity().getWindow().getDecorView().getRootView(),
+                            "Nessuna connesione a internet!", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("ESCI", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            getActivity().finish();
                         }
-                    }).show();
-            return false;
+                    });
+
+            // Changing message text color
+            snackbar.setActionTextColor(Color.RED);
+            snackbar.show();
         }
+        return false;
     }
 
     //callback from GetMisurazioniUser
     public void done(MainUserMeasurementsMessage response){
-        if((response!=null && response.getMeasurements()!=null )|| !misurazioni.isEmpty()) {
+        if(response!=null && response.getMeasurements()!=null) {
+            Log.e(TAG, "Nel done di getMisurazioni");
+            List<Misurazione> misurazioni=new LinkedList<Misurazione>();
             List<MainMeasurementInfoMessage> lista;
             if(response!=null || response.getMeasurements() != null)
                 lista = response.getMeasurements();
@@ -470,8 +477,6 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
             RVAdapter adapter = new RVAdapter(misurazioni);
             curRecView.setAdapter(adapter);
             Log.d(TAG, "itemCount: "+ adapter.getItemCount());
-            progressView.stopAnimation();
-            progressView.setVisibility(View.GONE);
             if(adapter.getItemViewType(0) == EMPTY_VIEW) {
                 Snackbar snackbar = Snackbar
                         .make(getActivity().getWindow().getDecorView().getRootView(),
@@ -480,11 +485,12 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
             }
         }
 		else {
-            progressView.stopAnimation();
-            progressView.setVisibility(View.GONE);
-            RVAdapter adapter = new RVAdapter(null);
+            RVAdapter adapter = new RVAdapter(new ArrayList<Misurazione>());
             curRecView.setAdapter(adapter);
         }
+
+        progressView.stopAnimation();
+        progressView.setVisibility(View.GONE);
         //Toast.makeText(getActivity(), "You don't have prescriptions. Add one clicking on the button", Toast.LENGTH_LONG).show();
     }
 
