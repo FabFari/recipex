@@ -28,6 +28,7 @@ import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserMainInfoMessage;
 import com.github.clans.fab.FloatingActionMenu;
+import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.recipex.AppConstants;
 import com.recipex.R;
@@ -53,6 +54,8 @@ public class PazientiFragment extends Fragment implements GetUserTC {
     private GoogleAccountCredential credential;
     private String accountName;
 
+    CircularProgressView progressView;
+
     private static final int REQUEST_ACCOUNT_PICKER = 2;
 
     @Nullable
@@ -71,6 +74,7 @@ public class PazientiFragment extends Fragment implements GetUserTC {
     }
 
     private void initUI(View rootView) {
+        progressView = (CircularProgressView) rootView.findViewById(R.id.home_progress_view);
         FloatingActionButton fab=(FloatingActionButton)rootView.findViewById(R.id.fabfragment);
         fab.setVisibility(View.GONE);
 
@@ -132,6 +136,8 @@ public class PazientiFragment extends Fragment implements GetUserTC {
 
             PazienteFamiliareAdapter adapter = new PazienteFamiliareAdapter(message.getPatients(), (Home)getActivity(), true);
             curRecView.setAdapter(adapter);
+            progressView.stopAnimation();
+            progressView.setVisibility(View.GONE);
         }
         else {
             PazienteFamiliareAdapter adapter = new PazienteFamiliareAdapter(null, (Home)getActivity(), true);

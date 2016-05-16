@@ -25,19 +25,32 @@ public class GetMeasurementsUser extends AsyncTask<Void, Void, MainUserMeasureme
     Context mContext;
     TaskCallbackGetMeasurements mCallback;
     RecipexServerApi apiHandler;
+    int scroll;
+    String data;
 
 
-    public GetMeasurementsUser(long id, Context context, TaskCallbackGetMeasurements t, RecipexServerApi handler){
+    public GetMeasurementsUser(long id, Context context, TaskCallbackGetMeasurements t, RecipexServerApi handler, int scroll,
+                               String data){
         this.id=id;
         mContext=context;
         mCallback=t;
         apiHandler=handler;
+        this.scroll=scroll;
+        this.data=data;
     }
 
     protected MainUserMeasurementsMessage doInBackground(Void... unused) {
 
         try {
             RecipexServerApi.User.GetMeasurements get = apiHandler.user().getMeasurements(id);
+            if(scroll!=0){
+                get.setFetch((long) scroll);
+                if(data!=null) {
+                    Log.d("GetMeasurement", data+".000");
+                    get.setDateTime(data+".000");
+                }
+                get.setReverse(true);
+            }
             MainUserMeasurementsMessage response = get.execute();
 
             Log.d("RESPONSE TERAPIE", response.getResponse().getMessage());

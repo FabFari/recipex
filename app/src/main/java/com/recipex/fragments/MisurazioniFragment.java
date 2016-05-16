@@ -90,6 +90,14 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
     private GoogleAccountCredential credential;
     private String accountName;
 
+    private final int scrollnum=6;
+
+    List<Misurazione> misurazioni=new LinkedList<>();
+
+    private int previousTotal = 0;
+    private boolean loading = true;
+    private int visibleThreshold = 3;
+    int firstVisibleItem, visibleItemCount, totalItemCount;
 
     View mainView;
 
@@ -173,7 +181,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
                     else {
                         if(checkNetwork()) {
                             RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-                            new GetMeasurementsUser(userId, getContext(), this, apiHandler).execute();
+                            new GetMeasurementsUser(userId, getContext(), this, apiHandler, 0, null).execute();
                             progressView.startAnimation();
                             progressView.setVisibility(View.VISIBLE);
                         }
@@ -194,7 +202,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
                         // User is authorized
                         RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
                         if (checkNetwork()) {
-                            new GetMeasurementsUser(userId, getContext(), this, apiHandler).execute();
+                            new GetMeasurementsUser(userId, getContext(), this, apiHandler,0, null).execute();
                             progressView.startAnimation();
                             progressView.setVisibility(View.VISIBLE);
                         }
@@ -210,7 +218,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
         emptyText = (TextView) rootView.findViewById(R.id.home_empty_message);
         RecyclerView rv = (RecyclerView)rootView.findViewById(R.id.my_recyclerview);
         curRecView=rv;
-        LinearLayoutManager llm = new LinearLayoutManager(getContext());
+        final LinearLayoutManager llm = new LinearLayoutManager(getContext());
         rv.setLayoutManager(llm);
 
         // GET FABs
@@ -328,8 +336,60 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
         }
         else {
             if (userId != 0 && checkNetwork()) {
-                RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-                new GetMeasurementsUser(userId, getContext(), this, apiHandler).execute();
+                final RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
+
+                final TaskCallbackGetMeasurements f=this;
+                //SCROLL
+                /*rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                    @Override
+                    public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                        super.onScrolled(recyclerView, dx, dy);
+                        if(checkNetwork() && !misurazioni.isEmpty()){
+                            new GetMeasurementsUser(userId, getContext(), f, apiHandler, scrollnum,
+                                    misurazioni.get(misurazioni.size()-1).data);
+                        }
+                    }
+                });*/
+                /*rv.setOnScrollListener(new RecyclerView.OnScrollListener() {
+                    @Override
+                    public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                        super.onScrolled(recyclerView, dx, dy);
+                        visibleItemCount = curRecView.getChildCount();
+                        totalItemCount = llm.getItemCount();
+                        firstVisibleItem = llm.findFirstVisibleItemPosition();
+
+                        Log.d(TAG, ""+visibleItemCount);
+                        Log.d(TAG, ""+totalItemCount);
+                        Log.d(TAG, ""+firstVisibleItem);
+
+                        if (loading) {
+                            if (totalItemCount > previousTotal) {
+                                loading = false;
+                                previousTotal = totalItemCount;
+                            }
+                        }
+                        if (!loading && (totalItemCount - visibleItemCount)
+                                <= (firstVisibleItem + visibleThreshold)) {
+                            // End has been reached
+
+                            //https://github.com/codepath/android_guides/wiki/Endless-Scrolling-with-AdapterViews
+                            Log.i(TAG, "end called");
+
+                            if(checkNetwork() && !misurazioni.isEmpty()){
+                                Log.d(TAG, "scrollll");
+                                Log.d(TAG, misurazioni.get(misurazioni.size()-1).data);
+                                new GetMeasurementsUser(userId, getContext(), f, apiHandler, scrollnum,
+                                        misurazioni.get(misurazioni.size()-1).data).execute();
+                            }
+
+                            loading = true;
+                        }
+
+                    }
+                });*/
+
+
+                new GetMeasurementsUser(userId, getContext(), this, apiHandler, 0, null).execute();
                 progressView.startAnimation();
                 progressView.setVisibility(View.VISIBLE);
             } else {
@@ -364,10 +424,9 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
 
     //callback from GetMisurazioniUser
     public void done(MainUserMeasurementsMessage response){
-        if(response!=null && response.getMeasurements()!=null) {
-            List<Misurazione> misurazioni=new LinkedList<>();
+        if((response!=null && response.getMeasurements()!=null )|| !misurazioni.isEmpty()) {
             List<MainMeasurementInfoMessage> lista;
-            if(response.getMeasurements() != null)
+            if(response!=null || response.getMeasurements() != null)
                 lista = response.getMeasurements();
             else
                 lista = new ArrayList<MainMeasurementInfoMessage>();
@@ -406,6 +465,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
                     mcur.setNota(cur.getNote());
 
                 misurazioni.add(mcur);
+                Log.d("MisIterator", mcur.data);
             }
             RVAdapter adapter = new RVAdapter(misurazioni);
             curRecView.setAdapter(adapter);

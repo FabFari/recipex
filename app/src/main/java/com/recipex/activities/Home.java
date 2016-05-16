@@ -220,8 +220,10 @@ public class Home extends AppCompatActivity
         if (id == R.id.action_logout) {
             //Login.signOutFromGplus();
             pref.edit().remove("email").commit();
-            if(!pref.getString("calendar", "").equals(""))
+            if(!pref.getString("calendar", "").equals("")) {
+                Log.d(TAG, "idCalendar "+pref.getString("calendar", ""));
                 pref.edit().remove("calendar").commit();
+            }
 
             pref.edit().putBoolean("token", true).commit();
             // Fabrizio Change

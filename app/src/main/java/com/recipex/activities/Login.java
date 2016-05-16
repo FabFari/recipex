@@ -543,7 +543,7 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
 */
 
     @Override
-    public void done(boolean canLogIn, String email) {
+    public void done(boolean canLogIn, String email, String idCalendar) {
         //if(x){ //Utente può accedere
         //Toast.makeText(getApplicationContext(), "Login eseguito con successo!", Toast.LENGTH_LONG).show();
         progressView.stopAnimation();
@@ -557,6 +557,11 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
             editor.putString("nome", nome);
             editor.putString("cognome", cognome);
             editor.putString("foto", personPhotoUrl);
+
+            if(idCalendar!=null) {
+                editor.putString("calendar", idCalendar);
+                Log.d(TAG, "idCalendar "+idCalendar);
+            }
 
             boolean utenteSemplice=pref.getBoolean("utenteSemplice", false);
             Log.d("UTENTESEMPLICE DONE", " "+utenteSemplice);

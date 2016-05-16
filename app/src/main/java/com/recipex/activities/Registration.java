@@ -269,7 +269,7 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
             return false;
         }
     }
-    public void done(boolean registered, String email) {
+    public void done(boolean registered, String email, String idCalendar) {
         //if(x){ //Utente può accedere
         // Toast.makeText(getApplicationContext(), "Login eseguito con successo!", Toast.LENGTH_LONG).show();
 
@@ -288,6 +288,10 @@ public class Registration extends ActionBarActivity implements TaskCallbackLogin
 
             if(campoSpecializzazione != null)
                 editor.putBoolean("caregiver", true);
+            if(idCalendar!=null) {
+                editor.putString("calendar", idCalendar);
+                Log.d(TAG, "idCalendar " + idCalendar);
+            }
 
             editor.commit();
 
