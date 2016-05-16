@@ -7,6 +7,10 @@
             android:icon="@drawable/home"
             android:title="Home" />
         <item
+            android:id="@+id/nav_calendario"
+            android:icon="@drawable/calendar_icon"
+            android:title="Calendario"/>
+        <item
             android:id="@+id/nav_infermieri"
             android:icon="@drawable/nurse_icon"
             android:title="I tuoi infermieri domiciliari" />
@@ -26,10 +30,7 @@
             android:id="@+id/nav_aiuto"
             android:icon="@drawable/ambulance"
             android:title="Chiedi aiuto" />
-        <item
-            android:id="@+id/nav_calendario"
-            android:icon="@drawable/calendar_icon"
-            android:title="Calendario"/>
+
     </group>
 
     <!--<item android:title="Communicate">

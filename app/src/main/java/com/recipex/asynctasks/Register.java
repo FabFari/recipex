@@ -183,16 +183,16 @@ public class Register extends AsyncTask<Void, Void, MainDefaultResponseMessage> 
                         editor.putBoolean("utenteSemplice", true);
                         editor.apply();
                         Log.d("UTENTESEMPLICE REGISTER", " " + pref.getBoolean("utenteSemplice", false));
-                        mCallback.done(true, utente.get("email").toString());
+                        mCallback.done(true, utente.get("email").toString(), utente.getCalendarId());
                     } else {
                         editor.putBoolean("utenteSemplice", false);
                         editor.apply();
-                        mCallback.done(true, utente.get("email").toString());
+                        mCallback.done(true, utente.get("email").toString(), utente.getCalendarId());
                     }
                 } else {
                     Log.d("DEBUG", "User NON era REGISTRATO!");
                     // System.out.println(email);
-                    mCallback.done(false, email);
+                    mCallback.done(false, email, null);
                 }
             }
             else {
@@ -205,15 +205,15 @@ public class Register extends AsyncTask<Void, Void, MainDefaultResponseMessage> 
                         editor.putBoolean("utenteSemplice", true);
                         editor.apply();
                         Log.d("UTENTESEMPLICE REGISTER", " " + pref.getBoolean("utenteSemplice", false));
-                        mCallback.done(true, email);
+                        mCallback.done(true, email, null);
                     } else {
                         editor.putBoolean("utenteSemplice", false);
                         editor.apply();
-                        mCallback.done(true, email);
+                        mCallback.done(true, email, null);
                     }
                 }
                 else
-                    mCallback.done(false, email);
+                    mCallback.done(false, email, response.getUser().getCalendarId());
             }
         }
     }

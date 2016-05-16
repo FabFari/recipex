@@ -26,6 +26,7 @@ import com.appspot.recipex_1281.recipexServerApi.model.MainMeasurementInfoMessag
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserMainInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserMeasurementsMessage;
+import com.github.clans.fab.FloatingActionMenu;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.recipex.AppConstants;
 import com.recipex.R;
@@ -76,6 +77,12 @@ public class CaregiversFragment extends Fragment implements GetUserTC{
     }
 
     private void initUI(View rootView) {
+        FloatingActionButton fab=(FloatingActionButton)rootView.findViewById(R.id.fabfragment);
+        fab.setVisibility(View.GONE);
+
+        FloatingActionMenu fabhome=(FloatingActionMenu) rootView.findViewById(R.id.home_fab_menu_measurement);
+        fabhome.setVisibility(View.GONE);
+
         RecyclerView rv = (RecyclerView)rootView.findViewById(R.id.my_recyclerview);
         curRecView=rv;
         LinearLayoutManager llm = new LinearLayoutManager(getContext());
@@ -148,9 +155,12 @@ public class CaregiversFragment extends Fragment implements GetUserTC{
                     emailcaregivers.add(cur.getEmail());
                 }
 
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putStringSet("emailcaregivers", emailcaregivers);
+
             }
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putStringSet("emailcaregivers", emailcaregivers);
+            editor.commit();
+            Log.d("CaregiversFragment", " "+emailcaregivers.size());
 
             CaregiverAdapter adapter = new CaregiverAdapter(message.getCaregivers(), message.getPcPhysician(),
                     message.getVisitingNurse(), (Home) getActivity(), null);

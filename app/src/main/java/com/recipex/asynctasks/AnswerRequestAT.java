@@ -1,16 +1,26 @@
 package com.recipex.asynctasks;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.appspot.recipex_1281.recipexServerApi.model.MainDefaultResponseMessage;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.services.calendar.CalendarScopes;
+import com.google.api.services.calendar.model.AclRule;
 import com.recipex.AppConstants;
 import com.recipex.taskcallbacks.AnswerRequestTC;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class AnswerRequestAT extends AsyncTask<Void, Void, MainDefaultResponseMessage> {
     public static String TAG = "SEND_REQUEST_AT";
@@ -38,6 +48,7 @@ public class AnswerRequestAT extends AsyncTask<Void, Void, MainDefaultResponseMe
         try {
             RecipexServerApi.Request.AnswerRequest put = apiHandler.request().answerRequest(user_id, request_id, answer);
             MainDefaultResponseMessage response = put.execute();
+
             return response;
         }
         catch(IOException e) {

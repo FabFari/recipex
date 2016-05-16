@@ -1,10 +1,17 @@
 package com.recipex.activities;
 
+import android.Manifest;
 import android.accounts.AccountManager;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -21,10 +28,23 @@ import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.appspot.recipex_1281.recipexServerApi.model.MainDefaultResponseMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserRequestsMessage;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.DateTime;
+import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.AclRule;
+import com.google.api.services.calendar.model.Calendar;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
+import com.google.api.services.calendar.model.EventReminder;
 import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.adapters.RequestsAdapter;
@@ -33,9 +53,15 @@ import com.recipex.asynctasks.GetUserRequestsAT;
 import com.recipex.taskcallbacks.AnswerRequestTC;
 import com.recipex.taskcallbacks.GetUserRequestsTC;
 import com.recipex.taskcallbacks.SendRequestTC;
+import com.recipex.taskcallbacks.TaskCallbackCalendar;
 import com.recipex.utilities.ConnectionDetector;
 
-public class UserRequests extends AppCompatActivity implements GetUserRequestsTC, AnswerRequestTC {
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+public class UserRequests extends AppCompatActivity implements GetUserRequestsTC, AnswerRequestTC{
 
     private final static String TAG = "USER_REQUESTS";
 
@@ -54,6 +80,7 @@ public class UserRequests extends AppCompatActivity implements GetUserRequestsTC
     private CircularProgressView progressView;
 
     private Long userId;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,34 +200,8 @@ public class UserRequests extends AppCompatActivity implements GetUserRequestsTC
                 Snackbar snackbar = Snackbar
                         .make(coordinator, "Risposta inviata con successo!", Snackbar.LENGTH_SHORT);
                 snackbar.show();
+
                 RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-
-                SharedPreferences pref=getSharedPreferences("MyPref", MODE_PRIVATE);
-                if(pref.getString("email", "").equals("")) {
-
-                    // Dò accesso al calendario dell'utente
-                    com.google.api.services.calendar.Calendar mService = new com.google.api.services.calendar.Calendar.Builder(
-                            AndroidHttp.newCompatibleTransport(), JacksonFactory.getDefaultInstance(), credential)
-                            .setApplicationName("RecipeX")
-                            .build();
-                    AclRule rule = new AclRule();
-                    AclRule.Scope scope = new AclRule.Scope();
-                    scope.setType("user").setValue(pref.getString("email", ""));
-                    rule.setScope(scope).setRole("writer");
-
-                    try {
-                        // Insert new access rule
-                        AclRule createdRule = mService.acl().insert(response.getPayload(), rule).execute();
-                        System.out.println(createdRule.getId());
-                    }
-                    catch(Exception e){e.printStackTrace();}
-
-                }
-                else{
-                    Toast.makeText(UserRequests.this, "Si è verificato un errore nella condivisione del calendario dell'utente.",
-                            Toast.LENGTH_LONG).show();
-                }
-                
                 if(checkNetwork()) new GetUserRequestsAT(this, this, coordinator, userId, apiHandler).execute();
 
             } else {

@@ -17,8 +17,9 @@ import java.util.List;
 /**
  * Created by Sara on 07/05/2016.
  */
-public class TerapieAdapter extends RecyclerView.Adapter<TerapieAdapter.MyViewHolder>{
+public class TerapieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
+    private static final int EMPTY_VIEW = 10;
     List<Terapia> terapie;
 
     public TerapieAdapter(List<Terapia> data){
@@ -26,35 +27,57 @@ public class TerapieAdapter extends RecyclerView.Adapter<TerapieAdapter.MyViewHo
     }
 
     @Override
-    public MyViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.terapia_item, viewGroup, false);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+        View v;
+
+        if (viewType == EMPTY_VIEW) {
+            v=LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.content_terapia_empty, viewGroup, false);
+            EmptyViewHolder evh = new EmptyViewHolder(v);
+            return evh;
+        }
+        v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.terapia_item, viewGroup, false);
         MyViewHolder pvh = new MyViewHolder(v);
         return pvh;
     }
 
     @Override
     public int getItemCount() {
-        return terapie.size();
+        if(terapie != null && terapie.size() > 0)
+            return terapie.size();
+        else
+            return 1;
+    }
+
+
+    @Override
+    public int getItemViewType(int position) {
+        if (terapie == null || terapie.size() == 0) {
+            return EMPTY_VIEW;
+        }
+        return super.getItemViewType(position);
     }
 
 
 
     @Override
-    public void onBindViewHolder(MyViewHolder personViewHolder, int i) {
-        personViewHolder.nome.setText(terapie.get(i).nome);
-        Log.d("TERAPIADOSE  ", i+" "+terapie.get(i).dose);
-        personViewHolder.dose.setText("Dose "+Long.toString(terapie.get(i).dose));
-        personViewHolder.tipo.setText("Tipo "+terapie.get(i).tipo);
-        personViewHolder.ricetta.setText("Ricetta "+(terapie.get(i).ricetta? "SI": "NO"));
-        personViewHolder.ingrediente.setText("Ingrediente "+terapie.get(i).ingrediente);
-        personViewHolder.unità.setText("Unità "+terapie.get(i).unità);
-        personViewHolder.quantità.setText("Quantità "+Long.toString(terapie.get(i).quantità));
-        if(!terapie.get(i).foglio.equals(""))
-            personViewHolder.foglio.setText("Foglio "+terapie.get(i).foglio);
-        else personViewHolder.foglio.setVisibility(View.INVISIBLE);
-        if(!terapie.get(i).caregiver.equals(""))
-            personViewHolder.foglio.setText("Caregiver "+terapie.get(i).caregiver);
-        else personViewHolder.foglio.setVisibility(View.INVISIBLE);
+    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
+        if(viewHolder instanceof MyViewHolder) {
+            MyViewHolder personViewHolder = (MyViewHolder) viewHolder;
+            personViewHolder.nome.setText(terapie.get(i).nome);
+            Log.d("TERAPIADOSE  ", i + " " + terapie.get(i).dose);
+            personViewHolder.dose.setText("Dose " + Long.toString(terapie.get(i).dose));
+            personViewHolder.tipo.setText("Tipo " + terapie.get(i).tipo);
+            personViewHolder.ricetta.setText("Ricetta " + (terapie.get(i).ricetta ? "SI" : "NO"));
+            personViewHolder.ingrediente.setText("Ingrediente " + terapie.get(i).ingrediente);
+            personViewHolder.unità.setText("Unità " + terapie.get(i).unità);
+            personViewHolder.quantità.setText("Quantità " + Long.toString(terapie.get(i).quantità));
+            if (!terapie.get(i).foglio.equals(""))
+                personViewHolder.foglio.setText("Foglio " + terapie.get(i).foglio);
+            else personViewHolder.foglio.setVisibility(View.INVISIBLE);
+            if (!terapie.get(i).caregiver.equals(""))
+                personViewHolder.foglio.setText("Caregiver " + terapie.get(i).caregiver);
+            else personViewHolder.foglio.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
@@ -87,5 +110,10 @@ public class TerapieAdapter extends RecyclerView.Adapter<TerapieAdapter.MyViewHo
         }
     }
 
+    public class EmptyViewHolder extends RecyclerView.ViewHolder {
+        public EmptyViewHolder(View itemView) {
+            super(itemView);
+        }
+    }
 
 }

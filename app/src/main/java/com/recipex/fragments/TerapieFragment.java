@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.appspot.recipex_1281.recipexServerApi.model.MainPrescriptionInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserPrescriptionsMessage;
 import com.github.clans.fab.FloatingActionMenu;
+import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.activities.AggiungiTerapia;
@@ -45,6 +46,8 @@ import java.util.List;
 public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie{
 
     static RecyclerView curRecView;
+
+    private CircularProgressView progressView;
 
     @Nullable
     @Override
@@ -74,6 +77,7 @@ public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie{
     }
 
     private void initUI(View rootView) {
+        progressView = (CircularProgressView) rootView.findViewById(R.id.home_progress_view);
         RecyclerView rv = (RecyclerView)rootView.findViewById(R.id.my_recyclerview);
         curRecView=rv;
         LinearLayoutManager llm = new LinearLayoutManager(getContext());
@@ -97,7 +101,11 @@ public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie{
         SharedPreferences pref=getActivity().getSharedPreferences("MyPref", Context.MODE_PRIVATE);
         long id=pref.getLong("userId", 0L);
 
-        if(id!=0 && checkNetwork()) new GetTerapieUser(id, getContext(), this ).execute();
+        if(id!=0 && checkNetwork()){
+            new GetTerapieUser(id, getContext(), this ).execute();
+            progressView.startAnimation();
+            progressView.setVisibility(View.VISIBLE);
+        }
         else Toast.makeText(getActivity(), "Si è verificato un errore.", Toast.LENGTH_SHORT).show();
     }
 
@@ -124,7 +132,7 @@ public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie{
 
     //callback from GetTerapieUser
     public void done(boolean b, MainUserPrescriptionsMessage response){
-        if(b==true) {
+        if(response!=null && response.getPrescriptions()!=null) {
             List<Terapia> terapie=new LinkedList<>();
             if(response.getPrescriptions()!=null){
                 List<MainPrescriptionInfoMessage> lista = response.getPrescriptions();
@@ -149,13 +157,12 @@ public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie{
                 Log.d("TERAPIEFRAGMENT", "size " + terapie.size());
                 curRecView.setAdapter(adapter);
             }
-            else {
-                Toast.makeText(getActivity(), "You don't have prescriptions. Add one clicking on the button", Toast.LENGTH_LONG).show();
-
-            }
         }
-        else{
-            Toast.makeText(getActivity(), "Si è verificato un errore", Toast.LENGTH_SHORT).show();
+        else {
+            progressView.stopAnimation();
+            progressView.setVisibility(View.GONE);
+            TerapieAdapter adapter = new TerapieAdapter(null);
+            curRecView.setAdapter(adapter);
         }
     }
 

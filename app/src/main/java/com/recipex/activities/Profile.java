@@ -9,35 +9,55 @@ import com.github.clans.fab.FloatingActionMenu;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.services.calendar.CalendarScopes;
+import com.google.api.services.calendar.model.AclRule;
 import com.recipex.AppConstants;
 import com.recipex.AppConstants.*;
 import com.recipex.R;
 import com.recipex.adapters.ContactAdapter;
 import com.recipex.asynctasks.CheckUserRelationsAT;
 import com.recipex.asynctasks.GetUserAT;
+import com.recipex.asynctasks.GetUserRequestsAT;
 import com.recipex.asynctasks.SendRequestAT;
 import com.recipex.fragments.ContactFragment;
 import com.recipex.taskcallbacks.CheckUserRelationsTC;
 import com.recipex.taskcallbacks.GetUserTC;
 import com.recipex.taskcallbacks.SendRequestTC;
+import com.recipex.taskcallbacks.TaskCallbackCalendar;
 import com.recipex.utilities.AlertDialogManager;
 import com.recipex.utilities.ConnectionDetector;
 import com.recipex.utilities.ContactItem;
 import com.squareup.picasso.Picasso;
 
+import android.Manifest;
 import android.accounts.AccountManager;
 import android.app.ActionBar;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.net.Credentials;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
@@ -66,14 +86,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
 
 public class Profile extends AppCompatActivity
         implements AppBarLayout.OnOffsetChangedListener, GetUserTC, CheckUserRelationsTC,
-        SendRequestTC, View.OnClickListener {
+        SendRequestTC, View.OnClickListener, TaskCallbackCalendar, EasyPermissions.PermissionCallbacks {
 
     public static final String TAG = "PROFILE";
     private static final float PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR = 0.9f;
@@ -187,6 +210,16 @@ public class Profile extends AppCompatActivity
 
     private int fabPressed;
     private boolean utente_semplice;
+
+    //per calendario
+    GoogleAccountCredential mCredential;
+    public static final int REQUEST_AUTHORIZATION = 1001;
+    static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
+    static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
+    private static final int REQUEST_ACCOUNT_PICKER_CALENDAR = 1000;
+    private static final String[] SCOPES = { CalendarScopes.CALENDAR };
+    private static final String PREF_ACCOUNT_NAME = "accountName";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -404,6 +437,39 @@ public class Profile extends AppCompatActivity
                     Snackbar snackbar = Snackbar
                             .make(coordinatorLayout, "Terapia aggiunta con successo!", Snackbar.LENGTH_SHORT);
                     snackbar.show();
+                }
+                break;
+            case REQUEST_GOOGLE_PLAY_SERVICES:
+                if (resultCode != RESULT_OK) {
+                    Toast.makeText(Profile.this, "This app requires Google Play Services. Please install " +
+                            "Google Play Services on your device and relaunch this app.", Toast.LENGTH_SHORT).show();
+
+                } else {
+                    getResultsFromApi();
+                }
+                break;
+            case REQUEST_ACCOUNT_PICKER_CALENDAR:
+                if (resultCode == RESULT_OK && data != null &&
+                        data.getExtras() != null) {
+                    Log.d("CALENDARres", "entro in res");
+
+                    String accountName =
+                            data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                    if (accountName != null) {
+                        SharedPreferences settings =
+                                getPreferences(Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putString(PREF_ACCOUNT_NAME, accountName);
+                        editor.apply();
+                        mCredential.setSelectedAccountName(accountName);
+                        Log.d("CALENDARres", accountName);
+                        getResultsFromApi();
+                    }
+                }
+                break;
+            case REQUEST_AUTHORIZATION:
+                if (resultCode == RESULT_OK) {
+                    getResultsFromApi();
                 }
                 break;
         }
@@ -680,6 +746,7 @@ public class Profile extends AppCompatActivity
     public void onClick(View v) {
         MainRequestSendMessage content = new MainRequestSendMessage();
         content.setSender(user_id);
+        SharedPreferences pref=getSharedPreferences("MyPref", MODE_PRIVATE);
         fabPressed = v.getId();
         // TODO Aggiungere Dialog per inserimento messaggio
         switch (v.getId()) {
@@ -718,6 +785,16 @@ public class Profile extends AppCompatActivity
                 com.github.clans.fab.FloatingActionButton fab_pressed = (com.github.clans.fab.FloatingActionButton)
                         findViewById(fabPressed);
                 fab_pressed.setEnabled(false);
+                SharedPreferences pref=getSharedPreferences("MyPref", MODE_PRIVATE);
+
+                //aggiungo caregiver al mio calendario
+                if(!pref.getString("calendar", "").equals("")) {
+                    mCredential = GoogleAccountCredential.usingOAuth2(
+                            getApplicationContext(), Arrays.asList(SCOPES))
+                            .setBackOff(new ExponentialBackOff());
+                    Log.d(TAG, "Inizio calendario");
+                    getResultsFromApi();
+                }
             } else {
                 Snackbar snackbar = Snackbar
                         .make(coordinatorLayout, "Operazione non riuscita: " + response.getCode(), Snackbar.LENGTH_SHORT);
@@ -824,4 +901,249 @@ public class Profile extends AppCompatActivity
         return result;
     }
     */
+    private void getResultsFromApi() {
+        if (! isGooglePlayServicesAvailable()) {
+            acquireGooglePlayServices();
+        } else if (mCredential.getSelectedAccountName() == null) {
+            Log.d("CALENDARgetres", "account");
+            chooseAccount();
+        } else if (! isDeviceOnline()) {
+            Toast.makeText(Profile.this, "No network connection available.", Toast.LENGTH_SHORT).show();
+        } else {
+            Log.d("CALENDARgetres", "task");
+            new AggiungiCaregiverCalendar(mCredential, getApplicationContext(), this,
+                    getSharedPreferences("MyPref", MODE_PRIVATE).getString("calendar",""), email.getText().toString()).execute();
+        }
+    }
+
+    /**
+     * Attempts to set the account used with the API credentials. If an account
+     * name was previously saved it will use that one; otherwise an account
+     * picker dialog will be shown to the user. Note that the setting the
+     * account to use with the credentials object requires the app to have the
+     * GET_ACCOUNTS permission, which is requested here if it is not already
+     * present. The AfterPermissionGranted annotation indicates that this
+     * function will be rerun automatically whenever the GET_ACCOUNTS permission
+     * is granted.
+     */
+    @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
+    private void chooseAccount() {
+        if (EasyPermissions.hasPermissions(
+                this, Manifest.permission.GET_ACCOUNTS)) {
+
+            String accountName = getPreferences(Context.MODE_PRIVATE)
+                    .getString(PREF_ACCOUNT_NAME, null);
+            if (accountName != null) {
+                Log.d("CALENDARcho", "account");
+
+                mCredential.setSelectedAccountName(accountName);
+                getResultsFromApi();
+            } else {
+                Log.d("CALENDARcho", "choose");
+
+                // Start a dialog from which the user can choose an account
+                startActivityForResult(
+                        mCredential.newChooseAccountIntent(),
+                        REQUEST_ACCOUNT_PICKER_CALENDAR);
+            }
+        } else {
+            Log.d("CALENDARcho", "noperm");
+
+            // Request the GET_ACCOUNTS permission via a user dialog
+            EasyPermissions.requestPermissions(
+                    this,
+                    "This app needs to access your Google account (via Contacts).",
+                    REQUEST_PERMISSION_GET_ACCOUNTS,
+                    Manifest.permission.GET_ACCOUNTS);
+        }
+    }
+
+    /**
+     * Check that Google Play services APK is installed and up to date.
+     * @return true if Google Play Services is available and up to
+     *     date on this device; false otherwise.
+     */
+    private boolean isGooglePlayServicesAvailable() {
+        GoogleApiAvailability apiAvailability =
+                GoogleApiAvailability.getInstance();
+        final int connectionStatusCode =
+                apiAvailability.isGooglePlayServicesAvailable(this);
+        return connectionStatusCode == ConnectionResult.SUCCESS;
+    }
+
+    /**
+     * Attempt to resolve a missing, out-of-date, invalid or disabled Google
+     * Play Services installation via a user dialog, if possible.
+     */
+    private void acquireGooglePlayServices() {
+        GoogleApiAvailability apiAvailability =
+                GoogleApiAvailability.getInstance();
+        final int connectionStatusCode =
+                apiAvailability.isGooglePlayServicesAvailable(this);
+        if (apiAvailability.isUserResolvableError(connectionStatusCode)) {
+            showGooglePlayServicesAvailabilityErrorDialog(connectionStatusCode);
+        }
+    }
+
+    /**
+     * Display an error dialog showing that Google Play Services is missing
+     * or out of date.
+     * @param connectionStatusCode code describing the presence (or lack of)
+     *     Google Play Services on this device.
+     */
+    public void showGooglePlayServicesAvailabilityErrorDialog(
+            final int connectionStatusCode) {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        Dialog dialog = apiAvailability.getErrorDialog(
+                Profile.this,
+                connectionStatusCode,
+                REQUEST_GOOGLE_PLAY_SERVICES);
+        dialog.show();
+    }
+    /**
+     * Respond to requests for permissions at runtime for API 23 and above.
+     * @param requestCode The request code passed in
+     *     requestPermissions(android.app.Activity, String, int, String[])
+     * @param permissions The requested permissions. Never null.
+     * @param grantResults The grant results for the corresponding permissions
+     *     which is either PERMISSION_GRANTED or PERMISSION_DENIED. Never null.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        EasyPermissions.onRequestPermissionsResult(
+                requestCode, permissions, grantResults, this);
+    }
+
+    /**
+     * Callback for when a permission is granted using the EasyPermissions
+     * library.
+     * @param requestCode The request code associated with the requested
+     *         permission
+     * @param list The requested permission list. Never null.
+     */
+    @Override
+    public void onPermissionsGranted(int requestCode, List<String> list) {
+        // Do nothing.
+    }
+
+    /**
+     * Callback for when a permission is denied using the EasyPermissions
+     * library.
+     * @param requestCode The request code associated with the requested
+     *         permission
+     * @param list The requested permission list. Never null.
+     */
+    @Override
+    public void onPermissionsDenied(int requestCode, List<String> list) {
+        // Do nothing.
+    }
+
+    /**
+     * Checks whether the device currently has a network connection.
+     * @return true if the device has a network connection, false otherwise.
+     */
+    private boolean isDeviceOnline() {
+        ConnectivityManager connMgr =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        return (networkInfo != null && networkInfo.isConnected());
+    }
+
+    //callback from Calendar
+    public void done(boolean b){
+        if(b){
+            Log.d(TAG, "DONE_TASKCALLBACK_CALENDAR");
+        }
+    }
+
+
+    private class AggiungiCaregiverCalendar extends AsyncTask<Void, Void, Boolean> {
+
+        private Context context;
+        private TaskCallbackCalendar mCallback;
+        private String idCalendar;
+        private String emailCaregiver;
+
+        private com.google.api.services.calendar.Calendar mService = null;
+        private Exception mLastError = null;
+
+        public AggiungiCaregiverCalendar(GoogleAccountCredential credential, Context context, TaskCallbackCalendar c,
+                                         String id, String e) {
+            HttpTransport transport = AndroidHttp.newCompatibleTransport();
+            JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+            mService = new com.google.api.services.calendar.Calendar.Builder(
+                    transport, jsonFactory, credential)
+                    .setApplicationName("RecipeX")
+                    .build();
+            this.context=context;
+            this.mCallback=c;
+            this.idCalendar=id;
+            this.emailCaregiver=e;
+        }
+
+        /**
+         * Background task to call Google Calendar API.
+         * @param params no parameters needed for this task.
+         */
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            SharedPreferences pref=context.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+
+            try {
+                Log.d(TAG, idCalendar);
+                // Create access rule with associated scope
+                AclRule rule = new AclRule();
+                AclRule.Scope scope = new AclRule.Scope();
+                scope.setType("user").setValue(emailCaregiver);
+                rule.setScope(scope).setRole("writer");
+
+                // Insert new access rule
+                AclRule createdRule = mService.acl().insert(idCalendar, rule).execute();
+                System.out.println(createdRule.getId());
+                return true;
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                //Log.d("ECCEZIONE CALENDAR", e.getCause().toString());
+                mLastError = e;
+                cancel(true);
+                return false;
+            }
+        }
+
+
+        @Override
+        protected void onPostExecute(Boolean response) {
+            if(response){
+                mCallback.done(response);
+            }
+            else{
+                Toast.makeText(context, "Operazione non riuscita", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            if (mLastError != null) {
+                if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
+                    showGooglePlayServicesAvailabilityErrorDialog(
+                            ((GooglePlayServicesAvailabilityIOException) mLastError)
+                                    .getConnectionStatusCode());
+                } else if (mLastError instanceof UserRecoverableAuthIOException) {
+                    startActivityForResult(
+                            ((UserRecoverableAuthIOException) mLastError).getIntent(),
+                            AddMeasurement.REQUEST_AUTHORIZATION);
+                } else {
+                    Toast.makeText(context, "The following error occurred:\n"
+                            + mLastError.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.d("ERRORE CALENDAR", mLastError.getMessage());
+                }
+            } else {
+                Toast.makeText(context, "Request cancelled.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 }

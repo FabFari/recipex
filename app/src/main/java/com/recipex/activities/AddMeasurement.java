@@ -824,6 +824,8 @@ public class AddMeasurement extends AppCompatActivity
                         Iterator<String> i = emailcaregivers.iterator();
                         while (i.hasNext()) {
                             String emailcur = (String) i.next();
+
+                            Log.d("CALENDAR", emailcur);
                             // Create access rule with associated scope
                             AclRule rule = new AclRule();
                             AclRule.Scope scope = new AclRule.Scope();
@@ -928,7 +930,7 @@ public class AddMeasurement extends AppCompatActivity
 
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.d("ECCEZIONE CALENDAR", e.getCause().toString());
+                //Log.d("ECCEZIONE CALENDAR", e.getCause().toString());
                 mLastError = e;
                 cancel(true);
                 return false;

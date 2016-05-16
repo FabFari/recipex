@@ -156,4 +156,14 @@
             fab:fab_label="Pressione" />
     </com.github.clans.fab.FloatingActionMenu>
 
+
+    <com.github.rahatarmanahmed.cpv.CircularProgressView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/home.progress_view"
+        android:layout_gravity="center"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:cpv_animAutostart="true"
+        app:cpv_indeterminate="true" />
+
 </android.support.design.widget.CoordinatorLayout>

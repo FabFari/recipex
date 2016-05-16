@@ -5,5 +5,5 @@ package com.recipex.taskcallbacks;
  */
 
 public interface TaskCallbackLogin {
-    void done(boolean x, String m);
+    void done(boolean x, String m, String n);
 }
