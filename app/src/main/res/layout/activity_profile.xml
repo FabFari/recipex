@@ -104,8 +104,8 @@
                 android:layout_height="?attr/actionBarSize"
                 android:background="@color/colorPrimary"
                 app:layout_anchor="@id/profile.framelayout.title"
-                app:theme="@style/ThemeOverlay.AppCompat.Dark"
-                app:title="">
+                app:theme="@style/AppTheme.FixedPadding"
+                app:title="" >
 
                 <LinearLayout
                     android:layout_width="wrap_content"

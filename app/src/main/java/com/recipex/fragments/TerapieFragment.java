@@ -4,13 +4,16 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,6 +27,7 @@ import android.widget.Toast;
 import com.appspot.recipex_1281.recipexServerApi.model.MainPrescriptionInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserPrescriptionsMessage;
 import com.github.clans.fab.FloatingActionMenu;
+import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.activities.AggiungiTerapia;
@@ -33,8 +37,10 @@ import com.recipex.adapters.TerapieAdapter;
 import com.recipex.asynctasks.GetTerapieUser;
 import com.recipex.taskcallbacks.TaskCallbackAggiungiTerapia;
 import com.recipex.taskcallbacks.TaskCallbackGetTerapie;
+import com.recipex.utilities.ConnectionDetector;
 import com.recipex.utilities.Terapia;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,6 +51,11 @@ import java.util.List;
 public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie{
 
     static RecyclerView curRecView;
+
+    private CoordinatorLayout coordinatorLayout;
+    private CircularProgressView progressView;
+
+    private ConnectionDetector cd;
 
     @Nullable
     @Override
@@ -74,6 +85,8 @@ public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie{
     }
 
     private void initUI(View rootView) {
+        coordinatorLayout = (CoordinatorLayout)rootView.findViewById(R.id.home_coordinator);
+        progressView = (CircularProgressView) rootView.findViewById(R.id.home_progress_view);
         RecyclerView rv = (RecyclerView)rootView.findViewById(R.id.my_recyclerview);
         curRecView=rv;
         LinearLayoutManager llm = new LinearLayoutManager(getContext());
@@ -98,33 +111,41 @@ public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie{
         long id=pref.getLong("userId", 0L);
 
         if(id!=0 && checkNetwork()) new GetTerapieUser(id, getContext(), this ).execute();
-        else Toast.makeText(getActivity(), "Si è verificato un errore.", Toast.LENGTH_SHORT).show();
-    }
-
-    public boolean checkNetwork() {
-        ConnectivityManager cm = (ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        boolean isOnline = (netInfo != null && netInfo.isConnectedOrConnecting());
-        if(isOnline) {
-            return true;
-        }else{
-            new AlertDialog.Builder(getActivity())
-                    .setTitle("Ops..qualcosa è andato storto!")
-                    .setMessage("Sembra che tu non sia collegato ad internet! ")
-                    .setPositiveButton("Impostazioni", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            // continue with delete
-                            Intent callGPSSettingIntent = new Intent(Settings.ACTION_SETTINGS);
-                            startActivityForResult(callGPSSettingIntent,0);
-                        }
-                    }).show();
-            return false;
+        else {
+            //Toast.makeText(getActivity(), "Si è verificato un errore.", Toast.LENGTH_SHORT).show();
+            Snackbar snackbar = Snackbar
+                    .make(getActivity().getWindow().getDecorView().getRootView(),
+                            "Si è verificato un errore.", Snackbar.LENGTH_SHORT);
+            snackbar.show();
         }
     }
 
+    public boolean checkNetwork() {
+        cd = new ConnectionDetector(getActivity().getApplicationContext());
+        // Check if Internet present
+        if (cd.isConnectingToInternet()) {
+            return true;
+        }else{
+            Snackbar snackbar = Snackbar
+                    .make(getActivity().getWindow().getDecorView().getRootView(),
+                            "Nessuna connesione a internet!", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("ESCI", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            getActivity().finish();
+                        }
+                    });
+
+            // Changing message text color
+            snackbar.setActionTextColor(Color.RED);
+            snackbar.show();
+        }
+        return false;
+    }
+
     //callback from GetTerapieUser
-    public void done(boolean b, MainUserPrescriptionsMessage response){
-        if(b==true) {
+    public void done(boolean res, MainUserPrescriptionsMessage response){
+        if(res) {
             List<Terapia> terapie=new LinkedList<>();
             if(response.getPrescriptions()!=null){
                 List<MainPrescriptionInfoMessage> lista = response.getPrescriptions();
@@ -145,18 +166,29 @@ public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie{
                     Log.d("TERAPIEFRAGMENT", cur.getActiveIngrName());
 
                 }
-                TerapieAdapter adapter = new TerapieAdapter(terapie);
+                TerapieAdapter adapter = new TerapieAdapter(terapie, this);
                 Log.d("TERAPIEFRAGMENT", "size " + terapie.size());
                 curRecView.setAdapter(adapter);
             }
             else {
-                Toast.makeText(getActivity(), "You don't have prescriptions. Add one clicking on the button", Toast.LENGTH_LONG).show();
-
+                TerapieAdapter adapter = new TerapieAdapter(new ArrayList<Terapia>(), this);
+                Log.d("TERAPIEFRAGMENT", "size " + terapie.size());
+                curRecView.setAdapter(adapter);
+                //Toast.makeText(getActivity(), "You don't have prescriptions. Add one clicking on the button", Toast.LENGTH_LONG).show();
+                Snackbar snackbar = Snackbar
+                        .make(getActivity().getWindow().getDecorView().getRootView(),
+                                "Non hai terapie al momento.\nAggiungine una cliccando sul bottone.", Snackbar.LENGTH_SHORT);
+                snackbar.show();
             }
         }
         else{
-            Toast.makeText(getActivity(), "Si è verificato un errore", Toast.LENGTH_SHORT).show();
+            Snackbar snackbar = Snackbar
+                    .make(getActivity().getWindow().getDecorView().getRootView(),
+                            "Si è verificato un errore.", Snackbar.LENGTH_SHORT);
+            snackbar.show();
         }
+        progressView.stopAnimation();
+        progressView.setVisibility(View.GONE);
     }
 
 }

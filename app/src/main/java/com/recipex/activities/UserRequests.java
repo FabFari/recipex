@@ -94,7 +94,7 @@ public class UserRequests extends AppCompatActivity implements GetUserRequestsTC
     public void done(boolean res, MainUserRequestsMessage response) {
         if (response != null) {
             if (res) {
-                adapter = new RequestsAdapter(response.getRequests(), this, progressView);
+                //adapter = new RequestsAdapter(response.getRequests(), this, progressView);
                 recycler.setAdapter(adapter);
             } else {
                 Snackbar snackbar = Snackbar

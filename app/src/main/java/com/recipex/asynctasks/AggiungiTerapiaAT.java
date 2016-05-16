@@ -1,5 +1,6 @@
 package com.recipex.asynctasks;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -33,6 +34,7 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
     boolean ricetta;
     String foglioIllustrativo;
     Long assistente;
+    Long paziente;
 
     GoogleAccountCredential credential;
     SharedPreferences settings;
@@ -44,7 +46,7 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
     }
 
     public AggiungiTerapiaAT(Context context, String nome, long ingrediente, String tipo, long dose, String unità,
-                             int quantità, boolean ricetta, String foglioIllustrativo, Long assistente,
+                             int quantità, boolean ricetta, String foglioIllustrativo, Long assistente, Long paziente,
                              TaskCallbackAggiungiTerapia mCallback) {
         mContext = context;
         this.mCallback = mCallback;
@@ -56,6 +58,7 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
         this.quantità = quantità;
         this.ricetta = ricetta;
         this.assistente=assistente;
+        this.paziente=paziente;
         this.foglioIllustrativo = foglioIllustrativo;
     }
 
@@ -97,7 +100,13 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
             if(assistente != null)
                 reg.setCaregiver(assistente);
 
-            long id=pref.getLong("userId", 0L);
+
+            //long id=pref.getLong("userId", 0L);
+            Long id;
+            if(paziente != null)
+                id = paziente;
+            else
+                id = pref.getLong("userId", 0L);
 
             RecipexServerApi.Prescription.AddPrescription post = apiServiceHandle.prescription().addPrescription(id, reg);
 

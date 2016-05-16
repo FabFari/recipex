@@ -48,6 +48,7 @@ import com.recipex.fragments.FamiliariFragment;
 import com.recipex.fragments.MisurazioniFragment;
 import com.recipex.fragments.TabFragment;
 import com.recipex.fragments.TerapieFragment;
+import com.recipex.fragments.UserRequestFragment;
 import com.recipex.utilities.Terapia;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
@@ -276,9 +277,10 @@ public class Home extends AppCompatActivity
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.containerView,new FamiliariFragment()).commit();
         } else if (id == R.id.nav_requests) {
-            Intent myIntent = new Intent(getApplicationContext(), UserRequests.class);
-            startActivity(myIntent);
-
+            //Intent myIntent = new Intent(getApplicationContext(), UserRequests.class);
+            //startActivity(myIntent);
+            FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.containerView,new UserRequestFragment()).commit();
         } else if (id == R.id.nav_aiuto) {
             Intent phoneIntent = new Intent(Intent.ACTION_DIAL);
             phoneIntent.setData(Uri.parse("tel:" + "112"));

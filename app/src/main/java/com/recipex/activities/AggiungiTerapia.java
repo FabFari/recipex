@@ -2,6 +2,7 @@ package com.recipex.activities;
 
 import android.Manifest;
 import android.accounts.AccountManager;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -25,6 +26,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -65,7 +67,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class AggiungiTerapia extends AppCompatActivity implements EasyPermissions.PermissionCallbacks, TaskCallbackAggiungiTerapia,
-        TaskCallbackActiveIngredients, TaskCallbackCalendar, AdapterView.OnItemSelectedListener{
+        TaskCallbackActiveIngredients, TaskCallbackCalendar, AdapterView.OnItemSelectedListener, View.OnClickListener{
 
     GoogleAccountCredential mCredential;
     private static final String PREF_ACCOUNT_NAME = "accountName";
@@ -80,7 +82,11 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
     private static final String[] SCOPES = { CalendarScopes.CALENDAR };
 
     private CoordinatorLayout coordinatorLayout;
-    private Long caregiverId;
+    private Long caregiverId, patientId;
+
+    private Toolbar toolbar;
+
+    private int mDay, mMonth, mYear;
 
     boolean fatto=false;
 
@@ -104,11 +110,14 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_aggiungi_terapia);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Aggiungi Terapia");
+
+        setSupportActionBar(toolbar);
 
         Intent intent = getIntent();
         caregiverId = intent.getLongExtra("caregiverId", 0L);
+        patientId = intent.getLongExtra("patientId", 0L);
 
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.lay_aggiungiterapia);
         Spinner numerocadenza=(Spinner)findViewById(R.id.numerocadenzaspin);
@@ -160,6 +169,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         inserisciQuantità=(EditText)findViewById(R.id.insertQuantità);
         inserisciFoglio=(EditText)findViewById(R.id.insertFoglio);
         inserisciInizio=(EditText)findViewById(R.id.insertInizio);
+        inserisciInizio.setOnClickListener(this);
 
         if(checkNetwork()) new GetMainIngredientsAT(getApplicationContext(), this).execute();
     }
@@ -167,7 +177,8 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_registration, menu);
+        //getMenuInflater().inflate(R.menu.menu_registration, menu);
+        toolbar.inflateMenu(R.menu.menu_registration);
         return true;
     }
 
@@ -204,17 +215,19 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                 if (checkNetwork()) {
                     if(!caregiverId.equals(0L)) {
                         new AggiungiTerapiaAT(getApplicationContext(), nome, ingredienteID, tipo, dose2, unità,
-                                quanto, recipe, foglio, caregiverId, this).execute();
+                                quanto, recipe, foglio, caregiverId, patientId, this).execute();
                     }
                     else {
                         new AggiungiTerapiaAT(getApplicationContext(), nome, ingredienteID, tipo, dose2, unità,
-                                quanto, recipe, foglio, null, this).execute();
+                                quanto, recipe, foglio, null, null, this).execute();
                     }
                 }
 
             }
             else {
-                Toast.makeText(getApplicationContext(),"Compilare i campi obbligatori", Toast.LENGTH_LONG).show();
+                Snackbar snackbar = Snackbar
+                        .make(coordinatorLayout, "Attenzione! Uno o più campi obbligatori vuoti!", Snackbar.LENGTH_SHORT);
+                snackbar.show();
             }
             return true;
         }
@@ -307,7 +320,23 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
             Log.d("INGREDIENTEID ", " "+ingredienteID);
         }
         else if(parent.getId()==R.id.tipi){
-            tipo=(String) parent.getItemAtPosition(pos);
+            //tipo=(String) parent.getItemAtPosition(pos);
+            switch (pos) {
+                case 0:
+                    tipo = AppConstants.PILLOLA;
+                    break;
+                case 1:
+                    tipo = AppConstants.BUSTINE;
+                    break;
+                case 2:
+                    tipo = AppConstants.FIALA;
+                    break;
+                case 3:
+                    tipo = AppConstants.CREMA;
+                    break;
+                case 4:
+                    tipo = AppConstants.ALTRO;
+            }
         }
         else if(parent.getId()==R.id.ricettaSINO){
             ricetta=(String)parent.getItemAtPosition(pos);
@@ -669,7 +698,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
 
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.d("ECCEZIONE CALENDAR", e.getMessage());
+                Log.d("ECCEZIONE CALENDAR", e.getCause().toString());
                 mLastError = e;
                 cancel(true);
                 return false;
@@ -709,4 +738,42 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
             }
         }
     }
+
+    @Override
+    public void onClick(View v) {
+        final java.util.Calendar c = java.util.Calendar.getInstance();
+        switch (v.getId()) {
+            case R.id.insertInizio:
+                mYear = c.get(java.util.Calendar.YEAR);
+                mMonth = c.get(java.util.Calendar.MONTH);
+                mDay = c.get(java.util.Calendar.DAY_OF_MONTH);
+
+                // Launch Date Picker Dialog
+                DatePickerDialog dpd = new DatePickerDialog(this,
+                        new DatePickerDialog.OnDateSetListener() {
+
+                            @Override
+                            public void onDateSet(DatePicker view, int year,
+                                                  int monthOfYear, int dayOfMonth) {
+                                // Display Selected date in textbox
+                                String dayOfMonthStr = null;
+                                if(dayOfMonth < 10)
+                                    dayOfMonthStr = "0" + dayOfMonth;
+                                else
+                                    dayOfMonthStr = "" + dayOfMonth;
+
+                                String monthOfYearStr = null;
+                                if(monthOfYear < 10)
+                                    monthOfYearStr = "0" + (monthOfYear + 1);
+                                else
+                                    monthOfYearStr = "" + (monthOfYear + 1);
+
+                                inserisciInizio.setText(year + "-" + monthOfYearStr + "-" + dayOfMonthStr);
+                            }
+                        }, mYear, mMonth, mDay);
+                dpd.show();
+                break;
+        }
+    }
+
 }

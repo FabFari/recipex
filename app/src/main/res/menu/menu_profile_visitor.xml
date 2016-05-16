@@ -16,6 +16,14 @@
         android:title="Aggiungi terapia"
         android:orderInCategory="1"
         app:showAsAction="always"
+        android:icon="@drawable/ic_add_prescription"
+        android:visible="false" />
+
+    <item
+        android:id="@+id/profile.user_measurements"
+        android:title="VIsualizza misurazioni"
+        android:orderInCategory="1"
+        app:showAsAction="always"
         android:icon="@drawable/ic_add_terapy"
         android:visible="false" />
 
