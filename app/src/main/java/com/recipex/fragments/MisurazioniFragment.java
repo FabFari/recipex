@@ -420,6 +420,8 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
             }
         }
 		else {
+            progressView.stopAnimation();
+            progressView.setVisibility(View.GONE);
             RVAdapter adapter = new RVAdapter(null);
             curRecView.setAdapter(adapter);
         }

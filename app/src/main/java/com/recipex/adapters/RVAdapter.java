@@ -117,6 +117,7 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                     personViewHolder.icon.setImageResource(R.drawable.ic_pain_dark);
                     personViewHolder.titolo.setText("Dolore");
                     personViewHolder.dato1_lbl.setText("Dolore: ");
+            }
 
             if (m.nota != null)
                 personViewHolder.nota.setText(m.nota);
@@ -125,7 +126,7 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     }
 
     @Override
-    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+    public void onAttachedToRecyclerView (RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
     }
 
