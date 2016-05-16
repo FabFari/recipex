@@ -632,6 +632,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                     // Insert the new calendar
                     Calendar createdCalendar = mService.calendars().insert(calendar).execute();
                     System.out.println("New Calendar "+createdCalendar.getId());
+                    idCalendar=createdCalendar.getId();
                     SharedPreferences.Editor editor=pref.edit();
                     editor.putString("calendar", createdCalendar.getId());
                     editor.commit();

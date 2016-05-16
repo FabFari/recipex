@@ -85,7 +85,7 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
         else {
             if (profileId != 0 && checkNetwork()) {
                 RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-                new GetMeasurementsUser(profileId, this, this, apiHandler).execute();
+                new GetMeasurementsUser(profileId, this, this, apiHandler, 0, null).execute();
                 progressView.startAnimation();
                 progressView.setVisibility(View.VISIBLE);
             } else {
@@ -131,7 +131,7 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
                         // User is authorized
                         RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
                         if (checkNetwork()) {
-                            new GetMeasurementsUser(profileId, this, this, apiHandler).execute();
+                            new GetMeasurementsUser(profileId, this, this, apiHandler, 0, null).execute();
                             progressView.startAnimation();
                             progressView.setVisibility(View.VISIBLE);
                         }
