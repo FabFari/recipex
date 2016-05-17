@@ -11,8 +11,11 @@ held by Prof. Ioannis Chatzigiannakis within the Master of Science in Computer S
 at University if Rome "La Sapienza". Informations about the course are available in the following page:
 http://ichatz.me/index.php/Site/PervasiveSystems2016.
 
-Additional informations about the project can be found in the following Slideshare presentation:
+Additional informations about the project can be found in the following Slideshare presentations:
 http://www.slideshare.net/FabrizioFarinacci1/recipex-your-personal-caregiver-and-lifestyle-makeover.
+
+http://www.slideshare.net/FabrizioFarinacci1/recipex-your-personal-caregiver-and-lifestyle-makeover-62091050
+
 
 
 Architecture
@@ -25,5 +28,8 @@ Through the GAE backend, the app access to:
 Google + API, to register the user
 Google Calendar API, to store the history of measurement and therapies and to notify the user about its therapeutical requirements.
 
+Screenshot
+----------
 
+You can find screenshot of the application in this repository. Enjoy!
 
