@@ -18,7 +18,7 @@ http://www.slideshare.net/FabrizioFarinacci1/recipex-your-personal-caregiver-and
 Architecture
 ------------
 
-![Alt text](https://github.com/FabFari/recipex/master/architettura.PNG)
+.. image:: recipex/master/architettura.PNG
 
 The frontend is a mobile application (Android).
 The backend is a Python application running on Google App Engine.
@@ -30,7 +30,7 @@ Google Calendar API, to store the history of measurement and therapies and to no
 Screenshot
 ----------
 
-![Alt text](https://github.com/FabFari/recipex/master/photo555404074295601126.jpg)
-![Alt text](https://github.com/FabFari/recipex/master/photo555404074295601127.jpg)
+.. image:: recipex/master/photo555404074295601126.jpg
+.. image:: recipex/master/photo555404074295601127.jpg
 
 
