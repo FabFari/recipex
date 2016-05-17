@@ -203,7 +203,6 @@ public class UserRequests extends AppCompatActivity implements GetUserRequestsTC
 
                 RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
                 if(checkNetwork()) new GetUserRequestsAT(this, this, coordinator, userId, apiHandler).execute();
-
             } else {
                 Snackbar snackbar = Snackbar
                         .make(coordinator, "Operazione non riuscita: " + response.getCode(), Snackbar.LENGTH_SHORT);
