@@ -28,10 +28,10 @@ import java.util.List;
  */
 public class TerapieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
-    private static final int EMPTY_VIEW = 10;
     List<Terapia> terapie;
     Fragment fragment;
     private static final String TAG = "TERAPIE_ADAPTER";
+    private static final int EMPTY_VIEW = 10;
 
     public TerapieAdapter(List<Terapia> data, Fragment fragment){
         if(data != null)

@@ -101,7 +101,7 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                     personViewHolder.icon.setImageResource(R.drawable.ic_spo2_dark);
                     personViewHolder.titolo.setText("Ossigenazione sanguigna");
                     personViewHolder.dato1_lbl.setText("SpO2: ");
-                    personViewHolder.dato1.setText(m.datodouble);
+                    personViewHolder.dato1.setText(m.datodouble+"%");
                     break;
                 case AppConstants.GLUCOSIO:
                     personViewHolder.icon.setImageResource(R.drawable.ic_diabetes_dark);

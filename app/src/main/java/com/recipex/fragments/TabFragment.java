@@ -3,6 +3,7 @@ package com.recipex.fragments;
 /**
  * Created by Sara on 24/04/2016.
  */
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -32,7 +33,13 @@ public class TabFragment extends Fragment {
         /**
          *Inflate tab_layout and setup Views.
          */
-        View x =  inflater.inflate(R.layout.tab_layout,null);
+        View x;
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            // only for lollipop and newer versions
+            x =  inflater.inflate(R.layout.tab_layout_fab,null);
+        else
+            x =  inflater.inflate(R.layout.tab_layout,null);
+
         tabLayout = (TabLayout) x.findViewById(R.id.tabs);
         viewPager = (ViewPager) x.findViewById(R.id.viewpager);
 
