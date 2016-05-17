@@ -21,6 +21,9 @@ http://www.slideshare.net/FabrizioFarinacci1/recipex-your-personal-caregiver-and
 Architecture
 ------------
 
+.. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/architettura.PNG
+   :align: center
+
 The frontend is a mobile application (Android).
 The backend is a Python application running on Google App Engine.
 The frontend interacts with a Web Service API offered by the GAE backend through Google Cloud Endpoints
