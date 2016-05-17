@@ -36,14 +36,3 @@ Screenshot
 
 You can find screenshot of the application in this repository. Enjoy!
 
-.. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/photo555404074295601126.jpg
-   :align: center
-   
-.. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/photo555404074295601127.jpg
-   :align: center 
-
-.. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/photo555404074295601128.jpg
-   :align: center
-   
-.. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/photo555404074295601129.jpg
-   :align: center
