@@ -21,7 +21,7 @@ The main functionalities offered by the application are:
 Architecture
 ------------
 
-.. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/architettura.PNG
+.. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/architecture.png
    :align: center
 
 The frontend is a mobile application (Android).
