@@ -6,17 +6,17 @@ Your personal caregiver and lifestyle makeover.
 
 RecipeX is an android application that has two main goals:
 
-# Helping patients to follow their therapies, simplifying the communication with the health care assistants
-# Giving health care assistants a simple and useful tool to keep track of the therapies of their assisted
+- Helping patients to follow their therapies, simplifying the communication with the health care assistants
+- Giving health care assistants a simple and useful tool to keep track of the therapies of their assisted
 
 Main functionalities
 --------------------
 The main functionalities offered by the application are:
 
-# Record vital signs and nursing prescriptions, keeping track of your progress within long term treatments
-# Manage a shared Google Calendar with your caregiver (and all those you would like to monitor your health), with all your current treatments and performed measurements
-# Send mail notifications through Google calendar, to remind you about your therapeutic requirements
-# The possibility to contact, directly from the application, your caregivers and family members
+- Record vital signs and nursing prescriptions, keeping track of your progress within long term treatments
+- Manage a shared Google Calendar with your caregiver (and all those you would like to monitor your health), with all your current treatments and performed measurements
+- Send mail notifications through Google calendar, to remind you about your therapeutic requirements
+- The possibility to contact, directly from the application, your caregivers and family members
 
 Architecture
 ------------
