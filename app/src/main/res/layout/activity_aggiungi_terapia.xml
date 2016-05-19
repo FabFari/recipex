@@ -93,6 +93,7 @@
                         android:layout_alignParentTop="true"
                         android:layout_centerHorizontal="true"/>
 
+                    <!--
                     <Spinner
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
@@ -100,6 +101,14 @@
                         android:id="@+id/ingredienti"
                         android:spinnerMode="dropdown"
                         android:textColor="@color/colorPrimaryDark" />
+                    -->
+
+                    <AutoCompleteTextView
+                        android:id="@+id/ingredienti"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:textColor="@color/colorPrimaryDark"/>
 
                     <!--tipo-->
                     <TextView
@@ -211,7 +220,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Foglio illustrativo"
+                        android:text="Foglio illustrativo: "
                         android:textAppearance="?android:attr/textAppearanceLarge"
                         android:paddingLeft="10dp"
                         android:id="@+id/foglio"
@@ -240,6 +249,8 @@
                         android:textColor="@color/colorPrimaryDark"
                         android:layout_alignParentTop="true"
                         android:layout_centerHorizontal="true"/>
+
+                    <!--
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -285,16 +296,85 @@
                         </Spinner>
                     </LinearLayout>
 
+                    -->
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ogni: "
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:id="@+id/ogni"
+                        android:paddingLeft="10dp"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <Spinner
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/numerocadenzaspin"
+                            android:spinnerMode="dropdown"
+                            android:textColor="@color/colorPrimaryDark" >
+                        </Spinner>
+                        <Spinner
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/cadenzaspin"
+                            android:spinnerMode="dropdown"
+                            android:textColor="@color/colorPrimaryDark">
+                        </Spinner>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ora della giornata:"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:id="@+id/ore"
+                        android:paddingLeft="10dp"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textStyle="bold" />
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp">
+
+                        <ImageView
+                            android:id="@+id/date_item_add"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_plus_accent"
+                            android:clickable="true"/>
+
+                        <ListView
+                            android:id="@+id/date_item_listview"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:dividerHeight="0dp"
+                            android:divider="@null"
+                            android:layout_alignTop="@id/date_item_add"
+                            android:layout_toEndOf="@id/date_item_add" >
+
+                        </ListView>
+
+                    </RelativeLayout>
+
                     <!--data di inizio-->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Data d'inizio"
+                        android:text="Data d'inizio: "
                         android:textAppearance="?android:attr/textAppearanceLarge"
                         android:paddingLeft="10dp"
                         android:id="@+id/inizio"
                         android:spinnerMode="dropdown"
                         android:textColor="@color/colorPrimaryDark"
+                        android:textStyle="bold"
                         android:layout_alignParentTop="true"
                         android:layout_centerHorizontal="true"/>
 

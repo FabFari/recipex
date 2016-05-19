@@ -100,7 +100,6 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
             if(assistente != null)
                 reg.setCaregiver(assistente);
 
-
             //long id=pref.getLong("userId", 0L);
             Long id;
             if(paziente != null)
