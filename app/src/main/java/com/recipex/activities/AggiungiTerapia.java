@@ -52,6 +52,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.calendar.CalendarScopes;
+import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
@@ -71,6 +72,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -116,7 +118,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
     private ArrayList<String> orari_assunzioni = new ArrayList<>();
     private AutoCompleteTextView princ_attivo;
 
-    String nome, ingrediente, tipo, dose, unità, quantità, ricetta, foglio, caregiver, numerocadenza, cadenza, ore, inizio;
+    String nome, ingrediente, tipo, dose, unità, quantità, ricetta, foglio, caregiver, numerocadenza, cadenza, inizio;
 
     boolean recipe;
     long ingredienteID;
@@ -240,10 +242,6 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                 //caregiver = inserisciCaregiver.getText().toString();
 
                 inizio=inserisciInizio.getText().toString();
-
-                //Fabrizio: per provare prendo di default il primo valore della lista
-                // che assumo ci sia sempre
-                ore = orari_assunzioni.get(0);
 
                 Log.d("REGISTRAZIONE ", "Sono qui");
 
@@ -443,7 +441,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         } else {
             Log.d("CALENDARgetres", "task");
             new AggiungiTerapiaCalendar(mCredential, getApplicationContext(), this, nome, numerocadenza, cadenza,
-                    ore, inizio).execute();
+                    inizio).execute();
         }
     }
     /**
@@ -646,14 +644,13 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         private String nome;
         private String numerocadenza;
         private String cadenza;
-        private String ore;
         private String inizio;
 
         private com.google.api.services.calendar.Calendar mService = null;
         private Exception mLastError = null;
 
         public AggiungiTerapiaCalendar(GoogleAccountCredential credential, Context context, TaskCallbackCalendar c,
-                                       String nome, String numerocadenza, String cadenza, String ore, String inizio) {
+                                       String nome, String numerocadenza, String cadenza, String inizio) {
             HttpTransport transport = AndroidHttp.newCompatibleTransport();
             JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
             mService = new com.google.api.services.calendar.Calendar.Builder(
@@ -665,7 +662,6 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
             this.nome=nome;
             this.numerocadenza=numerocadenza;
             this.cadenza=cadenza;
-            this.ore=ore;
             this.inizio=inizio;
         }
 
@@ -693,69 +689,98 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                     SharedPreferences.Editor editor=pref.edit();
                     editor.putString("calendar", createdCalendar.getId());
                     editor.commit();
+
+                    //se creo un nuovo calendario lo devo pubblicare a tutti i miei caregivers.
+                    if(pref.getStringSet("emailcaregivers",null)!=null) {
+                        Set<String> emailcaregivers = pref.getStringSet("emailcaregivers", null);
+
+                        Iterator<String> i = emailcaregivers.iterator();
+                        while (i.hasNext()) {
+                            String emailcur = (String) i.next();
+
+                            Log.d("CALENDAR", emailcur);
+                            // Create access rule with associated scope
+                            AclRule rule = new AclRule();
+                            AclRule.Scope scope = new AclRule.Scope();
+                            scope.setType("user").setValue(emailcur);
+                            rule.setScope(scope).setRole("writer");
+
+                            // Insert new access rule
+                            AclRule createdRule = mService.acl().insert(idCalendar, rule).execute();
+                            System.out.println(createdRule.getId());
+                        }
+
+                    }
                 }
                 //aggiungo la terapia
                 System.out.println("arrivo");
-                Event event = new Event()
-                        .setSummary(nome);
-                // Fabrizio: per adesso lo commento. Poi rivedilo bene tu
-                /*
-                if(Integer.parseInt(ore)<=9)
-                    ore="0"+ore;
-                */
-                ore = ore.substring(0,2);
+                Iterator<String> iteratore=orari_assunzioni.iterator();
 
-                Log.d("STARTTIME ", inizio+"T"+ore+":00:00+02:00");
-                DateTime startDateTime = new DateTime(inizio+"T"+ore+":00:00+02:00");
+                while(iteratore.hasNext()) {
+                    String o=(String)iteratore.next();
+                    String oreminuti=o.substring(0, 5);
+                    String ore=o.substring(0, 2);
+                    if(!ore.equals("")){
+                        Event event = new Event()
+                                .setSummary(nome);
+                        // Fabrizio: per adesso lo commento. Poi rivedilo bene tu
+                    /*
+                    if(Integer.parseInt(ore)<=9)
+                        ore="0"+ore;
+                    */
+                        Log.d("STARTTIME ", inizio + "T" + oreminuti + ":00+02:00");
+                        DateTime startDateTime = new DateTime(inizio + "T" + oreminuti + ":00+02:00");
 
-                EventDateTime startEvento = new EventDateTime()
-                        .setDateTime(startDateTime)
-                        .setTimeZone("Europe/Rome");
-                event.setStart(startEvento);
+                        EventDateTime startEvento = new EventDateTime()
+                                .setDateTime(startDateTime)
+                                .setTimeZone("Europe/Rome");
+                        event.setStart(startEvento);
 
-                //event.setEndTimeUnspecified(true);
+                        //event.setEndTimeUnspecified(true);
 
 
-                int orepiùunoint = Integer.parseInt(ore) + 1;
-                String orepiùuno = Integer.toString(orepiùunoint);
-                if(Integer.parseInt(orepiùuno)<=9)
-                    orepiùuno="0"+orepiùuno;
+                        int orepiùunoint = Integer.parseInt(ore) + 1;
+                        String orepiùuno = Integer.toString(orepiùunoint);
+                        if (Integer.parseInt(orepiùuno) <= 9)
+                            orepiùuno = "0" + orepiùuno;
 
-                DateTime endDateTime=new DateTime(inizio+"T"+orepiùuno+":00:00+02:00");
-                Log.d("DATAEND", inizio+"T"+orepiùuno+":00:00+02:00");
+                        DateTime endDateTime = new DateTime(inizio + "T" + orepiùuno + o.substring(2, 5)+":00+02:00");
+                        Log.d("DATAEND", inizio + "T" + orepiùuno + ":00+02:00");
 
-                EventDateTime endEvento = new EventDateTime()
-                        .setDateTime(endDateTime)
-                        .setTimeZone("Europe/Rome");
-                event.setStart(startEvento);
-                event.setEnd(endEvento);
+                        EventDateTime endEvento = new EventDateTime()
+                                .setDateTime(endDateTime)
+                                .setTimeZone("Europe/Rome");
+                        event.setStart(startEvento);
+                        event.setEnd(endEvento);
 
-                String ruledef="";
-                if(cadenza.equals("giorno"))
-                    ruledef="DAILY";
-                else if(cadenza.equals("settimana"))
-                    ruledef="WEEKLY";
-                else if(cadenza.equals("mese"))
-                    ruledef="MONTHLY";
-                else if(cadenza.equals("anno"))
-                    ruledef="YEARLY";
+                        String ruledef = "";
+                        if (cadenza.equals("giorno"))
+                            ruledef = "DAILY";
+                        else if (cadenza.equals("settimana"))
+                            ruledef = "WEEKLY";
+                        else if (cadenza.equals("mese"))
+                            ruledef = "MONTHLY";
+                        else if (cadenza.equals("anno"))
+                            ruledef = "YEARLY";
 
-                String[] recurrence = new String[] {"RRULE:FREQ="+ruledef+";INTERVAL="+numerocadenza};
+                        String[] recurrence = new String[]{"RRULE:FREQ=" + ruledef + ";INTERVAL=" + numerocadenza};
 
-                event.setRecurrence(Arrays.asList(recurrence));
-                Log.d("RECURRENCE ",recurrence[0]);
+                        event.setRecurrence(Arrays.asList(recurrence));
+                        Log.d("RECURRENCE ", recurrence[0]);
 
-                EventReminder[] reminderOverrides = new EventReminder[] {
-                        new EventReminder().setMethod("email").setMinutes(24 * 60),
-                        new EventReminder().setMethod("popup").setMinutes(10),
-                };
-                Event.Reminders reminders = new Event.Reminders()
-                        .setUseDefault(false)
-                        .setOverrides(Arrays.asList(reminderOverrides));
-                event.setReminders(reminders);
+                        EventReminder[] reminderOverrides = new EventReminder[]{
+                                new EventReminder().setMethod("email").setMinutes(24 * 60),
+                                new EventReminder().setMethod("popup").setMinutes(10),
+                        };
+                        Event.Reminders reminders = new Event.Reminders()
+                                .setUseDefault(false)
+                                .setOverrides(Arrays.asList(reminderOverrides));
+                        event.setReminders(reminders);
 
-                event = mService.events().insert(idCalendar, event).execute();
-                System.out.printf("Event created: %s\n", event.getHtmlLink());
+                        event = mService.events().insert(idCalendar, event).execute();
+                        System.out.printf("Event created: %s\n", event.getHtmlLink());
+                    }
+                }
                 return true;
 
             } catch (Exception e) {
