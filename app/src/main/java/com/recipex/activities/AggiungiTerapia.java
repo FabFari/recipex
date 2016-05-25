@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -24,10 +25,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -46,28 +52,35 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.calendar.CalendarScopes;
+import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.EventReminder;
 import com.recipex.AppConstants;
 import com.recipex.R;
+import com.recipex.adapters.DateItemAdapter;
 import com.recipex.asynctasks.AggiungiTerapiaAT;
 import com.recipex.asynctasks.GetMainIngredientsAT;
 import com.recipex.taskcallbacks.TaskCallbackActiveIngredients;
 import com.recipex.taskcallbacks.TaskCallbackAggiungiTerapia;
 import com.recipex.taskcallbacks.TaskCallbackCalendar;
+import com.recipex.utilities.ConnectionDetector;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class AggiungiTerapia extends AppCompatActivity implements EasyPermissions.PermissionCallbacks, TaskCallbackAggiungiTerapia,
         TaskCallbackActiveIngredients, TaskCallbackCalendar, AdapterView.OnItemSelectedListener, View.OnClickListener{
+
+    private final static String TAG = "AGGIUNGI_TERAPIA";
 
     GoogleAccountCredential mCredential;
     private static final String PREF_ACCOUNT_NAME = "accountName";
@@ -95,7 +108,17 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
 
     Spinner spinner;
 
-    String nome, ingrediente, tipo, dose, unità, quantità, ricetta, foglio, caregiver, numerocadenza, cadenza, ore, inizio;
+    // Added Fabrizio
+    ImageView add_date_item;
+    ListView date_item_listview;
+    DateItemAdapter date_item_adapter;
+    List<Integer> integers;
+    int count = 1;
+    private ConnectionDetector cd;
+    private ArrayList<String> orari_assunzioni = new ArrayList<>();
+    private AutoCompleteTextView princ_attivo;
+
+    String nome, ingrediente, tipo, dose, unità, quantità, ricetta, foglio, caregiver, numerocadenza, cadenza, inizio;
 
     boolean recipe;
     long ingredienteID;
@@ -121,7 +144,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
 
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.lay_aggiungiterapia);
         Spinner numerocadenza=(Spinner)findViewById(R.id.numerocadenzaspin);
-        Spinner orespin=(Spinner)findViewById(R.id.orespin);
+        //Spinner orespin=(Spinner)findViewById(R.id.orespin);
 
         String[] np = new String[MAXNUMEROCADENZA];
         for(int i=1;i<=MAXNUMEROCADENZA;i++){
@@ -136,16 +159,26 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         numerocadenza.setAdapter(_aa);
 
         ArrayAdapter <String> _aa2 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item,np2);//array holding min and max pages
-        orespin.setAdapter(_aa2);
+        //orespin.setAdapter(_aa2);
 
         numerocadenza.setOnItemSelectedListener(this);
-        orespin.setOnItemSelectedListener(this);
+        //orespin.setOnItemSelectedListener(this);
 
         Spinner cadenzaspin=(Spinner)findViewById(R.id.cadenzaspin);
         ArrayAdapter<CharSequence> adapterc = ArrayAdapter.createFromResource(this,
                 R.array.cadenze, android.R.layout.simple_spinner_item);
         cadenzaspin.setAdapter(adapterc);
         cadenzaspin.setOnItemSelectedListener(this);
+
+        add_date_item = (ImageView)findViewById(R.id.date_item_add);
+        add_date_item.setOnClickListener(this);
+        date_item_listview = (ListView)findViewById(R.id.date_item_listview);
+        integers = new ArrayList<Integer>();
+        integers.add(new Integer(count));
+        orari_assunzioni.add("");
+        date_item_adapter = new DateItemAdapter(this, integers, orari_assunzioni);
+        date_item_listview.setAdapter(date_item_adapter);
+
 
         Spinner tipi=(Spinner) findViewById(R.id.tipi);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
@@ -254,6 +287,11 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                             .setBackOff(new ExponentialBackOff());
                     getResultsFromApi();
                 }
+                else {
+                    Snackbar snackbar = Snackbar
+                            .make(coordinatorLayout, "Terapia inserita con successo!", Snackbar.LENGTH_SHORT);
+                    snackbar.show();
+                }
             }
             else {
                 //Toast.makeText(this, "Operazione non riuscita", Toast.LENGTH_LONG).show();
@@ -295,13 +333,22 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
             idsIngredienti.add(cur.getId());
         }
 
-        spinner = (Spinner) findViewById(R.id.ingredienti);
+        //spinner = (Spinner) findViewById(R.id.ingredienti);
+        princ_attivo = (AutoCompleteTextView) findViewById(R.id.ingredienti);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_dropdown_item, nomiIngredienti);
+                android.R.layout.simple_dropdown_item_1line, nomiIngredienti);
         // Apply the adapter to the spinner
-        spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(this);
+        princ_attivo.setAdapter(adapter);
+        princ_attivo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long rowId) {
+                ingrediente = (String)parent.getItemAtPosition(position);
+                Log.d("INGREDIENTE ", ingrediente);
+                ingredienteID = idsIngredienti.get(position);
+                Log.d("INGREDIENTEID ", " "+ingredienteID);
+            }
+        });
+        //spinner.setOnItemSelectedListener(this);
 
         //mi serve per aspettare prima che l'utente mandi i dati
         fatto=true;
@@ -350,33 +397,36 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
             cadenza=(String)parent.getItemAtPosition(pos);
             Log.d("CADENZA", cadenza);
         }
+        /*
         else if(parent.getId()==R.id.orespin){
             ore=(String)parent.getItemAtPosition(pos);
             Log.d("ORE", ore);
         }
+        */
     }
     public void onNothingSelected(AdapterView<?> parent) {
     }
 
     public boolean checkNetwork() {
-        ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        boolean isOnline = (netInfo != null && netInfo.isConnectedOrConnecting());
-        if(isOnline) {
+        cd = new ConnectionDetector(getApplicationContext());
+        // Check if Internet present
+        if (cd.isConnectingToInternet()) {
             return true;
         }else{
-            new AlertDialog.Builder(this)
-                    .setTitle("Ops..qualcosa è andato storto!")
-                    .setMessage("Sembra che tu non sia collegato ad internet! ")
-                    .setPositiveButton("Impostazioni", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            // continue with delete
-                            Intent callGPSSettingIntent = new Intent(Settings.ACTION_SETTINGS);
-                            startActivityForResult(callGPSSettingIntent,0);
+            Snackbar snackbar = Snackbar
+                    .make(coordinatorLayout, "Nessuna connesione a internet!", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("ESCI", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            finish();
                         }
-                    }).show();
-            return false;
+                    });
+
+            // Changing message text color
+            snackbar.setActionTextColor(Color.RED);
+            snackbar.show();
         }
+        return false;
     }
 
 
@@ -391,7 +441,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         } else {
             Log.d("CALENDARgetres", "task");
             new AggiungiTerapiaCalendar(mCredential, getApplicationContext(), this, nome, numerocadenza, cadenza,
-                    ore, inizio).execute();
+                    inizio).execute();
         }
     }
     /**
@@ -409,8 +459,12 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         if (EasyPermissions.hasPermissions(
                 this, Manifest.permission.GET_ACCOUNTS)) {
 
-            String accountName = getPreferences(Context.MODE_PRIVATE)
+            /*
+            String accountName = getSharedPreferences(AppConstants.PREFS_NAME,Context.MODE_PRIVATE)
                     .getString(PREF_ACCOUNT_NAME, null);
+            */
+            String accountName = getSharedPreferences(AppConstants.PREFS_NAME,Context.MODE_PRIVATE)
+                    .getString(AppConstants.DEFAULT_ACCOUNT, null);
             if (accountName != null) {
                 Log.d("CALENDARcho", "account");
 
@@ -468,9 +522,10 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                             data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
                     if (accountName != null) {
                         SharedPreferences settings =
-                                getPreferences(Context.MODE_PRIVATE);
+                                getSharedPreferences(AppConstants.PREFS_NAME,Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = settings.edit();
-                        editor.putString(PREF_ACCOUNT_NAME, accountName);
+                        //editor.putString(PREF_ACCOUNT_NAME, accountName);
+                        editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
                         editor.apply();
                         mCredential.setSelectedAccountName(accountName);
                         Log.d("CALENDARres", accountName);
@@ -589,14 +644,13 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         private String nome;
         private String numerocadenza;
         private String cadenza;
-        private String ore;
         private String inizio;
 
         private com.google.api.services.calendar.Calendar mService = null;
         private Exception mLastError = null;
 
         public AggiungiTerapiaCalendar(GoogleAccountCredential credential, Context context, TaskCallbackCalendar c,
-                                       String nome, String numerocadenza, String cadenza, String ore, String inizio) {
+                                       String nome, String numerocadenza, String cadenza, String inizio) {
             HttpTransport transport = AndroidHttp.newCompatibleTransport();
             JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
             mService = new com.google.api.services.calendar.Calendar.Builder(
@@ -608,7 +662,6 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
             this.nome=nome;
             this.numerocadenza=numerocadenza;
             this.cadenza=cadenza;
-            this.ore=ore;
             this.inizio=inizio;
         }
 
@@ -636,65 +689,98 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                     SharedPreferences.Editor editor=pref.edit();
                     editor.putString("calendar", createdCalendar.getId());
                     editor.commit();
+
+                    //se creo un nuovo calendario lo devo pubblicare a tutti i miei caregivers.
+                    if(pref.getStringSet("emailcaregivers",null)!=null) {
+                        Set<String> emailcaregivers = pref.getStringSet("emailcaregivers", null);
+
+                        Iterator<String> i = emailcaregivers.iterator();
+                        while (i.hasNext()) {
+                            String emailcur = (String) i.next();
+
+                            Log.d("CALENDAR", emailcur);
+                            // Create access rule with associated scope
+                            AclRule rule = new AclRule();
+                            AclRule.Scope scope = new AclRule.Scope();
+                            scope.setType("user").setValue(emailcur);
+                            rule.setScope(scope).setRole("writer");
+
+                            // Insert new access rule
+                            AclRule createdRule = mService.acl().insert(idCalendar, rule).execute();
+                            System.out.println(createdRule.getId());
+                        }
+
+                    }
                 }
                 //aggiungo la terapia
                 System.out.println("arrivo");
-                Event event = new Event()
-                        .setSummary(nome);
+                Iterator<String> iteratore=orari_assunzioni.iterator();
 
-                if(Integer.parseInt(ore)<=9)
-                    ore="0"+ore;
-                Log.d("STARTTIME ", inizio+"T"+ore+":00:00+02:00");
-                DateTime startDateTime = new DateTime(inizio+"T"+ore+":00:00+02:00");
+                while(iteratore.hasNext()) {
+                    String o=(String)iteratore.next();
+                    String oreminuti=o.substring(0, 5);
+                    String ore=o.substring(0, 2);
+                    if(!ore.equals("")){
+                        Event event = new Event()
+                                .setSummary(nome);
+                        // Fabrizio: per adesso lo commento. Poi rivedilo bene tu
+                    /*
+                    if(Integer.parseInt(ore)<=9)
+                        ore="0"+ore;
+                    */
+                        Log.d("STARTTIME ", inizio + "T" + oreminuti + ":00+02:00");
+                        DateTime startDateTime = new DateTime(inizio + "T" + oreminuti + ":00+02:00");
 
-                EventDateTime startEvento = new EventDateTime()
-                        .setDateTime(startDateTime)
-                        .setTimeZone("Europe/Rome");
-                event.setStart(startEvento);
+                        EventDateTime startEvento = new EventDateTime()
+                                .setDateTime(startDateTime)
+                                .setTimeZone("Europe/Rome");
+                        event.setStart(startEvento);
 
-                //event.setEndTimeUnspecified(true);
+                        //event.setEndTimeUnspecified(true);
 
 
-                int orepiùunoint = Integer.parseInt(ore) + 1;
-                String orepiùuno = Integer.toString(orepiùunoint);
-                if(Integer.parseInt(orepiùuno)<=9)
-                    orepiùuno="0"+orepiùuno;
+                        int orepiùunoint = Integer.parseInt(ore) + 1;
+                        String orepiùuno = Integer.toString(orepiùunoint);
+                        if (Integer.parseInt(orepiùuno) <= 9)
+                            orepiùuno = "0" + orepiùuno;
 
-                DateTime endDateTime=new DateTime(inizio+"T"+orepiùuno+":00:00+02:00");
-                Log.d("DATAEND", inizio+"T"+orepiùuno+":00:00+02:00");
+                        DateTime endDateTime = new DateTime(inizio + "T" + orepiùuno + o.substring(2, 5)+":00+02:00");
+                        Log.d("DATAEND", inizio + "T" + orepiùuno + ":00+02:00");
 
-                EventDateTime endEvento = new EventDateTime()
-                        .setDateTime(endDateTime)
-                        .setTimeZone("Europe/Rome");
-                event.setStart(startEvento);
-                event.setEnd(endEvento);
+                        EventDateTime endEvento = new EventDateTime()
+                                .setDateTime(endDateTime)
+                                .setTimeZone("Europe/Rome");
+                        event.setStart(startEvento);
+                        event.setEnd(endEvento);
 
-                String ruledef="";
-                if(cadenza.equals("giorno"))
-                    ruledef="DAILY";
-                else if(cadenza.equals("settimana"))
-                    ruledef="WEEKLY";
-                else if(cadenza.equals("mese"))
-                    ruledef="MONTHLY";
-                else if(cadenza.equals("anno"))
-                    ruledef="YEARLY";
+                        String ruledef = "";
+                        if (cadenza.equals("giorno"))
+                            ruledef = "DAILY";
+                        else if (cadenza.equals("settimana"))
+                            ruledef = "WEEKLY";
+                        else if (cadenza.equals("mese"))
+                            ruledef = "MONTHLY";
+                        else if (cadenza.equals("anno"))
+                            ruledef = "YEARLY";
 
-                String[] recurrence = new String[] {"RRULE:FREQ="+ruledef+";INTERVAL="+numerocadenza};
+                        String[] recurrence = new String[]{"RRULE:FREQ=" + ruledef + ";INTERVAL=" + numerocadenza};
 
-                event.setRecurrence(Arrays.asList(recurrence));
-                Log.d("RECURRENCE ",recurrence[0]);
+                        event.setRecurrence(Arrays.asList(recurrence));
+                        Log.d("RECURRENCE ", recurrence[0]);
 
-                EventReminder[] reminderOverrides = new EventReminder[] {
-                        new EventReminder().setMethod("email").setMinutes(24 * 60),
-                        new EventReminder().setMethod("popup").setMinutes(10),
-                };
-                Event.Reminders reminders = new Event.Reminders()
-                        .setUseDefault(false)
-                        .setOverrides(Arrays.asList(reminderOverrides));
-                event.setReminders(reminders);
+                        EventReminder[] reminderOverrides = new EventReminder[]{
+                                new EventReminder().setMethod("email").setMinutes(24 * 60),
+                                new EventReminder().setMethod("popup").setMinutes(10),
+                        };
+                        Event.Reminders reminders = new Event.Reminders()
+                                .setUseDefault(false)
+                                .setOverrides(Arrays.asList(reminderOverrides));
+                        event.setReminders(reminders);
 
-                event = mService.events().insert(idCalendar, event).execute();
-                System.out.printf("Event created: %s\n", event.getHtmlLink());
+                        event = mService.events().insert(idCalendar, event).execute();
+                        System.out.printf("Event created: %s\n", event.getHtmlLink());
+                    }
+                }
                 return true;
 
             } catch (Exception e) {
@@ -705,7 +791,6 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                 return false;
             }
         }
-
 
         @Override
         protected void onPostExecute(Boolean response) {
@@ -774,7 +859,56 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                         }, mYear, mMonth, mDay);
                 dpd.show();
                 break;
+            case R.id.date_item_add:
+                integers.add(new Integer(count++));
+                date_item_adapter.notifyDataSetChanged();
+                setListViewHeightBasedOnItems(date_item_listview);
+                orari_assunzioni.add("");
+                //Log.e(TAG, "Count: "+ date_item_adapter.getCount());
+                //Log.e(TAG, "Integers("+count+"): "+ date_item_adapter.getItem(count));
+                //count++;
+                //date_item_adapter.notifyDataSetChanged();
+                break;
         }
+    }
+
+    /**
+     * Sets ListView height dynamically based on the height of the items.
+     *
+     * @param listView to be resized
+     * @return true if the listView is successfully resized, false otherwise
+     */
+    public static boolean setListViewHeightBasedOnItems(ListView listView) {
+
+        ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter != null) {
+
+            int numberOfItems = listAdapter.getCount();
+
+            // Get total height of all items.
+            int totalItemsHeight = 0;
+            for (int itemPos = 0; itemPos < numberOfItems; itemPos++) {
+                View item = listAdapter.getView(itemPos, null, listView);
+                item.measure(0, 0);
+                totalItemsHeight += item.getMeasuredHeight();
+            }
+
+            // Get total height of all item dividers.
+            int totalDividersHeight = listView.getDividerHeight() *
+                    (numberOfItems - 1);
+
+            // Set list height.
+            ViewGroup.LayoutParams params = listView.getLayoutParams();
+            params.height = totalItemsHeight + totalDividersHeight;
+            listView.setLayoutParams(params);
+            listView.requestLayout();
+
+            return true;
+
+        } else {
+            return false;
+        }
+
     }
 
 }
