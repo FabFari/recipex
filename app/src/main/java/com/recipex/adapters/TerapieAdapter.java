@@ -1,8 +1,12 @@
 package com.recipex.adapters;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatAutoCompleteTextView;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -13,8 +17,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.recipex.AppConstants;
 import com.recipex.R;
+import com.recipex.asynctasks.RimuoviTerapiaAT;
+import com.recipex.asynctasks.UpdateRelationInfoAT;
+import com.recipex.taskcallbacks.RimuoviTerapiaTC;
+import com.recipex.utilities.ConnectionDetector;
 import com.recipex.utilities.Terapia;
 
 import org.w3c.dom.Text;
@@ -29,16 +38,24 @@ import java.util.List;
 public class TerapieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     List<Terapia> terapie;
+    RecipexServerApi apiHandler;
     Fragment fragment;
+    ConnectionDetector cd;
+    RimuoviTerapiaTC taskCallbak;
+    Long user_id;
     private static final String TAG = "TERAPIE_ADAPTER";
     private static final int EMPTY_VIEW = 10;
 
-    public TerapieAdapter(List<Terapia> data, Fragment fragment){
+    public TerapieAdapter(List<Terapia> data, Fragment fragment, RecipexServerApi apiHandler,
+                          RimuoviTerapiaTC taskCallback, Long user_id){
         if(data != null)
             this.terapie = data;
         else
             this.terapie = new ArrayList<Terapia>();
         this.fragment = fragment;
+        this.apiHandler = apiHandler;
+        this.taskCallbak =taskCallback;
+        this.user_id = user_id;
     }
 
     @Override
@@ -125,6 +142,40 @@ public class TerapieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             if (terapie.get(i).caregiver != null && terapie.get(i).caregiver.equals(""))
                 terapieViewHolder.foglio.setText(terapie.get(i).caregiver);
             //else terapieViewHolder.foglio.setVisibility(View.INVISIBLE);
+            terapieViewHolder.remove.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // 1. Instantiate an AlertDialog.Builder with its constructor
+                    AlertDialog.Builder builder = new AlertDialog.Builder(fragment.getActivity());
+
+                    // Add the buttons
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            if(checkNetwork()) {
+                                //Log.d(TAG, "ID: "+user_id);
+                                //Log.d(TAG, "CAREGIVER ID: "+caregivers.get(pos).getId());
+                                new RimuoviTerapiaAT(taskCallbak, fragment.getActivity(),
+                                        fragment.getActivity().getWindow().getDecorView().getRootView(),
+                                        terapie.get(pos).id, user_id, apiHandler).execute();
+                            }
+                        }
+                    });
+                    builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // User cancelled the dialog
+                            dialog.cancel();
+                        }
+                    });
+
+                    // 2. Chain together various setter methods to set the dialog characteristics
+                    builder.setMessage("Vuoi rimuovere "+terapie.get(pos).nome+" dalle tue terapie?")
+                            .setTitle("Attenzione");
+
+                    // 3. Get the AlertDialog from create()
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                }
+            });
         }
     }
 
@@ -145,6 +196,7 @@ public class TerapieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         TextView foglio;
         TextView foglio_empty;
         TextView caregiver;
+        ImageView remove;
 
         MyViewHolder(View itemView) {
             super(itemView);
@@ -159,6 +211,7 @@ public class TerapieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             foglio = (TextView)itemView.findViewById(R.id.foglioCard);
             foglio_empty = (TextView) itemView.findViewById(R.id.foglioCard_empty);
             caregiver = (TextView)itemView.findViewById(R.id.caregiverCard);
+            remove = (ImageView)itemView.findViewById(R.id.remove);
         }
     }
 
@@ -166,6 +219,29 @@ public class TerapieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         public EmptyViewHolder(View itemView) {
             super(itemView);
         }
+    }
+
+    public boolean checkNetwork() {
+        cd = new ConnectionDetector(fragment.getActivity().getApplicationContext());
+        // Check if Internet present
+        if (cd.isConnectingToInternet()) {
+            return true;
+        }else{
+            Snackbar snackbar = Snackbar
+                    .make(fragment.getActivity().getWindow().getDecorView().getRootView(),
+                            "Nessuna connesione a internet!", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("ESCI", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            fragment.getActivity().finish();
+                        }
+                    });
+
+            // Changing message text color
+            snackbar.setActionTextColor(Color.RED);
+            snackbar.show();
+        }
+        return false;
     }
 
 }

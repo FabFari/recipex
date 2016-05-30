@@ -58,6 +58,15 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
+        <ImageView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/remove"
+            android:src="@drawable/ic_decline"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true" />
+
         <View
             android:id="@+id/divider"
             android:layout_width="fill_parent"

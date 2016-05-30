@@ -13,7 +13,7 @@
         <item
             android:id="@+id/nav_infermieri"
             android:icon="@drawable/nurse_icon"
-            android:title="I tuoi infermieri domiciliari" />
+            android:title="I tuoi caregivers" />
         <item
             android:id="@+id/nav_requests"
             android:icon="@drawable/ic_requests"

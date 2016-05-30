@@ -1,7 +1,11 @@
 package com.recipex.adapters;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -11,13 +15,18 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.appspot.recipex_1281.recipexServerApi.model.MainRequestInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserMainInfoMessage;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
+import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.activities.Home;
 import com.recipex.activities.Profile;
 import com.recipex.activities.UserSearch;
+import com.recipex.asynctasks.UpdateRelationInfoAT;
+import com.recipex.taskcallbacks.UpdateRelationInfoTC;
+import com.recipex.utilities.ConnectionDetector;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -34,6 +43,7 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         TextView userName;
         TextView crgvField;
         ImageView crgvIcon;
+        ImageView remove;
 
         UserViewHolder(View itemView) {
             super(itemView);
@@ -42,6 +52,7 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             userName = (TextView)itemView.findViewById(R.id.user_search_user_name);
             crgvField = (TextView)itemView.findViewById(R.id.user_search_crgv_field);
             crgvIcon = (ImageView)itemView.findViewById(R.id.user_search_crgv_icon);
+            remove = (ImageView)itemView.findViewById(R.id.user_search_remove);
         }
     }
     public class EmptyViewHolder extends RecyclerView.ViewHolder {
@@ -51,16 +62,21 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     private static final int EMPTY_VIEW = 10;
+    private final static String TAG = "CAREGIVER_ADAPTER";
 
     List<MainUserMainInfoMessage> caregivers;
     MainUserMainInfoMessage physician;
     MainUserMainInfoMessage nurse;
     Home activity;
     CircularProgressView progressView;
+    RecipexServerApi apiHandler;
+    ConnectionDetector cd;
+    Long user_id;
+    UpdateRelationInfoTC taskCallback;
 
     public CaregiverAdapter(List<MainUserMainInfoMessage> users, MainUserMainInfoMessage physician,
-                            MainUserMainInfoMessage nurse, Home activity,
-                        CircularProgressView progressView){
+                            MainUserMainInfoMessage nurse, Home activity, CircularProgressView progressView,
+                            UpdateRelationInfoTC taskCallback, Long user_id, RecipexServerApi apiHandler){
         if(users != null)
             this.caregivers = users;
         else
@@ -80,6 +96,9 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         this.physician=physician;
         this.nurse=nurse;
+        this.taskCallback = taskCallback;
+        this.user_id = user_id;
+        this.apiHandler = apiHandler;
     }
 
     @Override
@@ -107,7 +126,7 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             return evh;
         }
 
-        v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.user_item, viewGroup, false);
+        v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.caregiver_item, viewGroup, false);
         UserViewHolder rvh = new UserViewHolder(v);
         return rvh;
     }
@@ -116,7 +135,7 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public void onBindViewHolder(final RecyclerView.ViewHolder viewHolder, int i) {
         final int pos = i;
         if(viewHolder instanceof UserViewHolder) {
-            UserViewHolder userViewHolder=(UserViewHolder)viewHolder;
+            final UserViewHolder userViewHolder=(UserViewHolder)viewHolder;
             //significa che ho aggiunto il medico di base, quindi sarà sicuramente alla prima posizione
             if(physician!=null){
                 if(i==0) {
@@ -139,6 +158,41 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                             activity.startActivity(myIntent);
                         }
                     });
+
+                    userViewHolder.remove.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            // 1. Instantiate an AlertDialog.Builder with its constructor
+                            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+
+                            // Add the buttons
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    if(checkNetwork()) {
+                                        new UpdateRelationInfoAT(user_id, physician.getId(), AppConstants.MEDICO_BASE,
+                                                activity.getWindow().getDecorView().getRootView(), activity, taskCallback,
+                                                apiHandler, AppConstants.ASSISTITO).execute();
+                                    }
+                                }
+                            });
+                            builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    // User cancelled the dialog
+                                    dialog.cancel();
+                                }
+                            });
+
+                            // 2. Chain together various setter methods to set the dialog characteristics
+                            builder.setMessage("Vuoi rimuovere "+physician.getName()+" "+physician.getSurname()
+                                    +" dai tuoi caregivers?")
+                                    .setTitle("Attenzione");
+
+                            // 3. Get the AlertDialog from create()
+                            AlertDialog dialog = builder.create();
+                            dialog.show();
+                        }
+                    });
+
                 }
                 //se ho anche l'infermiera, sarà alla seconda posizione
                 if(i==1 && nurse!=null){
@@ -161,6 +215,41 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                             activity.startActivity(myIntent);
                         }
                     });
+
+                    userViewHolder.remove.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            // 1. Instantiate an AlertDialog.Builder with its constructor
+                            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+
+                            // Add the buttons
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    if(checkNetwork()) {
+                                        new UpdateRelationInfoAT(user_id, nurse.getId(), AppConstants.INF_DOMICILIARE,
+                                                activity.getWindow().getDecorView().getRootView(), activity, taskCallback,
+                                                apiHandler, AppConstants.ASSISTITO).execute();
+                                    }
+                                }
+                            });
+                            builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    // User cancelled the dialog
+                                    dialog.cancel();
+                                }
+                            });
+
+                            // 2. Chain together various setter methods to set the dialog characteristics
+                            builder.setMessage("Vuoi rimuovere "+nurse.getName()+" "+nurse.getSurname()
+                                    +" dai tuoi caregivers?")
+                                    .setTitle("Attenzione");
+
+                            // 3. Get the AlertDialog from create()
+                            AlertDialog dialog = builder.create();
+                            dialog.show();
+                        }
+                    });
+
                 }
             }
             //se ho solo l'infermiera sarà alla prima posizione
@@ -184,9 +273,45 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                         activity.startActivity(myIntent);
                     }
                 });
+
+                userViewHolder.remove.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // 1. Instantiate an AlertDialog.Builder with its constructor
+                        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+
+                        // Add the buttons
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                if(checkNetwork()) {
+                                    new UpdateRelationInfoAT(user_id, nurse.getId(), AppConstants.INF_DOMICILIARE,
+                                            activity.getWindow().getDecorView().getRootView(), activity, taskCallback,
+                                            apiHandler, AppConstants.ASSISTITO).execute();
+                                }
+                            }
+                        });
+                        builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // User cancelled the dialog
+                                dialog.cancel();
+                            }
+                        });
+
+                        // 2. Chain together various setter methods to set the dialog characteristics
+                        builder.setMessage("Vuoi rimuovere "+nurse.getName()+" "+nurse.getSurname()
+                                +" dai tuoi caregivers?")
+                                .setTitle("Attenzione");
+
+                        // 3. Get the AlertDialog from create()
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    }
+                });
+
             }
 
             else {
+                userViewHolder.crgvIcon.setImageResource(R.drawable.ic_caregivers_accent);
                 userViewHolder.userName.setText(String.format(Locale.getDefault(), "%s %s",
                         caregivers.get(i).getName(), caregivers.get(i).getSurname()));
                 String field = caregivers.get(i).getField();
@@ -207,6 +332,44 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                         activity.startActivity(myIntent);
                     }
                 });
+
+                userViewHolder.remove.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Log.d(TAG, "REMOVE CLICKED!!");
+                        // 1. Instantiate an AlertDialog.Builder with its constructor
+                        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+
+                        // Add the buttons
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                if(checkNetwork()) {
+                                    //Log.d(TAG, "ID: "+user_id);
+                                    //Log.d(TAG, "CAREGIVER ID: "+caregivers.get(pos).getId());
+                                    new UpdateRelationInfoAT(user_id, caregivers.get(pos).getId(), AppConstants.CAREGIVER,
+                                            activity.getWindow().getDecorView().getRootView(), activity, taskCallback,
+                                            apiHandler, AppConstants.ASSISTITO).execute();
+                                }
+                            }
+                        });
+                        builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // User cancelled the dialog
+                                dialog.cancel();
+                            }
+                        });
+
+                        // 2. Chain together various setter methods to set the dialog characteristics
+                        builder.setMessage("Vuoi rimuovere "+caregivers.get(pos).getName()+" "+
+                                caregivers.get(pos).getSurname()+" dai tuoi caregivers?")
+                                .setTitle("Attenzione");
+
+                        // 3. Get the AlertDialog from create()
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    }
+                });
+
             }
         }
     }
@@ -218,6 +381,29 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     public void setDataset(List<MainUserMainInfoMessage> updatedUsers) {
         this.caregivers = updatedUsers;
+    }
+
+    public boolean checkNetwork() {
+        cd = new ConnectionDetector(activity.getApplicationContext());
+        // Check if Internet present
+        if (cd.isConnectingToInternet()) {
+            return true;
+        }else{
+            Snackbar snackbar = Snackbar
+                    .make(activity.getWindow().getDecorView().getRootView(),
+                            "Nessuna connesione a internet!", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("ESCI", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            activity.finish();
+                        }
+                    });
+
+            // Changing message text color
+            snackbar.setActionTextColor(Color.RED);
+            snackbar.show();
+        }
+        return false;
     }
 
 }
