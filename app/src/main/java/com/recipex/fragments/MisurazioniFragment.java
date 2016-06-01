@@ -184,7 +184,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
                     else {
                         if(checkNetwork()) {
                             RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-                            new GetMeasurementsUser(userId, getContext(), this, apiHandler, 0, null).execute();
+                            new GetMeasurementsUser(userId, getContext(), this, apiHandler, scrollnum, 0).execute();
                             progressView.startAnimation();
                             progressView.setVisibility(View.VISIBLE);
                         }
@@ -205,7 +205,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
                         // User is authorized
                         RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
                         if (checkNetwork()) {
-                            new GetMeasurementsUser(userId, getContext(), this, apiHandler,0, null).execute();
+                            new GetMeasurementsUser(userId, getContext(), this, apiHandler,scrollnum, 0).execute();
                             progressView.startAnimation();
                             progressView.setVisibility(View.VISIBLE);
                         }
@@ -353,7 +353,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
                         }
                     }
                 });*/
-                /*rv.setOnScrollListener(new RecyclerView.OnScrollListener() {
+                rv.setOnScrollListener(new RecyclerView.OnScrollListener() {
                     @Override
                     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                         super.onScrolled(recyclerView, dx, dy);
@@ -382,17 +382,17 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
                                 Log.d(TAG, "scrollll");
                                 Log.d(TAG, misurazioni.get(misurazioni.size()-1).data);
                                 new GetMeasurementsUser(userId, getContext(), f, apiHandler, scrollnum,
-                                        misurazioni.get(misurazioni.size()-1).data).execute();
+                                        misurazioni.get(misurazioni.size()-1).id).execute();
                             }
 
                             loading = true;
                         }
 
                     }
-                });*/
+                });
 
 
-                new GetMeasurementsUser(userId, getContext(), this, apiHandler, 0, null).execute();
+                new GetMeasurementsUser(userId, getContext(), this, apiHandler, scrollnum, 0).execute();
                 progressView.startAnimation();
                 progressView.setVisibility(View.VISIBLE);
             } else {
@@ -429,60 +429,66 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
 
     //callback from GetMisurazioniUser
     public void done(MainUserMeasurementsMessage response){
-        if(response!=null && response.getMeasurements()!=null) {
+        if((response!=null && response.getMeasurements()!=null) || !misurazioni.isEmpty() ) {
             Log.e(TAG, "Nel done di getMisurazioni");
-            List<Misurazione> misurazioni=new LinkedList<Misurazione>();
-            List<MainMeasurementInfoMessage> lista;
-            if(response!=null || response.getMeasurements() != null)
+            List<MainMeasurementInfoMessage> lista=new LinkedList<>();
+            if(response!=null && response.getMeasurements() != null && !response.getMeasurements().isEmpty()) {
                 lista = response.getMeasurements();
-            else
-                lista = new ArrayList<MainMeasurementInfoMessage>();
-            Iterator<MainMeasurementInfoMessage> i = lista.iterator();
-            while (i.hasNext()) {
-                MainMeasurementInfoMessage cur = i.next();
-                Misurazione mcur=new Misurazione();
-                switch (cur.getKind()) {
-                    case AppConstants.COLESTEROLO:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getChlLevel()));
-                        break;
-                    case AppConstants.FREQ_CARDIACA:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getBpm()), "", "");
-                        break;
-                    case AppConstants.PRESSIONE:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getSystolic()),
-                                Long.toString(cur.getDiastolic()), "");
-                        break;
-                    case AppConstants.FREQ_RESPIRAZIONE:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getRespirations()), "", "");
-                        break;
-                    case AppConstants.SPO2:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getSpo2()));
-                        break;
-                    case AppConstants.GLUCOSIO:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "","", Double.toString(cur.getHgt()));
-                        break;
-                    case AppConstants.TEMP_CORPOREA:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(),"", "", Double.toString(cur.getDegrees()));
-                        break;
-                    case AppConstants.DOLORE:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getNrs()), "", "");
-                        break;
-                }
-                if(cur.getNote()!=null)
-                    mcur.setNota(cur.getNote());
+                Iterator<MainMeasurementInfoMessage> i = lista.iterator();
+                while (i.hasNext()) {
+                    MainMeasurementInfoMessage cur = i.next();
+                    Misurazione mcur = new Misurazione();
+                    switch (cur.getKind()) {
+                        case AppConstants.COLESTEROLO:
+                            mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getChlLevel()));
+                            break;
+                        case AppConstants.FREQ_CARDIACA:
+                            mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getBpm()), "", "");
+                            break;
+                        case AppConstants.PRESSIONE:
+                            mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getSystolic()),
+                                    Long.toString(cur.getDiastolic()), "");
+                            break;
+                        case AppConstants.FREQ_RESPIRAZIONE:
+                            mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getRespirations()), "", "");
+                            break;
+                        case AppConstants.SPO2:
+                            mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getSpo2()));
+                            break;
+                        case AppConstants.GLUCOSIO:
+                            mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getHgt()));
+                            break;
+                        case AppConstants.TEMP_CORPOREA:
+                            mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getDegrees()));
+                            break;
+                        case AppConstants.DOLORE:
+                            mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getNrs()), "", "");
+                            break;
+                    }
+                    if (cur.getNote() != null)
+                        mcur.setNota(cur.getNote());
 
-                misurazioni.add(mcur);
-                Log.d("MisIterator", mcur.data);
+                    mcur.setId(cur.getId());
+                    misurazioni.add(mcur);
+                    Log.d("MisIterator", mcur.data);
+
+                }
             }
-            RVAdapter adapter = new RVAdapter(misurazioni);
-            curRecView.setAdapter(adapter);
-            Log.d(TAG, "itemCount: "+ adapter.getItemCount());
-            if(adapter.getItemViewType(0) == EMPTY_VIEW) {
-                Snackbar snackbar = Snackbar
-                        .make(getActivity().getWindow().getDecorView().getRootView(),
-                                "Ancora nessuna misurazione?\nAggiungine subito una cliccando il bottone!", Snackbar.LENGTH_SHORT);
-                snackbar.show();
+            /*if(response.getMeasurements().isEmpty())
+                misurazioni.clear();
+            else {*/
+            if(!misurazioni.isEmpty()) {
+                RVAdapter adapter = new RVAdapter(misurazioni);
+                curRecView.setAdapter(adapter);
+                Log.d(TAG, "itemCount: " + adapter.getItemCount());
+                if (adapter.getItemViewType(0) == EMPTY_VIEW) {
+                    Snackbar snackbar = Snackbar
+                            .make(getActivity().getWindow().getDecorView().getRootView(),
+                                    "Ancora nessuna misurazione?\nAggiungine subito una cliccando il bottone!", Snackbar.LENGTH_SHORT);
+                    snackbar.show();
+                }
             }
+            //}
         }
 		else {
             RVAdapter adapter = new RVAdapter(new ArrayList<Misurazione>());

@@ -18,6 +18,8 @@ import com.recipex.AppConstants;
 import com.recipex.taskcallbacks.TaskCallbackAggiungiTerapia;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by Sara on 03/05/2016.
@@ -35,6 +37,7 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
     String foglioIllustrativo;
     Long assistente;
     Long paziente;
+    List<String> idEventi;
 
     GoogleAccountCredential credential;
     SharedPreferences settings;
@@ -46,7 +49,7 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
     }
 
     public AggiungiTerapiaAT(Context context, String nome, long ingrediente, String tipo, long dose, String unità,
-                             int quantità, boolean ricetta, String foglioIllustrativo, Long assistente, Long paziente,
+                             int quantità, boolean ricetta, String foglioIllustrativo, Long assistente, Long paziente, List<String> idEventi,
                              TaskCallbackAggiungiTerapia mCallback) {
         mContext = context;
         this.mCallback = mCallback;
@@ -60,6 +63,7 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
         this.assistente=assistente;
         this.paziente=paziente;
         this.foglioIllustrativo = foglioIllustrativo;
+        this.idEventi=idEventi;
     }
 
     // setSelectedAccountName definition
@@ -92,10 +96,13 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
             reg.setDose(dose);
             reg.setUnits(unità);
             reg.setQuantity((long) quantità);
+            Log.d("AggiungiATricetta", ""+ricetta );
             reg.setRecipe(ricetta);
 
             //NON OBBLIGATORI
             reg.setPil(foglioIllustrativo);
+            if(!idEventi.isEmpty())
+                reg.setCalendarIds(idEventi);
 
             if(assistente != null)
                 reg.setCaregiver(assistente);
@@ -107,13 +114,14 @@ public class AggiungiTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponse
             else
                 id = pref.getLong("userId", 0L);
 
+            Log.d("AggiungiAT", "pre execute");
+
             RecipexServerApi.Prescription.AddPrescription post = apiServiceHandle.prescription().addPrescription(id, reg);
 
             MainDefaultResponseMessage response = post.execute();
             return response;
-        } catch (IOException e) {
-            Looper.prepare();
-            Toast.makeText(mContext, "Exception during API call! " + e.getMessage(), Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Log.d("AggiungiAT", e.getMessage());
         }
         return null;
     }
