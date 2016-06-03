@@ -38,6 +38,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.appspot.recipex_1281.recipexServerApi.model.MainDefaultResponseMessage;
 import com.github.clans.fab.FloatingActionMenu;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.google.android.gms.plus.model.people.Person;
@@ -64,6 +65,7 @@ import com.recipex.adapters.RVAdapter;
 import com.recipex.adapters.TerapieAdapter;
 import com.recipex.asynctasks.GetMeasurementsUser;
 import com.recipex.asynctasks.GetTerapieUser;
+import com.recipex.taskcallbacks.DeleteMeasurementTC;
 import com.recipex.taskcallbacks.TaskCallbackGetMeasurements;
 import com.recipex.utilities.ConnectionDetector;
 import com.recipex.utilities.Misurazione;
@@ -81,7 +83,8 @@ import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 /**
  * Created by Sara on 02/05/2016.
  */
-public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeasurements/*, Toolbar.OnMenuItemClickListener*/ {
+public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeasurements,
+        DeleteMeasurementTC /*, Toolbar.OnMenuItemClickListener*/ {
 
     private final static String TAG = "MISURAZIONI_FRAGMENT";
     private final static int ADD_MEASUREMENT = 1;
@@ -124,6 +127,8 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
     private Long userId;
 
     static RecyclerView curRecView;
+
+    RecipexServerApi apiHandler;
 
     @Nullable
     @Override
@@ -183,7 +188,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
                     }
                     else {
                         if(checkNetwork()) {
-                            RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
+                            apiHandler = AppConstants.getApiServiceHandle(credential);
                             new GetMeasurementsUser(userId, getContext(), this, apiHandler, 0, null).execute();
                             progressView.startAnimation();
                             progressView.setVisibility(View.VISIBLE);
@@ -203,7 +208,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
                         editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
                         editor.apply();
                         // User is authorized
-                        RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
+                        apiHandler = AppConstants.getApiServiceHandle(credential);
                         if (checkNetwork()) {
                             new GetMeasurementsUser(userId, getContext(), this, apiHandler,0, null).execute();
                             progressView.startAnimation();
@@ -339,7 +344,8 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
         }
         else {
             if (userId != 0 && checkNetwork()) {
-                final RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
+                //final RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
+                apiHandler = AppConstants.getApiServiceHandle(credential);
 
                 final TaskCallbackGetMeasurements f=this;
                 //SCROLL
@@ -443,29 +449,29 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
                 Misurazione mcur=new Misurazione();
                 switch (cur.getKind()) {
                     case AppConstants.COLESTEROLO:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getChlLevel()));
+                        mcur = new Misurazione(cur.getId(), cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getChlLevel()));
                         break;
                     case AppConstants.FREQ_CARDIACA:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getBpm()), "", "");
+                        mcur = new Misurazione(cur.getId(), cur.getKind(), cur.getDateTime(), Long.toString(cur.getBpm()), "", "");
                         break;
                     case AppConstants.PRESSIONE:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getSystolic()),
+                        mcur = new Misurazione(cur.getId(), cur.getKind(), cur.getDateTime(), Long.toString(cur.getSystolic()),
                                 Long.toString(cur.getDiastolic()), "");
                         break;
                     case AppConstants.FREQ_RESPIRAZIONE:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getRespirations()), "", "");
+                        mcur = new Misurazione(cur.getId(), cur.getKind(), cur.getDateTime(), Long.toString(cur.getRespirations()), "", "");
                         break;
                     case AppConstants.SPO2:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getSpo2()));
+                        mcur = new Misurazione(cur.getId(), cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getSpo2()));
                         break;
                     case AppConstants.GLUCOSIO:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "","", Double.toString(cur.getHgt()));
+                        mcur = new Misurazione(cur.getId(), cur.getKind(), cur.getDateTime(), "","", Double.toString(cur.getHgt()));
                         break;
                     case AppConstants.TEMP_CORPOREA:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(),"", "", Double.toString(cur.getDegrees()));
+                        mcur = new Misurazione(cur.getId(), cur.getKind(), cur.getDateTime(),"", "", Double.toString(cur.getDegrees()));
                         break;
                     case AppConstants.DOLORE:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getNrs()), "", "");
+                        mcur = new Misurazione(cur.getId(), cur.getKind(), cur.getDateTime(), Long.toString(cur.getNrs()), "", "");
                         break;
                 }
                 if(cur.getNote()!=null)
@@ -474,7 +480,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
                 misurazioni.add(mcur);
                 Log.d("MisIterator", mcur.data);
             }
-            RVAdapter adapter = new RVAdapter(misurazioni);
+            RVAdapter adapter = new RVAdapter(misurazioni, this.getActivity(), this, userId, apiHandler);
             curRecView.setAdapter(adapter);
             Log.d(TAG, "itemCount: "+ adapter.getItemCount());
             if(adapter.getItemViewType(0) == EMPTY_VIEW) {
@@ -485,7 +491,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
             }
         }
 		else {
-            RVAdapter adapter = new RVAdapter(new ArrayList<Misurazione>());
+            RVAdapter adapter = new RVAdapter(new ArrayList<Misurazione>(), this.getActivity(), this, userId, apiHandler);
             curRecView.setAdapter(adapter);
         }
 
@@ -664,4 +670,38 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
     }
 
 
+    @Override
+    public void done(boolean res, MainDefaultResponseMessage response) {
+        if(res) {
+            Snackbar snackbar = Snackbar
+                    .make(getActivity().getWindow().getDecorView().getRootView(),
+                            "Misurazione rimossa con successo!", Snackbar.LENGTH_SHORT);
+            snackbar.show();
+        }
+        else {
+            Snackbar snackbar = Snackbar
+                    .make(getActivity().getWindow().getDecorView().getRootView(),
+                            "Operazione non riuscita!", Snackbar.LENGTH_SHORT);
+            snackbar.show();
+        }
+
+        if(checkNetwork()){
+            settings = getActivity().getSharedPreferences(AppConstants.PREFS_NAME, 0);
+            credential = GoogleAccountCredential.usingAudience(getContext(), AppConstants.AUDIENCE);
+            Log.d("Caregivers", "Credential: " + credential);
+            setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+
+            if (credential.getSelectedAccountName() == null) {
+                Log.d("Caregivers", "AccountName == null: startActivityForResult.");
+                startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
+            } else {
+                apiHandler = AppConstants.getApiServiceHandle(credential);
+                if (checkNetwork()) {
+                    progressView.startAnimation();
+                    progressView.setVisibility(View.VISIBLE);
+                    new GetMeasurementsUser(userId, getContext(), this, apiHandler, 0, null).execute();
+                }
+            }
+        }
+    }
 }
