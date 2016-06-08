@@ -57,6 +57,7 @@ import com.google.api.services.calendar.model.EventReminder;
 import com.google.api.services.calendar.model.Events;
 import com.recipex.AppConstants;
 import com.recipex.asynctasks.AddMeasurementAT;
+import com.recipex.asynctasks.EliminaEventiCalendar;
 import com.recipex.asynctasks.NdefReaderTask;
 import com.recipex.asynctasks.RegistraCalendarioAT;
 import com.recipex.taskcallbacks.AddMeasurementTC;
@@ -91,7 +92,6 @@ public class AddMeasurement extends AppCompatActivity
     GoogleAccountCredential mCredential;
     private static final String PREF_ACCOUNT_NAME = "accountName";
 
-    public static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
     static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
     private static final int REQUEST_ACCOUNT_CALENDAR = 1000;
@@ -680,7 +680,7 @@ public class AddMeasurement extends AppCompatActivity
                     Log.d("CALENDARres", "errore");
                 }
                 break;
-            case REQUEST_AUTHORIZATION:
+            case AppConstants.REQUEST_AUTHORIZATION:
                 if (resultCode == RESULT_OK) {
                     getResultsFromApi();
                 }
@@ -1062,7 +1062,7 @@ public class AddMeasurement extends AppCompatActivity
                 } else if (mLastError instanceof UserRecoverableAuthIOException) {
                     startActivityForResult(
                             ((UserRecoverableAuthIOException) mLastError).getIntent(),
-                            AddMeasurement.REQUEST_AUTHORIZATION);
+                            AppConstants.REQUEST_AUTHORIZATION);
                 } else {
                     Toast.makeText(context, "The following error occurred:\n"
                             + mLastError.getMessage(), Toast.LENGTH_SHORT).show();
@@ -1074,7 +1074,7 @@ public class AddMeasurement extends AppCompatActivity
         }
     }
 
-    public class EliminaEventiCalendar  extends AsyncTask<Void, Void, Boolean> {
+    /*public class EliminaEventiCalendar  extends AsyncTask<Void, Void, Boolean> {
         private Context context;
         private TaskCallbackCalendarElimina mCallback;
 
@@ -1102,7 +1102,7 @@ public class AddMeasurement extends AppCompatActivity
         /**
          * Background task to call Google Calendar API.
          * @param params no parameters needed for this task.
-         */
+
         @Override
         protected Boolean doInBackground(Void... params) {
             SharedPreferences pref=context.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
@@ -1152,7 +1152,7 @@ public class AddMeasurement extends AppCompatActivity
                 } else if (mLastError instanceof UserRecoverableAuthIOException) {
                     startActivityForResult(
                             ((UserRecoverableAuthIOException) mLastError).getIntent(),
-                            AddMeasurement.REQUEST_AUTHORIZATION);
+                            AppConstants.REQUEST_AUTHORIZATION);
                 } else {
                     Toast.makeText(context, "The following error occurred:\n"
                             + mLastError.getMessage(), Toast.LENGTH_SHORT).show();
@@ -1163,6 +1163,6 @@ public class AddMeasurement extends AppCompatActivity
             }
         }
 
-    }
+    }*/
 
 }

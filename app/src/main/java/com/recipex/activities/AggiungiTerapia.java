@@ -61,6 +61,7 @@ import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.adapters.DateItemAdapter;
 import com.recipex.asynctasks.AggiungiTerapiaAT;
+import com.recipex.asynctasks.EliminaEventiCalendar;
 import com.recipex.asynctasks.GetMainIngredientsAT;
 import com.recipex.asynctasks.RegistraCalendarioAT;
 import com.recipex.taskcallbacks.TaskCallbackActiveIngredients;
@@ -96,7 +97,6 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
     static final int REQUEST_ACCOUNT_PICKER2 = 2;
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
-    public static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
     static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
 
@@ -374,6 +374,8 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         if(response != null) {
             if(b) {
 
+                Log.d(TAG, "aggiunta");
+
                 Snackbar snackbar = Snackbar
                         .make(coordinatorLayout, "Terapia inserita con successo!", Snackbar.LENGTH_SHORT);
                 snackbar.show();
@@ -410,6 +412,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
 
     //callback elimina eventi calendar
     public void done(boolean b, String inutile){
+        idEventi.clear();
         if(!b){
             Snackbar snackbar = Snackbar
                     .make(coordinatorLayout, "Errore: aggiunto evento sul calendario" +
@@ -661,7 +664,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                     }
                 }
                 break;
-            case REQUEST_AUTHORIZATION:
+            case AppConstants.REQUEST_AUTHORIZATION:
                 if (resultCode == RESULT_OK) {
                     getResultsFromApi();
                 }
@@ -914,7 +917,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
 
                         event = mService.events().insert(idCalendar, event).execute();
                         idEventiCalendar.add(event.getId());
-                        System.out.printf("Event created: %s\n", event.getHtmlLink());
+                        System.out.printf("Event created: %s\n", event.getId());
                     }
                 }
                 return true;
@@ -950,7 +953,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                 } else if (mLastError instanceof UserRecoverableAuthIOException) {
                     startActivityForResult(
                             ((UserRecoverableAuthIOException) mLastError).getIntent(),
-                            AggiungiTerapia.REQUEST_AUTHORIZATION);
+                            AppConstants.REQUEST_AUTHORIZATION);
                 } else {
                     Toast.makeText(context, "The following error occurred:\n"
                             + mLastError.getMessage(), Toast.LENGTH_SHORT).show();
@@ -962,7 +965,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         }
     }
 
-    private class EliminaEventiCalendar  extends AsyncTask<Void, Void, Boolean> {
+    /*private class EliminaEventiCalendar  extends AsyncTask<Void, Void, Boolean> {
         private Context context;
         private TaskCallbackCalendarElimina mCallback;
 
@@ -990,7 +993,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         /**
          * Background task to call Google Calendar API.
          * @param params no parameters needed for this task.
-         */
+
         @Override
         protected Boolean doInBackground(Void... params) {
             SharedPreferences pref=context.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
@@ -1052,7 +1055,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
             }
         }
 
-    }
+    }*/
 
 
     @Override

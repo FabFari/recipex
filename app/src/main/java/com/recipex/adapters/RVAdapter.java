@@ -1,6 +1,6 @@
 package com.recipex.adapters;
 
-import android.support.v7.widget.CardView;
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.recipex.AppConstants;
 import com.recipex.R;
+import com.recipex.fragments.MisurazioniFragment;
 import com.recipex.utilities.Misurazione;
 
 import java.util.ArrayList;
@@ -22,6 +23,8 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     List<Misurazione> misurazioni;
     private static final int EMPTY_VIEW = 10;
+
+    String email;
 
     public RVAdapter(List<Misurazione> data){
         if(data == null)
@@ -40,6 +43,7 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         }
 
         v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.misurazione_item, viewGroup, false);
+        email=v.getContext().getSharedPreferences("MyPref", Context.MODE_PRIVATE).getString("email","");
         RVAdapter.MyViewHolder pvh = new RVAdapter.MyViewHolder(v);
         return pvh;
     }
@@ -64,7 +68,7 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
         if(viewHolder instanceof MyViewHolder) {
             MyViewHolder personViewHolder = (MyViewHolder) viewHolder;
-            Misurazione m = misurazioni.get(i);
+            final Misurazione m = misurazioni.get(i);
             String[] data_ora = m.data.split(" ");
             personViewHolder.data.setText(data_ora[0]);
             personViewHolder.ora.setText(data_ora[1]);

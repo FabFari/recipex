@@ -28,6 +28,7 @@ import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.adapters.RVAdapter;
 import com.recipex.asynctasks.GetMeasurementsUser;
+import com.recipex.fragments.MisurazioniFragment;
 import com.recipex.taskcallbacks.TaskCallbackGetMeasurements;
 import com.recipex.utilities.ConnectionDetector;
 import com.recipex.utilities.Misurazione;

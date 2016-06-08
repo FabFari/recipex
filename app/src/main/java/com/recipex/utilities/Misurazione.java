@@ -11,6 +11,7 @@ public class Misurazione {
     public String datodouble;
     public String nota;
     public long id;
+    public String idCalendar;
 
     public Misurazione(){}
     public Misurazione(String tipo, String data, String dato1long, String dato2long, String datodouble){
@@ -24,4 +25,5 @@ public class Misurazione {
         this.nota=nota;
     }
     public void setId(long i){id=i;}
+    public void setIdCalendar(String i){idCalendar=i;}
 }

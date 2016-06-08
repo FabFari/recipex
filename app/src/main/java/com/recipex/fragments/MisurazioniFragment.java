@@ -5,69 +5,47 @@ import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationCompatSideChannelService;
 
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AlertDialog;
 
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionMenu;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
-import com.google.android.gms.plus.model.people.Person;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.activities.AddMeasurement;
-import com.recipex.activities.Home;
-import com.recipex.activities.Login;
-import com.recipex.activities.UserSearch;
-import com.recipex.adapters.PazienteFamiliareAdapter;
 import com.recipex.adapters.RVAdapter;
 
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.appspot.recipex_1281.recipexServerApi.model.MainMeasurementInfoMessage;
-import com.appspot.recipex_1281.recipexServerApi.model.MainPrescriptionInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserMeasurementsMessage;
-import com.appspot.recipex_1281.recipexServerApi.model.MainUserPrescriptionsMessage;
-import com.recipex.AppConstants;
-import com.recipex.R;
-import com.recipex.activities.AddMeasurement;
-import com.recipex.activities.AggiungiTerapia;
-import com.recipex.adapters.RVAdapter;
-import com.recipex.adapters.TerapieAdapter;
 import com.recipex.asynctasks.GetMeasurementsUser;
-import com.recipex.asynctasks.GetTerapieUser;
+import com.recipex.taskcallbacks.TaskCallbackElimina;
 import com.recipex.taskcallbacks.TaskCallbackGetMeasurements;
 import com.recipex.utilities.ConnectionDetector;
 import com.recipex.utilities.Misurazione;
-import com.recipex.utilities.Terapia;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -81,7 +59,7 @@ import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 /**
  * Created by Sara on 02/05/2016.
  */
-public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeasurements/*, Toolbar.OnMenuItemClickListener*/ {
+public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeasurements, TaskCallbackElimina/*, Toolbar.OnMenuItemClickListener*/ {
 
     private final static String TAG = "MISURAZIONI_FRAGMENT";
     private final static int ADD_MEASUREMENT = 1;
@@ -120,10 +98,12 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
     private TextView emptyText;
     private CircularProgressView progressView;
     private CoordinatorLayout coordinatorLayout;
+    ImageView delete;
 
     private Long userId;
 
     static RecyclerView curRecView;
+    SharedPreferences pref;
 
     @Nullable
     @Override
@@ -325,7 +305,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
             }
         });
 
-        SharedPreferences pref=getActivity().getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+        pref=getActivity().getSharedPreferences("MyPref", Context.MODE_PRIVATE);
         userId = pref.getLong("userId", 0L);
 
         settings = getActivity().getSharedPreferences(AppConstants.PREFS_NAME, 0);
@@ -427,6 +407,18 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
         return false;
     }
 
+    //callback elimina
+    public void done(boolean b, String id){
+        if(!b){
+            Snackbar snackbar = Snackbar
+                    .make(getActivity().getWindow().getDecorView().getRootView(),
+                            "Operazione fallita! Si è verificato un errore imprevisto!", Snackbar.LENGTH_SHORT);
+            snackbar.show();
+        }
+        else{
+
+        }
+    }
     //callback from GetMisurazioniUser
     public void done(MainUserMeasurementsMessage response){
         if((response!=null && response.getMeasurements()!=null) || !misurazioni.isEmpty() ) {
@@ -468,6 +460,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
                     if (cur.getNote() != null)
                         mcur.setNota(cur.getNote());
 
+                    mcur.setIdCalendar(cur.getCalendarId());
                     mcur.setId(cur.getId());
                     misurazioni.add(mcur);
                     Log.d("MisIterator", mcur.data);
@@ -508,8 +501,9 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
         editor.apply();
         Log.d(TAG, "ACCOUNT NAME: " + accountName);
         credential.setSelectedAccountName(accountName);
-        this.accountName = accountName;        
+        this.accountName = accountName;
     }
+
 
    /* @Override
     public boolean onOptionsItemSelected(MenuItem item) {
