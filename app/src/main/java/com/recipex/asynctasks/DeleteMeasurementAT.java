@@ -23,15 +23,17 @@ public class DeleteMeasurementAT extends AsyncTask<Void, Void, MainDefaultRespon
     DeleteMeasurementTC taskCallback;
     Long id;
     Long user_id;
+    String calId;
 
     public DeleteMeasurementAT(DeleteMeasurementTC taskCallback, Activity activity, View mainView, Long id,
-                            Long user_id, RecipexServerApi apiHandler) {
+                            Long user_id, String calId, RecipexServerApi apiHandler) {
         this.taskCallback = taskCallback;
         this.activity = activity;
         this.mainView = mainView;
         this.id = id;
         this.user_id = user_id;
         this.apiHandler = apiHandler;
+        this.calId=calId;
     }
 
     protected MainDefaultResponseMessage doInBackground(Void... unused){
@@ -55,7 +57,7 @@ public class DeleteMeasurementAT extends AsyncTask<Void, Void, MainDefaultRespon
                     });
                 }
             });
-            taskCallback.done(false, null);
+            taskCallback.done(false, "", null);
         }
 
         return null;
@@ -64,9 +66,9 @@ public class DeleteMeasurementAT extends AsyncTask<Void, Void, MainDefaultRespon
     @Override
     protected void onPostExecute(MainDefaultResponseMessage response) {
         if(response != null && response.getCode().equals(AppConstants.OK))
-            taskCallback.done(true, response);
+            taskCallback.done(true, calId, response);
         else
-            taskCallback.done(false, response);
+            taskCallback.done(false, "", response);
 
     }
 }

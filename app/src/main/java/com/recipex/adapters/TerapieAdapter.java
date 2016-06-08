@@ -156,7 +156,7 @@ public class TerapieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                 //Log.d(TAG, "CAREGIVER ID: "+caregivers.get(pos).getId());
                                 new RimuoviTerapiaAT(taskCallbak, fragment.getActivity(),
                                         fragment.getActivity().getWindow().getDecorView().getRootView(),
-                                        terapie.get(pos).id, user_id, apiHandler).execute();
+                                        terapie.get(pos).id, user_id, terapie.get(pos).idsCalendar, apiHandler).execute();
                             }
                         }
                     });
