@@ -102,7 +102,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
 
     //IMPORTANTISSIMO!
     private static final String[] SCOPES = { CalendarScopes.CALENDAR };
-    public LinkedList<String> idEventi;
+    public ArrayList<String> idEventi;
 
     private CoordinatorLayout coordinatorLayout;
     private Long caregiverId, patientId;
@@ -279,7 +279,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                                 .setBackOff(new ExponentialBackOff());
                         getResultsFromApi();
                     }
-                    else done(true, new LinkedList<String>());
+                    else done(true, new ArrayList<String>());
                 }
 
             }
@@ -310,7 +310,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
     }
 
     //callback from Calendar
-    public void done(boolean b, LinkedList<String> idEventiC){
+    public void done(boolean b, ArrayList<String> idEventiC){
         SharedPreferences pref=getSharedPreferences("MyPref", MODE_PRIVATE);
         //vuol dire che devo registrare il calendario
         if(pref.getBoolean("nuovocalendario", false) && !pref.getString("calendar", "").equals("")){
@@ -778,7 +778,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         private String inizio;
 
         //per inserire gli id degli eventi che creo sul calendario (vuota se non aggiungo eventi)
-        private LinkedList<String> idEventiCalendar;
+        private ArrayList<String> idEventiCalendar;
 
         private com.google.api.services.calendar.Calendar mService = null;
         private Exception mLastError = null;
@@ -797,7 +797,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
             this.numerocadenza=numerocadenza;
             this.cadenza=cadenza;
             this.inizio=inizio;
-            idEventiCalendar=new LinkedList<>();
+            idEventiCalendar=new ArrayList<>();
         }
 
         /**

@@ -21,6 +21,7 @@ import com.recipex.activities.AddMeasurement;
 import com.recipex.activities.AggiungiTerapia;
 import com.recipex.taskcallbacks.TaskCallbackCalendarElimina;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,13 +36,13 @@ public class EliminaEventiCalendar  extends AsyncTask<Void, Void, Boolean> {
     private final static String TAG = "ELIMINA_EVENTO";
 
     //per inserire gli id degli eventi che creo sul calendario (vuota se non aggiungo eventi)
-    private LinkedList<String> idEventiCalendar;
+    private ArrayList<String> idEventiCalendar;
 
     private com.google.api.services.calendar.Calendar mService = null;
     private Exception mLastError = null;
 
     public EliminaEventiCalendar(GoogleAccountCredential credential, Context context, TaskCallbackCalendarElimina c,
-                                 LinkedList<String> idEventi) {
+                                 ArrayList<String> idEventi) {
         HttpTransport transport = AndroidHttp.newCompatibleTransport();
         JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
         mService = new com.google.api.services.calendar.Calendar.Builder(

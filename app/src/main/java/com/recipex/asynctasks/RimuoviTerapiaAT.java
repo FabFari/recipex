@@ -12,6 +12,8 @@ import com.recipex.taskcallbacks.RimuoviTerapiaTC;
 import com.recipex.taskcallbacks.SendRequestTC;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * Created by Fabrizio on 30/05/2016.
@@ -24,15 +26,17 @@ public class RimuoviTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponseM
     RimuoviTerapiaTC taskCallback;
     Long id;
     Long user_id;
+    ArrayList<String> idCal;
 
     public RimuoviTerapiaAT(RimuoviTerapiaTC taskCallback, Activity activity, View mainView, Long id,
-                            Long user_id, RecipexServerApi apiHandler) {
+                            Long user_id, ArrayList<String> idsCal, RecipexServerApi apiHandler) {
         this.taskCallback = taskCallback;
         this.activity = activity;
         this.mainView = mainView;
         this.id = id;
         this.user_id = user_id;
         this.apiHandler = apiHandler;
+        this.idCal=idsCal;
     }
 
     protected MainDefaultResponseMessage doInBackground(Void... unused){
@@ -56,7 +60,7 @@ public class RimuoviTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponseM
                     });
                 }
             });
-            taskCallback.done(false, null);
+            taskCallback.done(false, null, null);
         }
 
         return null;
@@ -65,9 +69,9 @@ public class RimuoviTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponseM
     @Override
     protected void onPostExecute(MainDefaultResponseMessage response) {
         if(response != null && response.getCode().equals(AppConstants.OK))
-            taskCallback.done(true, response);
+            taskCallback.done(true, idCal, response);
         else
-            taskCallback.done(false, response);
+            taskCallback.done(false, null, response);
 
     }
 }

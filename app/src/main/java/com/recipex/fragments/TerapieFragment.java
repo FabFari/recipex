@@ -1,6 +1,8 @@
 package com.recipex.fragments;
 
+import android.Manifest;
 import android.accounts.AccountManager;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -31,29 +33,39 @@ import com.appspot.recipex_1281.recipexServerApi.model.MainPrescriptionInfoMessa
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserPrescriptionsMessage;
 import com.github.clans.fab.FloatingActionMenu;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.services.calendar.CalendarScopes;
 import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.activities.AggiungiTerapia;
 import com.recipex.activities.Home;
 import com.recipex.adapters.RVAdapter;
 import com.recipex.adapters.TerapieAdapter;
+import com.recipex.asynctasks.EliminaEventiCalendar;
 import com.recipex.asynctasks.GetTerapieUser;
 import com.recipex.taskcallbacks.RimuoviTerapiaTC;
 import com.recipex.taskcallbacks.TaskCallbackAggiungiTerapia;
+import com.recipex.taskcallbacks.TaskCallbackCalendarElimina;
 import com.recipex.taskcallbacks.TaskCallbackGetTerapie;
 import com.recipex.utilities.ConnectionDetector;
 import com.recipex.utilities.Terapia;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
+
 /**
  * Created by Sara on 03/05/2016.
  */
-public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie, RimuoviTerapiaTC{
+public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie, RimuoviTerapiaTC, TaskCallbackCalendarElimina{
 
     static RecyclerView curRecView;
 
@@ -69,6 +81,14 @@ public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie,
     private CircularProgressView progressView;
 
     private ConnectionDetector cd;
+
+    public ArrayList<String> idEventi;
+    GoogleAccountCredential mCredential;
+    private static final String[] SCOPES = { CalendarScopes.CALENDAR };
+    static final int REQUEST_ACCOUNT_PICKER2 = 1000;
+    static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
+    static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
+
 
     @Nullable
     @Override
@@ -191,6 +211,8 @@ public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie,
                     else
                         tcur = new Terapia(cur.getName(), cur.getDose(), cur.getKind(), cur.getRecipe(),
                             cur.getActiveIngrName(), cur.getUnits(), cur.getQuantity(), cur.getPil(), cur.getCaregiverName(), cur.getId());
+                    if(cur.getCalendarIds()!=null)
+                        tcur.setIdCalendar(cur.getCalendarIds());
                     terapie.add(tcur);
 
                     Log.d("TERAPIEFRAGMENT", cur.getActiveIngrName());
@@ -251,16 +273,46 @@ public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie,
                     }
                 }
                 break;
+            case REQUEST_ACCOUNT_PICKER2:
+                if (resultCode == getActivity().RESULT_OK && data != null &&
+                        data.getExtras() != null) {
+                    Log.d("CALENDARres", "entro in res");
+
+                    String accountName =
+                            data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                    if (accountName != null) {
+                        SharedPreferences settings =
+                                getContext().getSharedPreferences(AppConstants.PREFS_NAME,Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = settings.edit();
+                        //editor.putString(PREF_ACCOUNT_NAME, accountName);
+                        editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
+                        editor.apply();
+                        mCredential.setSelectedAccountName(accountName);
+                        Log.d("CALENDARres", accountName);
+                        getResultsFromApi();
+                    }
+                }
+                break;
         }
     }
 
+    //callback from rimuovi terapia
     @Override
-    public void done(boolean res, MainDefaultResponseMessage response) {
+    public void done(boolean res, ArrayList<String> ids, MainDefaultResponseMessage response) {
         if(res) {
             Snackbar snackbar = Snackbar
                     .make(getActivity().getWindow().getDecorView().getRootView(),
                             "Terapia rimossa con successo!", Snackbar.LENGTH_SHORT);
             snackbar.show();
+
+            if(!ids.isEmpty()) {
+                idEventi = ids;
+                // Initialize credentials and service object.
+                mCredential = GoogleAccountCredential.usingOAuth2(
+                        getContext(), Arrays.asList(SCOPES))
+                        .setBackOff(new ExponentialBackOff());
+                getResultsFromApi();
+            }
         }
         else {
             Snackbar snackbar = Snackbar
@@ -287,5 +339,137 @@ public class TerapieFragment extends Fragment implements TaskCallbackGetTerapie,
                 }
             }
         }
+    }
+
+    private void getResultsFromApi() {
+        if (! isGooglePlayServicesAvailable()) {
+            acquireGooglePlayServices();
+        } else if (mCredential.getSelectedAccountName() == null) {
+            Log.d("CALENDARgetres", "account");
+            chooseAccount();
+        } else if (! isDeviceOnline()) {
+            Snackbar snackbar = Snackbar
+                    .make(getActivity().getWindow().getDecorView().getRootView(),
+                            "Connessione assente!", Snackbar.LENGTH_SHORT);
+            snackbar.show();
+        } else {
+            Log.d("CALENDARgetres", "task");
+            new EliminaEventiCalendar(mCredential, getContext(), this, idEventi).execute();
+        }
+    }
+    /**
+     * Checks whether the device currently has a network connection.
+     * @return true if the device has a network connection, false otherwise.
+     */
+    private boolean isDeviceOnline() {
+        ConnectivityManager connMgr =
+                (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        return (networkInfo != null && networkInfo.isConnected());
+    }
+
+
+    /**
+     * Attempts to set the account used with the API credentials. If an account
+     * name was previously saved it will use that one; otherwise an account
+     * picker dialog will be shown to the user. Note that the setting the
+     * account to use with the credentials object requires the app to have the
+     * GET_ACCOUNTS permission, which is requested here if it is not already
+     * present. The AfterPermissionGranted annotation indicates that this
+     * function will be rerun automatically whenever the GET_ACCOUNTS permission
+     * is granted.
+     */
+    @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
+    private void chooseAccount() {
+        if (EasyPermissions.hasPermissions(getContext(), Manifest.permission.GET_ACCOUNTS)) {
+
+            /*
+            String accountName = getSharedPreferences(AppConstants.PREFS_NAME,Context.MODE_PRIVATE)
+                    .getString(PREF_ACCOUNT_NAME, null);
+            */
+            String accountName = getContext().getSharedPreferences(AppConstants.PREFS_NAME,Context.MODE_PRIVATE)
+                    .getString(AppConstants.DEFAULT_ACCOUNT, null);
+            if (accountName != null) {
+                Log.d("CALENDARcho", "account");
+
+                mCredential.setSelectedAccountName(accountName);
+                getResultsFromApi();
+            } else {
+                Log.d("CALENDARcho", "choose");
+
+                // Start a dialog from which the user can choose an account
+                startActivityForResult(
+                        mCredential.newChooseAccountIntent(),
+                        REQUEST_ACCOUNT_PICKER2);
+            }
+        } else {
+            Log.d("CALENDARcho", "noperm");
+
+            // Request the GET_ACCOUNTS permission via a user dialog
+            EasyPermissions.requestPermissions(
+                    this,
+                    "This app needs to access your Google account (via Contacts).",
+                    REQUEST_PERMISSION_GET_ACCOUNTS,
+                    Manifest.permission.GET_ACCOUNTS);
+        }
+    }
+
+    /**
+     * Check that Google Play services APK is installed and up to date.
+     * @return true if Google Play Services is available and up to
+     *     date on this device; false otherwise.
+     */
+    private boolean isGooglePlayServicesAvailable() {
+        GoogleApiAvailability apiAvailability =
+                GoogleApiAvailability.getInstance();
+        final int connectionStatusCode =
+                apiAvailability.isGooglePlayServicesAvailable(getActivity());
+        return connectionStatusCode == ConnectionResult.SUCCESS;
+    }
+
+    /**
+     * Attempt to resolve a missing, out-of-date, invalid or disabled Google
+     * Play Services installation via a user dialog, if possible.
+     */
+    private void acquireGooglePlayServices() {
+        GoogleApiAvailability apiAvailability =
+                GoogleApiAvailability.getInstance();
+        final int connectionStatusCode =
+                apiAvailability.isGooglePlayServicesAvailable(getActivity());
+        if (apiAvailability.isUserResolvableError(connectionStatusCode)) {
+            showGooglePlayServicesAvailabilityErrorDialog(connectionStatusCode);
+        }
+    }
+
+
+    /**
+     * Display an error dialog showing that Google Play Services is missing
+     * or out of date.
+     * @param connectionStatusCode code describing the presence (or lack of)
+     *     Google Play Services on this device.
+     */
+    public void showGooglePlayServicesAvailabilityErrorDialog(
+            final int connectionStatusCode) {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        Dialog dialog = apiAvailability.getErrorDialog(
+                getActivity(),
+                connectionStatusCode,
+                REQUEST_GOOGLE_PLAY_SERVICES);
+        dialog.show();
+    }
+
+
+    //callback elimina eventi calendar
+    public void done(boolean b, String inutile){
+        idEventi.clear();
+        if(!b){
+            Snackbar snackbar = Snackbar
+                    .make(coordinatorLayout, "Errore: aggiunto evento sul calendario" +
+                            "che non corrisponde a una misurazione.", Snackbar.LENGTH_SHORT);
+            snackbar.show();
+        }
+        Intent i =new Intent(getActivity(), Home.class);
+        startActivity(i);
+        getActivity().finish();
     }
 }

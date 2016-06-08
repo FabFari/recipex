@@ -73,6 +73,7 @@ import com.vi.swipenumberpicker.SwipeNumberPicker;
 import com.recipex.R;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -102,7 +103,7 @@ public class AddMeasurement extends AppCompatActivity
     //IMPORTANTISSIMO!
     private static final String[] SCOPES = { CalendarScopes.CALENDAR };
     public static final String TAG = "ADD_MEASUREMENT";
-    public LinkedList<String> idEventi;
+    public ArrayList<String> idEventi;
 
     private SwipeNumberPicker picker1;
     private SwipeNumberPicker picker2;
@@ -426,7 +427,7 @@ public class AddMeasurement extends AppCompatActivity
     }
 
     //callback from Calendar
-    public void done(boolean b, LinkedList<String> s){
+    public void done(boolean b, ArrayList<String> s){
         SharedPreferences pref=getSharedPreferences("MyPref", MODE_PRIVATE);
         //vuol dire che devo registrare il calendario
         if(pref.getBoolean("nuovocalendario", false) && !pref.getString("calendar", "").equals("")){
@@ -871,7 +872,7 @@ public class AddMeasurement extends AppCompatActivity
         private String tipo;
 
         //per inserire gli id degli eventi che creo sul calendario (vuota se non aggiungo eventi)
-        private LinkedList<String> idEventiCalendar;
+        private ArrayList<String> idEventiCalendar;
 
         private com.google.api.services.calendar.Calendar mService = null;
         private Exception mLastError = null;
@@ -887,7 +888,7 @@ public class AddMeasurement extends AppCompatActivity
             this.context=context;
             this.mCallback=c;
             this.tipo=tipo;
-            idEventiCalendar=new LinkedList<>();
+            idEventiCalendar=new ArrayList<>();
         }
 
         /**

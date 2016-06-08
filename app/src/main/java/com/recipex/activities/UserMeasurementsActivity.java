@@ -57,8 +57,17 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
 
     private ConnectionDetector cd;
 
+    List<Misurazione> misurazioni=new LinkedList<>();;
+
     static RecyclerView curRecView;
+    LinearLayoutManager llm;
     RecipexServerApi apiHandler;
+
+    private int previousTotal = 0;
+    private boolean loading = true;
+    private int visibleThreshold = 4;
+    int firstVisibleItem, visibleItemCount, totalItemCount;
+    private final int scrollnum=6;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,10 +95,60 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
         }
         else {
             if (profileId != 0 && checkNetwork()) {
-                apiHandler = AppConstants.getApiServiceHandle(credential);
+                /*apiHandler = AppConstants.getApiServiceHandle(credential);
                 new GetMeasurementsUser(profileId, this, this, apiHandler, 0, 0).execute();
                 progressView.startAnimation();
+                progressView.setVisibility(View.VISIBLE);*/
+
+
+
+                apiHandler = AppConstants.getApiServiceHandle(credential);
+
+                //SCROLL
+                final TaskCallbackGetMeasurements t=this;
+                curRecView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+                    @Override
+                    public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                        super.onScrolled(recyclerView, dx, dy);
+                        visibleItemCount = curRecView.getChildCount();
+                        totalItemCount = llm.getItemCount();
+                        firstVisibleItem = llm.findFirstVisibleItemPosition();
+
+                        Log.d(TAG, ""+visibleItemCount);
+                        Log.d(TAG, ""+totalItemCount);
+                        Log.d(TAG, ""+firstVisibleItem);
+
+                        if (loading) {
+                            if (totalItemCount > previousTotal) {
+                                loading = false;
+                                previousTotal = totalItemCount;
+                            }
+                        }
+                        if (!loading && (totalItemCount - visibleItemCount)
+                                <= (firstVisibleItem + visibleThreshold)) {
+                            // End has been reached
+
+                            //https://github.com/codepath/android_guides/wiki/Endless-Scrolling-with-AdapterViews
+                            Log.i(TAG, "end called");
+
+                            if(checkNetwork() && !misurazioni.isEmpty()){
+                                Log.d(TAG, "scrollll");
+                                Log.d(TAG, misurazioni.get(misurazioni.size()-1).data);
+                                new GetMeasurementsUser(profileId, getApplicationContext(), t, apiHandler, scrollnum,
+                                        misurazioni.get(misurazioni.size()-1).id).execute();
+                            }
+
+                            loading = true;
+                        }
+
+                    }
+                });
+
+
+                new GetMeasurementsUser(profileId, getApplicationContext(), this, apiHandler, scrollnum, 0).execute();
+                progressView.startAnimation();
                 progressView.setVisibility(View.VISIBLE);
+
             } else {
                 Snackbar snackbar = Snackbar
                         .make(coordinatorLayout,
@@ -107,7 +166,7 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
         emptyText = (TextView) findViewById(R.id.home_empty_message);
         RecyclerView rv = (RecyclerView)findViewById(R.id.my_recyclerview);
         curRecView=rv;
-        LinearLayoutManager llm = new LinearLayoutManager(getApplicationContext());
+        llm = new LinearLayoutManager(getApplicationContext());
         rv.setLayoutManager(llm);
 
         fab_menu = (FloatingActionMenu) findViewById(R.id.home_fab_menu_measurement);
@@ -133,7 +192,7 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
                         // User is authorized
                         apiHandler = AppConstants.getApiServiceHandle(credential);
                         if (checkNetwork()) {
-                            new GetMeasurementsUser(profileId, this, this, apiHandler, 0, 0).execute();
+                            new GetMeasurementsUser(profileId, this, this, apiHandler, scrollnum, 0).execute();
                             progressView.startAnimation();
                             progressView.setVisibility(View.VISIBLE);
                         }
@@ -178,11 +237,10 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
     }
 
     public void done(MainUserMeasurementsMessage response){
-        if(response!=null && response.getMeasurements()!=null) {
+        if((response!=null && response.getMeasurements()!=null) || !misurazioni.isEmpty()) {
             Log.e(TAG, "Nel done di getMisurazioni");
-            List<Misurazione> misurazioni=new LinkedList<Misurazione>();
             List<MainMeasurementInfoMessage> lista;
-            if(response.getMeasurements() != null)
+            if(response!=null && response.getMeasurements() != null && !response.getMeasurements().isEmpty())
                 lista = response.getMeasurements();
             else
                 lista = new ArrayList<MainMeasurementInfoMessage>();

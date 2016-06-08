@@ -88,8 +88,10 @@ public class Home extends AppCompatActivity
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             // only for lollipop and newer versions
             setContentView(R.layout.activity_home);
-        else
+        else{
+            Log.d(TAG, "layout 2");
             setContentView(R.layout.activity_home2);
+        }
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 

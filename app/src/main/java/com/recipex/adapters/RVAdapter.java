@@ -169,7 +169,7 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                                     //Log.d(TAG, "CAREGIVER ID: "+caregivers.get(pos).getId());
                                     new DeleteMeasurementAT(taskCallback, activity,
                                             activity.getWindow().getDecorView().getRootView(),
-                                            misurazioni.get(pos).id, user_id, apiHandler).execute();
+                                            misurazioni.get(pos).id, user_id, misurazioni.get(pos).idCalendar, apiHandler).execute();
                                 }
                             }
                         });
