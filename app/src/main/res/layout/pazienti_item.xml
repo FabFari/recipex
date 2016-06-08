@@ -18,33 +18,48 @@
         card_view:cardElevation="2dp"
         card_view:cardUseCompatPadding="true" >
 
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/linlaymain"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:padding="4dp">
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/fotoPaziente"
-                android:layout_width="65dp"
-                android:layout_height="65dp"
-                android:src="@drawable/recipex_square_logo"
-                android:layout_centerVertical="true"
-                android:layout_alignParentLeft="true"
-                app:border_color="@android:color/white"
-                app:border_width="2dp"
-                app:layout_behavior="com.recipex.utilities.AvatarImageBehavior" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/nomePaziente"
-                android:text="Nome"
-                android:textColor="@color/colorPrimaryDark"
+            <ImageView
+                android:id="@+id/remove"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:clickable="true"
+                android:src="@drawable/ic_decline"
+                android:visibility="gone" />
+
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/linlaymain"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="4dp"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textStyle="bold" />
-        </LinearLayout>
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:padding="4dp">
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/fotoPaziente"
+                    android:layout_width="65dp"
+                    android:layout_height="65dp"
+                    android:src="@drawable/recipex_square_logo"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentLeft="true"
+                    app:border_color="@android:color/white"
+                    app:border_width="2dp"
+                    app:layout_behavior="com.recipex.utilities.AvatarImageBehavior" />
+
+                <TextView
+                    android:id="@+id/nomePaziente"
+                    android:text="Nome"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="4dp"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </RelativeLayout>
     </android.support.v7.widget.CardView>
 </FrameLayout>

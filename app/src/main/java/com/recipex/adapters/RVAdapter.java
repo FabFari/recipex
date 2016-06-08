@@ -1,16 +1,28 @@
 package com.recipex.adapters;
 
 import android.content.Context;
+import android.app.Activity;
+import android.content.DialogInterface;
+import android.graphics.Color;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.fragments.MisurazioniFragment;
+import com.recipex.asynctasks.DeleteMeasurementAT;
+import com.recipex.taskcallbacks.DeleteMeasurementTC;
+import com.recipex.utilities.ConnectionDetector;
 import com.recipex.utilities.Misurazione;
 
 import java.util.ArrayList;
@@ -22,14 +34,24 @@ import java.util.List;
 public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     List<Misurazione> misurazioni;
+    RecipexServerApi apiHandler;
+    Long user_id;
+    Activity activity;
+    DeleteMeasurementTC taskCallback;
     private static final int EMPTY_VIEW = 10;
-
+    ConnectionDetector cd;
+    private final static String TAG = "RVAdapter";
     String email;
 
-    public RVAdapter(List<Misurazione> data){
+    public RVAdapter(List<Misurazione> data, Activity activity, DeleteMeasurementTC taskCallback,
+                     Long user_id, RecipexServerApi apiHandler){
         if(data == null)
             misurazioni = new ArrayList<Misurazione>();
         misurazioni = data;
+        this.activity = activity;
+        this.taskCallback = taskCallback;
+        this.user_id = user_id;
+        this.apiHandler = apiHandler;
     }
 
     @Override
@@ -128,6 +150,46 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             }
             if (m.nota != null)
                 personViewHolder.nota.setText(m.nota);
+
+            final int pos = i;
+
+            if(taskCallback != null) {
+                personViewHolder.remove.setVisibility(View.VISIBLE);
+                personViewHolder.remove.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // 1. Instantiate an AlertDialog.Builder with its constructor
+                        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+
+                        // Add the buttons
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                if (checkNetwork()) {
+                                    //Log.d(TAG, "ID: "+user_id);
+                                    //Log.d(TAG, "CAREGIVER ID: "+caregivers.get(pos).getId());
+                                    new DeleteMeasurementAT(taskCallback, activity,
+                                            activity.getWindow().getDecorView().getRootView(),
+                                            misurazioni.get(pos).id, user_id, apiHandler).execute();
+                                }
+                            }
+                        });
+                        builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // User cancelled the dialog
+                                dialog.cancel();
+                            }
+                        });
+
+                        // 2. Chain together various setter methods to set the dialog characteristics
+                        builder.setMessage("Vuoi davvero rimuovere questa misurazione?")
+                                .setTitle("Attenzione");
+
+                        // 3. Get the AlertDialog from create()
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    }
+                });
+            }
         }
 
     }
@@ -147,6 +209,7 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         TextView dato2_lbl;
         TextView nota;
         ImageView icon;
+        ImageView remove;
 
         MyViewHolder(View itemView) {
             super(itemView);
@@ -159,6 +222,7 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             dato2  =(TextView)itemView.findViewById(R.id.dato2_value);
             dato2_lbl = (TextView)itemView.findViewById(R.id.dato2);
             nota = (TextView)itemView.findViewById(R.id.nota_value);
+            remove = (ImageView)itemView.findViewById(R.id.icon_remove);
         }
     }
 
@@ -166,6 +230,29 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         public EmptyViewHolder(View itemView) {
             super(itemView);
         }
+    }
+
+    public boolean checkNetwork() {
+        cd = new ConnectionDetector(activity.getApplicationContext());
+        // Check if Internet present
+        if (cd.isConnectingToInternet()) {
+            return true;
+        }else{
+            Snackbar snackbar = Snackbar
+                    .make(activity.getWindow().getDecorView().getRootView(),
+                            "Nessuna connesione a internet!", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("ESCI", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            activity.finish();
+                        }
+                    });
+
+            // Changing message text color
+            snackbar.setActionTextColor(Color.RED);
+            snackbar.show();
+        }
+        return false;
     }
 
 }

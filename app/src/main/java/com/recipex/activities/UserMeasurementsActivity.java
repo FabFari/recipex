@@ -58,6 +58,7 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
     private ConnectionDetector cd;
 
     static RecyclerView curRecView;
+    RecipexServerApi apiHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,8 +86,8 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
         }
         else {
             if (profileId != 0 && checkNetwork()) {
-                RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-                new GetMeasurementsUser(profileId, this, this, apiHandler, 0, 0).execute();
+                apiHandler = AppConstants.getApiServiceHandle(credential);
+                new GetMeasurementsUser(profileId, this, this, apiHandler, 0, null).execute();
                 progressView.startAnimation();
                 progressView.setVisibility(View.VISIBLE);
             } else {
@@ -130,7 +131,7 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
                         editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
                         editor.apply();
                         // User is authorized
-                        RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
+                        apiHandler = AppConstants.getApiServiceHandle(credential);
                         if (checkNetwork()) {
                             new GetMeasurementsUser(profileId, this, this, apiHandler, 0, 0).execute();
                             progressView.startAnimation();
@@ -191,29 +192,29 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
                 Misurazione mcur=new Misurazione();
                 switch (cur.getKind()) {
                     case AppConstants.COLESTEROLO:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getChlLevel()));
+                        mcur = new Misurazione(cur.getId(), cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getChlLevel()));
                         break;
                     case AppConstants.FREQ_CARDIACA:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getBpm()), "", "");
+                        mcur = new Misurazione(cur.getId(), cur.getKind(), cur.getDateTime(), Long.toString(cur.getBpm()), "", "");
                         break;
                     case AppConstants.PRESSIONE:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getSystolic()),
+                        mcur = new Misurazione(cur.getId(), cur.getKind(), cur.getDateTime(), Long.toString(cur.getSystolic()),
                                 Long.toString(cur.getDiastolic()), "");
                         break;
                     case AppConstants.FREQ_RESPIRAZIONE:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getRespirations()), "", "");
+                        mcur = new Misurazione(cur.getId(), cur.getKind(), cur.getDateTime(), Long.toString(cur.getRespirations()), "", "");
                         break;
                     case AppConstants.SPO2:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getSpo2()));
+                        mcur = new Misurazione(cur.getId(), cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getSpo2()));
                         break;
                     case AppConstants.GLUCOSIO:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "","", Double.toString(cur.getHgt()));
+                        mcur = new Misurazione(cur.getId(), cur.getKind(), cur.getDateTime(), "","", Double.toString(cur.getHgt()));
                         break;
                     case AppConstants.TEMP_CORPOREA:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(),"", "", Double.toString(cur.getDegrees()));
+                        mcur = new Misurazione(cur.getId(), cur.getKind(), cur.getDateTime(),"", "", Double.toString(cur.getDegrees()));
                         break;
                     case AppConstants.DOLORE:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getNrs()), "", "");
+                        mcur = new Misurazione(cur.getId(), cur.getKind(), cur.getDateTime(), Long.toString(cur.getNrs()), "", "");
                         break;
                 }
                 if(cur.getNote()!=null)
@@ -221,7 +222,7 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
 
                 misurazioni.add(mcur);
             }
-            RVAdapter adapter = new RVAdapter(misurazioni);
+            RVAdapter adapter = new RVAdapter(misurazioni, this, null, profileId, apiHandler);
             curRecView.setAdapter(adapter);
             Log.d(TAG, "itemCount: "+ adapter.getItemCount());
             if(adapter.getItemViewType(0) == EMPTY_VIEW) {
@@ -232,7 +233,7 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
             }
         }
         else {
-            RVAdapter adapter = new RVAdapter(new ArrayList<Misurazione>());
+            RVAdapter adapter = new RVAdapter(new ArrayList<Misurazione>(), this, null, profileId, apiHandler);
             curRecView.setAdapter(adapter);
         }
 

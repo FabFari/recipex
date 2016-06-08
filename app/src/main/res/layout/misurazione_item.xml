@@ -201,6 +201,15 @@
                 android:textAllCaps="true"
                 android:textStyle="bold" />
 
+            <ImageView
+                android:id="@+id/icon_remove"
+                android:src="@drawable/ic_decline"
+                android:visibility="gone"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp" />
+
         </LinearLayout>
 
     </RelativeLayout>

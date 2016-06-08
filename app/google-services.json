@@ -1,0 +1,76 @@
+{
+  "project_info": {
+    "project_number": "1077668244667",
+    "project_id": "recipex-1281"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1077668244667:android:0060545d27b44203",
+        "android_client_info": {
+          "package_name": "com.recipex"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1077668244667-1sbda995hu5tk9jkt82500no0h1g7c3q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.recipex",
+            "certificate_hash": "798446051668B8D780D3F4D7413AC9985806F41F"
+          }
+        },
+        {
+          "client_id": "1077668244667-50sh32b9e8co53vprb8skof00ti57goe.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.recipex",
+            "certificate_hash": "C463CA4533DABADF71E17D132B9F9BC192447814"
+          }
+        },
+        {
+          "client_id": "1077668244667-6pqtkj6at7pfvu25igstpgs0amkrimd8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.recipex",
+            "certificate_hash": "7135B40D8D023FD898EEB8F4081EF2A2B47E2DC9"
+          }
+        },
+        {
+          "client_id": "1077668244667-j63dkcsh53g86cgul3vcv5afn1d0m6np.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.recipex",
+            "certificate_hash": "EC3142AF87A3DCC7F43FBA3A6CE93EC9CF15050D"
+          }
+        },
+        {
+          "client_id": "1077668244667-ffc86ise0qgj4ogq4m2ev68cqjsqpqan.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "1077668244667-v42n91q6av4tlub6rh3dffbdqa0pncj0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjQF3k6gC3arhshHTjuV6EQNV0RGf4iE4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

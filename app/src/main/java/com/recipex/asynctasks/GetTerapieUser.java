@@ -25,18 +25,20 @@ public class GetTerapieUser extends AsyncTask<Void, Void, MainUserPrescriptionsM
     long id;
     Context mContext;
     TaskCallbackGetTerapie mCallback;
+    RecipexServerApi apiHandler;
 
-    GoogleAccountCredential credential;
-    SharedPreferences settings;
-    SharedPreferences pref;
+    //GoogleAccountCredential credential;
+    //SharedPreferences settings;
+    //SharedPreferences pref;
 
-
-    public GetTerapieUser(long id, Context context, TaskCallbackGetTerapie t){
+    public GetTerapieUser(long id, Context context, TaskCallbackGetTerapie t, RecipexServerApi apiHandler){
         this.id=id;
         mContext=context;
         mCallback=t;
+        this.apiHandler = apiHandler;
     }
 
+    /*
     // setSelectedAccountName definition
     private void setSelectedAccountName(String accountName) {
         settings = mContext.getSharedPreferences(AppConstants.PREFS_NAME, 0);
@@ -45,9 +47,11 @@ public class GetTerapieUser extends AsyncTask<Void, Void, MainUserPrescriptionsM
         editor.commit();
         credential.setSelectedAccountName(accountName);
     }
+    */
 
     protected MainUserPrescriptionsMessage doInBackground(Void... unused) {
 
+        /*
         // Retrieve service handle.
         credential = GoogleAccountCredential.usingAudience(mContext,
                 AppConstants.AUDIENCE);
@@ -56,9 +60,10 @@ public class GetTerapieUser extends AsyncTask<Void, Void, MainUserPrescriptionsM
         setSelectedAccountName(email);
 
         RecipexServerApi apiServiceHandle = AppConstants.getApiServiceHandle(credential);
+        */
 
         try {
-            RecipexServerApi.User.GetPrescriptions get = apiServiceHandle.user().getPrescriptions(id);
+            RecipexServerApi.User.GetPrescriptions get = apiHandler.user().getPrescriptions(id);
             MainUserPrescriptionsMessage response = get.execute();
 
             Log.d("RESPONSE TERAPIE", response.getResponse().getMessage());
