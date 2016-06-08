@@ -26,17 +26,17 @@ public class GetMeasurementsUser extends AsyncTask<Void, Void, MainUserMeasureme
     TaskCallbackGetMeasurements mCallback;
     RecipexServerApi apiHandler;
     int scroll;
-    String data;
 
+    long idmes;
 
     public GetMeasurementsUser(long id, Context context, TaskCallbackGetMeasurements t, RecipexServerApi handler, int scroll,
-                               String data){
+                               long idmes){
         this.id=id;
         mContext=context;
         mCallback=t;
         apiHandler=handler;
         this.scroll=scroll;
-        this.data=data;
+        this.idmes=idmes;
     }
 
     protected MainUserMeasurementsMessage doInBackground(Void... unused) {
@@ -45,9 +45,9 @@ public class GetMeasurementsUser extends AsyncTask<Void, Void, MainUserMeasureme
             RecipexServerApi.User.GetMeasurements get = apiHandler.user().getMeasurements(id);
             if(scroll!=0){
                 get.setFetch((long) scroll);
-                if(data!=null) {
-                    Log.d("GetMeasurement", data+".000");
-                    get.setDateTime(data+".000");
+                if(idmes!=0) {
+                    Log.d("GetMeasurement", ""+idmes);
+                    get.setMeasurementId(idmes);
                 }
                 get.setReverse(true);
             }

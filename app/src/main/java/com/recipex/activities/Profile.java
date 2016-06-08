@@ -1148,7 +1148,7 @@ public class Profile extends AppCompatActivity
                 } else if (mLastError instanceof UserRecoverableAuthIOException) {
                     startActivityForResult(
                             ((UserRecoverableAuthIOException) mLastError).getIntent(),
-                            AddMeasurement.REQUEST_AUTHORIZATION);
+                            AppConstants.REQUEST_AUTHORIZATION);
                 } else {
                     Toast.makeText(context, "The following error occurred:\n"
                             + mLastError.getMessage(), Toast.LENGTH_SHORT).show();

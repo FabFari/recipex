@@ -101,7 +101,7 @@ public class TerapieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             terapieViewHolder.nome.setText(terapie.get(i).nome);
             Log.d("TERAPIADOSE  ", i + " " + terapie.get(i).dose);
             terapieViewHolder.dose.setText(Long.toString(terapie.get(i).dose));
-            terapieViewHolder.ricetta.setText((terapie.get(i).ricetta ? "SI" : "NO"));
+            terapieViewHolder.ricetta.setText(((terapie.get(i).ricetta) ? "SI" : "NO"));
             terapieViewHolder.ingrediente.setText(terapie.get(i).ingrediente);
             terapieViewHolder.unità.setText(terapie.get(i).unità);
             terapieViewHolder.quantità.setText(Long.toString(terapie.get(i).quantità));

@@ -28,6 +28,7 @@ import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.adapters.RVAdapter;
 import com.recipex.asynctasks.GetMeasurementsUser;
+import com.recipex.fragments.MisurazioniFragment;
 import com.recipex.taskcallbacks.TaskCallbackGetMeasurements;
 import com.recipex.utilities.ConnectionDetector;
 import com.recipex.utilities.Misurazione;
@@ -85,7 +86,7 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
         else {
             if (profileId != 0 && checkNetwork()) {
                 RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-                new GetMeasurementsUser(profileId, this, this, apiHandler, 0, null).execute();
+                new GetMeasurementsUser(profileId, this, this, apiHandler, 0, 0).execute();
                 progressView.startAnimation();
                 progressView.setVisibility(View.VISIBLE);
             } else {
@@ -131,7 +132,7 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
                         // User is authorized
                         RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
                         if (checkNetwork()) {
-                            new GetMeasurementsUser(profileId, this, this, apiHandler, 0, null).execute();
+                            new GetMeasurementsUser(profileId, this, this, apiHandler, 0, 0).execute();
                             progressView.startAnimation();
                             progressView.setVisibility(View.VISIBLE);
                         }

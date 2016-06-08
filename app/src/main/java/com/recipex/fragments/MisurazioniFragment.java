@@ -5,69 +5,47 @@ import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationCompatSideChannelService;
 
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AlertDialog;
 
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionMenu;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
-import com.google.android.gms.plus.model.people.Person;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.activities.AddMeasurement;
-import com.recipex.activities.Home;
-import com.recipex.activities.Login;
-import com.recipex.activities.UserSearch;
-import com.recipex.adapters.PazienteFamiliareAdapter;
 import com.recipex.adapters.RVAdapter;
 
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.appspot.recipex_1281.recipexServerApi.model.MainMeasurementInfoMessage;
-import com.appspot.recipex_1281.recipexServerApi.model.MainPrescriptionInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserMeasurementsMessage;
-import com.appspot.recipex_1281.recipexServerApi.model.MainUserPrescriptionsMessage;
-import com.recipex.AppConstants;
-import com.recipex.R;
-import com.recipex.activities.AddMeasurement;
-import com.recipex.activities.AggiungiTerapia;
-import com.recipex.adapters.RVAdapter;
-import com.recipex.adapters.TerapieAdapter;
 import com.recipex.asynctasks.GetMeasurementsUser;
-import com.recipex.asynctasks.GetTerapieUser;
+import com.recipex.taskcallbacks.TaskCallbackElimina;
 import com.recipex.taskcallbacks.TaskCallbackGetMeasurements;
 import com.recipex.utilities.ConnectionDetector;
 import com.recipex.utilities.Misurazione;
-import com.recipex.utilities.Terapia;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -81,7 +59,7 @@ import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 /**
  * Created by Sara on 02/05/2016.
  */
-public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeasurements/*, Toolbar.OnMenuItemClickListener*/ {
+public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeasurements, TaskCallbackElimina/*, Toolbar.OnMenuItemClickListener*/ {
 
     private final static String TAG = "MISURAZIONI_FRAGMENT";
     private final static int ADD_MEASUREMENT = 1;
@@ -120,10 +98,12 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
     private TextView emptyText;
     private CircularProgressView progressView;
     private CoordinatorLayout coordinatorLayout;
+    ImageView delete;
 
     private Long userId;
 
     static RecyclerView curRecView;
+    SharedPreferences pref;
 
     @Nullable
     @Override
@@ -184,7 +164,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
                     else {
                         if(checkNetwork()) {
                             RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-                            new GetMeasurementsUser(userId, getContext(), this, apiHandler, 0, null).execute();
+                            new GetMeasurementsUser(userId, getContext(), this, apiHandler, scrollnum, 0).execute();
                             progressView.startAnimation();
                             progressView.setVisibility(View.VISIBLE);
                         }
@@ -205,7 +185,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
                         // User is authorized
                         RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
                         if (checkNetwork()) {
-                            new GetMeasurementsUser(userId, getContext(), this, apiHandler,0, null).execute();
+                            new GetMeasurementsUser(userId, getContext(), this, apiHandler,scrollnum, 0).execute();
                             progressView.startAnimation();
                             progressView.setVisibility(View.VISIBLE);
                         }
@@ -325,7 +305,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
             }
         });
 
-        SharedPreferences pref=getActivity().getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+        pref=getActivity().getSharedPreferences("MyPref", Context.MODE_PRIVATE);
         userId = pref.getLong("userId", 0L);
 
         settings = getActivity().getSharedPreferences(AppConstants.PREFS_NAME, 0);
@@ -353,7 +333,7 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
                         }
                     }
                 });*/
-                /*rv.setOnScrollListener(new RecyclerView.OnScrollListener() {
+                rv.setOnScrollListener(new RecyclerView.OnScrollListener() {
                     @Override
                     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                         super.onScrolled(recyclerView, dx, dy);
@@ -382,17 +362,17 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
                                 Log.d(TAG, "scrollll");
                                 Log.d(TAG, misurazioni.get(misurazioni.size()-1).data);
                                 new GetMeasurementsUser(userId, getContext(), f, apiHandler, scrollnum,
-                                        misurazioni.get(misurazioni.size()-1).data).execute();
+                                        misurazioni.get(misurazioni.size()-1).id).execute();
                             }
 
                             loading = true;
                         }
 
                     }
-                });*/
+                });
 
 
-                new GetMeasurementsUser(userId, getContext(), this, apiHandler, 0, null).execute();
+                new GetMeasurementsUser(userId, getContext(), this, apiHandler, scrollnum, 0).execute();
                 progressView.startAnimation();
                 progressView.setVisibility(View.VISIBLE);
             } else {
@@ -427,62 +407,81 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
         return false;
     }
 
+    //callback elimina
+    public void done(boolean b, String id){
+        if(!b){
+            Snackbar snackbar = Snackbar
+                    .make(getActivity().getWindow().getDecorView().getRootView(),
+                            "Operazione fallita! Si è verificato un errore imprevisto!", Snackbar.LENGTH_SHORT);
+            snackbar.show();
+        }
+        else{
+
+        }
+    }
     //callback from GetMisurazioniUser
     public void done(MainUserMeasurementsMessage response){
-        if(response!=null && response.getMeasurements()!=null) {
+        if((response!=null && response.getMeasurements()!=null) || !misurazioni.isEmpty() ) {
             Log.e(TAG, "Nel done di getMisurazioni");
-            List<Misurazione> misurazioni=new LinkedList<Misurazione>();
-            List<MainMeasurementInfoMessage> lista;
-            if(response!=null || response.getMeasurements() != null)
+            List<MainMeasurementInfoMessage> lista=new LinkedList<>();
+            if(response!=null && response.getMeasurements() != null && !response.getMeasurements().isEmpty()) {
                 lista = response.getMeasurements();
-            else
-                lista = new ArrayList<MainMeasurementInfoMessage>();
-            Iterator<MainMeasurementInfoMessage> i = lista.iterator();
-            while (i.hasNext()) {
-                MainMeasurementInfoMessage cur = i.next();
-                Misurazione mcur=new Misurazione();
-                switch (cur.getKind()) {
-                    case AppConstants.COLESTEROLO:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getChlLevel()));
-                        break;
-                    case AppConstants.FREQ_CARDIACA:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getBpm()), "", "");
-                        break;
-                    case AppConstants.PRESSIONE:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getSystolic()),
-                                Long.toString(cur.getDiastolic()), "");
-                        break;
-                    case AppConstants.FREQ_RESPIRAZIONE:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getRespirations()), "", "");
-                        break;
-                    case AppConstants.SPO2:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getSpo2()));
-                        break;
-                    case AppConstants.GLUCOSIO:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "","", Double.toString(cur.getHgt()));
-                        break;
-                    case AppConstants.TEMP_CORPOREA:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(),"", "", Double.toString(cur.getDegrees()));
-                        break;
-                    case AppConstants.DOLORE:
-                        mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getNrs()), "", "");
-                        break;
-                }
-                if(cur.getNote()!=null)
-                    mcur.setNota(cur.getNote());
+                Iterator<MainMeasurementInfoMessage> i = lista.iterator();
+                while (i.hasNext()) {
+                    MainMeasurementInfoMessage cur = i.next();
+                    Misurazione mcur = new Misurazione();
+                    switch (cur.getKind()) {
+                        case AppConstants.COLESTEROLO:
+                            mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getChlLevel()));
+                            break;
+                        case AppConstants.FREQ_CARDIACA:
+                            mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getBpm()), "", "");
+                            break;
+                        case AppConstants.PRESSIONE:
+                            mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getSystolic()),
+                                    Long.toString(cur.getDiastolic()), "");
+                            break;
+                        case AppConstants.FREQ_RESPIRAZIONE:
+                            mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getRespirations()), "", "");
+                            break;
+                        case AppConstants.SPO2:
+                            mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getSpo2()));
+                            break;
+                        case AppConstants.GLUCOSIO:
+                            mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getHgt()));
+                            break;
+                        case AppConstants.TEMP_CORPOREA:
+                            mcur = new Misurazione(cur.getKind(), cur.getDateTime(), "", "", Double.toString(cur.getDegrees()));
+                            break;
+                        case AppConstants.DOLORE:
+                            mcur = new Misurazione(cur.getKind(), cur.getDateTime(), Long.toString(cur.getNrs()), "", "");
+                            break;
+                    }
+                    if (cur.getNote() != null)
+                        mcur.setNota(cur.getNote());
 
-                misurazioni.add(mcur);
-                Log.d("MisIterator", mcur.data);
+                    mcur.setIdCalendar(cur.getCalendarId());
+                    mcur.setId(cur.getId());
+                    misurazioni.add(mcur);
+                    Log.d("MisIterator", mcur.data);
+
+                }
             }
-            RVAdapter adapter = new RVAdapter(misurazioni);
-            curRecView.setAdapter(adapter);
-            Log.d(TAG, "itemCount: "+ adapter.getItemCount());
-            if(adapter.getItemViewType(0) == EMPTY_VIEW) {
-                Snackbar snackbar = Snackbar
-                        .make(getActivity().getWindow().getDecorView().getRootView(),
-                                "Ancora nessuna misurazione?\nAggiungine subito una cliccando il bottone!", Snackbar.LENGTH_SHORT);
-                snackbar.show();
+            /*if(response.getMeasurements().isEmpty())
+                misurazioni.clear();
+            else {*/
+            if(!misurazioni.isEmpty()) {
+                RVAdapter adapter = new RVAdapter(misurazioni);
+                curRecView.setAdapter(adapter);
+                Log.d(TAG, "itemCount: " + adapter.getItemCount());
+                if (adapter.getItemViewType(0) == EMPTY_VIEW) {
+                    Snackbar snackbar = Snackbar
+                            .make(getActivity().getWindow().getDecorView().getRootView(),
+                                    "Ancora nessuna misurazione?\nAggiungine subito una cliccando il bottone!", Snackbar.LENGTH_SHORT);
+                    snackbar.show();
+                }
             }
+            //}
         }
 		else {
             RVAdapter adapter = new RVAdapter(new ArrayList<Misurazione>());
@@ -502,8 +501,9 @@ public class MisurazioniFragment extends Fragment implements TaskCallbackGetMeas
         editor.apply();
         Log.d(TAG, "ACCOUNT NAME: " + accountName);
         credential.setSelectedAccountName(accountName);
-        this.accountName = accountName;        
+        this.accountName = accountName;
     }
+
 
    /* @Override
     public boolean onOptionsItemSelected(MenuItem item) {

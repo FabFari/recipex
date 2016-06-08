@@ -2,6 +2,7 @@ package com.recipex;
 
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.http.HttpTransport;
@@ -47,6 +48,10 @@ public class AppConstants extends AppCompatActivity{
     // Costanti App
     public static final String DEFAULT_ACCOUNT = "PREF_ACCOUNT_NAME";
     public static final String PREFS_NAME = "com.recipex.RecipeXPrefs";
+
+    //codice per calendario
+    public static final int REQUEST_AUTHORIZATION = 1001;
+
 
     // Codici server
     public static final String CREATED = "201 Created";
@@ -106,6 +111,7 @@ public class AppConstants extends AppCompatActivity{
         recipexServerApi.setRootUrl("https://recipex-1281.appspot.com/_ah/api");
         return recipexServerApi.build();
     }
+
 
     /**
      * Count Google accounts on the device.

@@ -6,7 +6,6 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -14,11 +13,9 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -37,9 +34,11 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.appspot.recipex_1281.recipexServerApi.model.MainActiveIngredientMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainActiveIngredientsMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainDefaultResponseMessage;
+import com.appspot.recipex_1281.recipexServerApi.model.MainUpdateUserMessage;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -57,14 +56,19 @@ import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.EventReminder;
+import com.google.api.services.calendar.model.Events;
 import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.adapters.DateItemAdapter;
 import com.recipex.asynctasks.AggiungiTerapiaAT;
+import com.recipex.asynctasks.EliminaEventiCalendar;
 import com.recipex.asynctasks.GetMainIngredientsAT;
+import com.recipex.asynctasks.RegistraCalendarioAT;
 import com.recipex.taskcallbacks.TaskCallbackActiveIngredients;
 import com.recipex.taskcallbacks.TaskCallbackAggiungiTerapia;
-import com.recipex.taskcallbacks.TaskCallbackCalendar;
+import com.recipex.taskcallbacks.TaskCallbackCalendarAdd;
+import com.recipex.taskcallbacks.TaskCallbackCalendarElimina;
+import com.recipex.taskcallbacks.TaskCallbackRegistraCalendario;
 import com.recipex.utilities.ConnectionDetector;
 
 import java.util.ArrayList;
@@ -78,7 +82,8 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class AggiungiTerapia extends AppCompatActivity implements EasyPermissions.PermissionCallbacks, TaskCallbackAggiungiTerapia,
-        TaskCallbackActiveIngredients, TaskCallbackCalendar, AdapterView.OnItemSelectedListener, View.OnClickListener{
+        TaskCallbackActiveIngredients, TaskCallbackCalendarAdd, TaskCallbackCalendarElimina, TaskCallbackRegistraCalendario,
+        AdapterView.OnItemSelectedListener, View.OnClickListener{
 
     private final static String TAG = "AGGIUNGI_TERAPIA";
 
@@ -86,13 +91,18 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
     private static final String PREF_ACCOUNT_NAME = "accountName";
     public static ProgressDialog mProgress;
 
+    private SharedPreferences settings;
+    private GoogleAccountCredential credential;
+    private String accountName;
+    static final int REQUEST_ACCOUNT_PICKER2 = 2;
+
     static final int REQUEST_ACCOUNT_PICKER = 1000;
-    public static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
     static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
 
     //IMPORTANTISSIMO!
     private static final String[] SCOPES = { CalendarScopes.CALENDAR };
+    public LinkedList<String> idEventi;
 
     private CoordinatorLayout coordinatorLayout;
     private Long caregiverId, patientId;
@@ -119,6 +129,8 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
     private AutoCompleteTextView princ_attivo;
 
     String nome, ingrediente, tipo, dose, unità, quantità, ricetta, foglio, caregiver, numerocadenza, cadenza, inizio;
+    long dose2;
+    int quanto;
 
     boolean recipe;
     long ingredienteID;
@@ -231,12 +243,12 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
 
                 dose = inserisciDose.getText().toString();
 
-                long dose2= Long.parseLong(dose);
+                dose2= Long.parseLong(dose);
 
                 unità = inserisciUnità.getText().toString();
                 quantità = inserisciQuantità.getText().toString();
 
-                int quanto=Integer.parseInt(quantità);
+                quanto=Integer.parseInt(quantità);
 
                 foglio = inserisciFoglio.getText().toString();
                 //caregiver = inserisciCaregiver.getText().toString();
@@ -245,7 +257,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
 
                 Log.d("REGISTRAZIONE ", "Sono qui");
 
-                if (checkNetwork()) {
+                /*if (checkNetwork()) {
                     if(!caregiverId.equals(0L)) {
                         new AggiungiTerapiaAT(getApplicationContext(), nome, ingredienteID, tipo, dose2, unità,
                                 quanto, recipe, foglio, caregiverId, patientId, this).execute();
@@ -254,6 +266,20 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                         new AggiungiTerapiaAT(getApplicationContext(), nome, ingredienteID, tipo, dose2, unità,
                                 quanto, recipe, foglio, null, null, this).execute();
                     }
+                }*/
+                if(checkNetwork()){
+                    //aggiungo al calendario
+                    if(!inizio.equals("")) {
+                        mProgress = new ProgressDialog(this);
+                        mProgress.setMessage("Sto inserendo nel calendario...");
+
+                        // Initialize credentials and service object.
+                        mCredential = GoogleAccountCredential.usingOAuth2(
+                                getApplicationContext(), Arrays.asList(SCOPES))
+                                .setBackOff(new ExponentialBackOff());
+                        getResultsFromApi();
+                    }
+                    else done(true, new LinkedList<String>());
                 }
 
             }
@@ -268,56 +294,137 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         return super.onOptionsItemSelected(item);
     }
 
+    private void getResultsFromApi() {
+        if (! isGooglePlayServicesAvailable()) {
+            acquireGooglePlayServices();
+        } else if (mCredential.getSelectedAccountName() == null) {
+            Log.d("CALENDARgetres", "account");
+            chooseAccount();
+        } else if (! isDeviceOnline()) {
+            Toast.makeText(AggiungiTerapia.this, "No network connection available.", Toast.LENGTH_SHORT).show();
+        } else {
+            Log.d("CALENDARgetres", "task");
+            new AggiungiTerapiaCalendar(mCredential, getApplicationContext(), this, nome, numerocadenza, cadenza,
+                    inizio).execute();
+        }
+    }
+
+    //callback from Calendar
+    public void done(boolean b, LinkedList<String> idEventiC){
+        SharedPreferences pref=getSharedPreferences("MyPref", MODE_PRIVATE);
+        //vuol dire che devo registrare il calendario
+        if(pref.getBoolean("nuovocalendario", false) && !pref.getString("calendar", "").equals("")){
+            settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
+            credential = GoogleAccountCredential.usingAudience(this, AppConstants.AUDIENCE);
+            setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+
+            if(credential.getSelectedAccountName() == null) {
+                Log.d(TAG, "AccountName == null: startActivityForResult.");
+                startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER2);
+            }
+            else {
+                RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
+                MainUpdateUserMessage m=new MainUpdateUserMessage();
+                m.setCalendarId(pref.getString("calendar", ""));
+                if(checkNetwork()) new RegistraCalendarioAT(this, this, coordinatorLayout, pref.getLong("userId", 0L), m, apiHandler).execute();
+            }
+        }
+
+        //se la terapia è stata aggiunta al calendario
+        if(b){
+
+            Log.d(TAG, "done"+idEventiC.size());
+
+            //lista di eventi della terapia
+            idEventi=idEventiC;
+            if (checkNetwork()) {
+                if (!caregiverId.equals(0L)) {
+                    new AggiungiTerapiaAT(getApplicationContext(), nome, ingredienteID, tipo, dose2, unità,
+                            quanto, recipe, foglio, caregiverId, patientId, idEventiC, this).execute();
+                } else {
+                    new AggiungiTerapiaAT(getApplicationContext(), nome, ingredienteID, tipo, dose2, unità,
+                            quanto, recipe, foglio, null, null, idEventiC, this).execute();
+                }
+            }
+        }
+        //se non è stata aggiunta, torno alla home e mando l'errore
+        else{
+            Snackbar snackbar = Snackbar
+                    .make(coordinatorLayout, "Operazione non riuscita", Snackbar.LENGTH_SHORT);
+            snackbar.show();
+            Intent i =new Intent(AggiungiTerapia.this, Home.class);
+            startActivity(i);
+            this.finish();
+        }
+    }
+
+    //callback registra calendario
+    public void done(boolean b, int i){
+        if(b){
+            SharedPreferences pref=getSharedPreferences("MyPref", MODE_PRIVATE);
+            SharedPreferences.Editor editor=pref.edit();
+            //ho registrato il calendario.
+            editor.putBoolean("nuovocalendario", false);
+            editor.commit();
+        }
+    }
 
     //callback from AggiungiTerapiaAT
     public void done(boolean b, MainDefaultResponseMessage response){
         if(response != null) {
             if(b) {
-                //Toast.makeText(this, "Terapia inserita "+response.getMessage(), Toast.LENGTH_LONG).show();
 
-                //aggiungo al calendario
-                if(!inizio.equals("")) {
-                    mProgress = new ProgressDialog(this);
-                    mProgress.setMessage("Sto inserendo nel calendario...");
+                Log.d(TAG, "aggiunta");
 
-
-                    // Initialize credentials and service object.
-                    mCredential = GoogleAccountCredential.usingOAuth2(
-                            getApplicationContext(), Arrays.asList(SCOPES))
-                            .setBackOff(new ExponentialBackOff());
-                    getResultsFromApi();
-                }
-                else {
-                    Snackbar snackbar = Snackbar
-                            .make(coordinatorLayout, "Terapia inserita con successo!", Snackbar.LENGTH_SHORT);
-                    snackbar.show();
-                }
-            }
-            else {
-                //Toast.makeText(this, "Operazione non riuscita", Toast.LENGTH_LONG).show();
                 Snackbar snackbar = Snackbar
-                        .make(coordinatorLayout, "Operazione non riuscita", Snackbar.LENGTH_SHORT);
+                        .make(coordinatorLayout, "Terapia inserita con successo!", Snackbar.LENGTH_SHORT);
                 snackbar.show();
+                idEventi.clear();
+
+                Intent i = new Intent(AggiungiTerapia.this, Home.class);
+                this.setResult(RESULT_OK);
+                this.finish();
+                startActivity(i);
+                finish();
+
             }
+
         }
         else {
+            //Toast.makeText(this, "Operazione non riuscita", Toast.LENGTH_LONG).show();
             Snackbar snackbar = Snackbar
                     .make(coordinatorLayout, "Operazione non riuscita", Snackbar.LENGTH_SHORT);
             snackbar.show();
 
+            //elimina dal calendario la terapia che hai già inserito
+            if(!idEventi.isEmpty()) {
+                if (checkNetwork()) {
+                    new EliminaEventiCalendar(mCredential, this.getApplicationContext(), this, idEventi).execute();
+                }
+            }
+            else{
+                Intent i =new Intent(AggiungiTerapia.this, Home.class);
+                startActivity(i);
+                this.finish();
+            }
         }
     }
 
-    //callback from Calendar
-    public void done(boolean b){
-        if(b){
-            Intent i=new Intent(AggiungiTerapia.this, Home.class);
-            this.setResult(RESULT_OK);
-            this.finish();
-            startActivity(i);
-            finish();
+    //callback elimina eventi calendar
+    public void done(boolean b, String inutile){
+        idEventi.clear();
+        if(!b){
+            Snackbar snackbar = Snackbar
+                    .make(coordinatorLayout, "Errore: aggiunto evento sul calendario" +
+                            "che non corrisponde a una misurazione.", Snackbar.LENGTH_SHORT);
+            snackbar.show();
         }
+        Intent i =new Intent(AggiungiTerapia.this, Home.class);
+        startActivity(i);
+        this.finish();
     }
+
+
 
     //callback from GetIngredients
     public void done(MainActiveIngredientsMessage m){
@@ -343,8 +450,13 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         princ_attivo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long rowId) {
                 ingrediente = (String)parent.getItemAtPosition(position);
+                Log.d(TAG, "posizione nome "+position);
                 Log.d("INGREDIENTE ", ingrediente);
-                ingredienteID = idsIngredienti.get(position);
+
+                //prendo l'id effettivo: la posizione è diversa
+                int pos2=nomiIngredienti.indexOf(ingrediente);
+                Log.d(TAG, "posizione id "+pos2);
+                ingredienteID = idsIngredienti.get(pos2);
                 Log.d("INGREDIENTEID ", " "+ingredienteID);
             }
         });
@@ -354,6 +466,8 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         fatto=true;
         Log.d("FATTO", "fatto");
     }
+
+
 
 
     public void onItemSelected(AdapterView<?> parent, View view,
@@ -387,7 +501,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         }
         else if(parent.getId()==R.id.ricettaSINO){
             ricetta=(String)parent.getItemAtPosition(pos);
-            boolean recipe=(ricetta.equals("SI"))? true: false;
+            recipe=(ricetta.equals("SI"))? true: false;
             Log.d("RICETTA ", " "+recipe);
         }
         else if(parent.getId()==R.id.numerocadenzaspin){
@@ -430,20 +544,18 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
     }
 
 
-    private void getResultsFromApi() {
-        if (! isGooglePlayServicesAvailable()) {
-            acquireGooglePlayServices();
-        } else if (mCredential.getSelectedAccountName() == null) {
-            Log.d("CALENDARgetres", "account");
-            chooseAccount();
-        } else if (! isDeviceOnline()) {
-            Toast.makeText(AggiungiTerapia.this, "No network connection available.", Toast.LENGTH_SHORT).show();
-        } else {
-            Log.d("CALENDARgetres", "task");
-            new AggiungiTerapiaCalendar(mCredential, getApplicationContext(), this, nome, numerocadenza, cadenza,
-                    inizio).execute();
-        }
+
+
+    // setSelectedAccountName definition
+    private void setSelectedAccountName(String accountName) {
+        SharedPreferences settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
+        editor.apply();
+        credential.setSelectedAccountName(accountName);
+        this.accountName = accountName;
     }
+
     /**
      * Attempts to set the account used with the API credentials. If an account
      * name was previously saved it will use that one; otherwise an account
@@ -513,6 +625,25 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                     getResultsFromApi();
                 }
                 break;
+            case REQUEST_ACCOUNT_PICKER2:
+                if (data != null && data.getExtras() != null) {
+                    String accountName =
+                            data.getExtras().getString(
+                                    AccountManager.KEY_ACCOUNT_NAME);
+                    if (accountName != null) {
+                        setSelectedAccountName(accountName);
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
+                        editor.apply();
+                        SharedPreferences pref=getSharedPreferences("MyPref", MODE_PRIVATE);
+                        // User is authorized
+                        RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
+                        MainUpdateUserMessage m=new MainUpdateUserMessage();
+                        m.setCalendarId(pref.getString("calendar", ""));
+                        if(checkNetwork()) new RegistraCalendarioAT(this, this, coordinatorLayout, pref.getLong("userId", 0L), m, apiHandler).execute();
+                    }
+                }
+                break;
             case REQUEST_ACCOUNT_PICKER:
                 if (resultCode == RESULT_OK && data != null &&
                         data.getExtras() != null) {
@@ -533,7 +664,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                     }
                 }
                 break;
-            case REQUEST_AUTHORIZATION:
+            case AppConstants.REQUEST_AUTHORIZATION:
                 if (resultCode == RESULT_OK) {
                     getResultsFromApi();
                 }
@@ -640,16 +771,19 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
     private class AggiungiTerapiaCalendar extends AsyncTask<Void, Void, Boolean> {
 
         private Context context;
-        private TaskCallbackCalendar mCallback;
+        private TaskCallbackCalendarAdd mCallback;
         private String nome;
         private String numerocadenza;
         private String cadenza;
         private String inizio;
 
+        //per inserire gli id degli eventi che creo sul calendario (vuota se non aggiungo eventi)
+        private LinkedList<String> idEventiCalendar;
+
         private com.google.api.services.calendar.Calendar mService = null;
         private Exception mLastError = null;
 
-        public AggiungiTerapiaCalendar(GoogleAccountCredential credential, Context context, TaskCallbackCalendar c,
+        public AggiungiTerapiaCalendar(GoogleAccountCredential credential, Context context, TaskCallbackCalendarAdd c,
                                        String nome, String numerocadenza, String cadenza, String inizio) {
             HttpTransport transport = AndroidHttp.newCompatibleTransport();
             JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
@@ -663,6 +797,7 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
             this.numerocadenza=numerocadenza;
             this.cadenza=cadenza;
             this.inizio=inizio;
+            idEventiCalendar=new LinkedList<>();
         }
 
         /**
@@ -688,7 +823,10 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                     idCalendar=createdCalendar.getId();
                     SharedPreferences.Editor editor=pref.edit();
                     editor.putString("calendar", createdCalendar.getId());
+                    //nel done mi serve per capire se registrare il calendario o no.
+                    editor.putBoolean("nuovocalendario", true);
                     editor.commit();
+
 
                     //se creo un nuovo calendario lo devo pubblicare a tutti i miei caregivers.
                     if(pref.getStringSet("emailcaregivers",null)!=null) {
@@ -778,7 +916,8 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                         event.setReminders(reminders);
 
                         event = mService.events().insert(idCalendar, event).execute();
-                        System.out.printf("Event created: %s\n", event.getHtmlLink());
+                        idEventiCalendar.add(event.getId());
+                        System.out.printf("Event created: %s\n", event.getId());
                     }
                 }
                 return true;
@@ -795,10 +934,102 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
         @Override
         protected void onPostExecute(Boolean response) {
             if(response){
-                mCallback.done(response);
+                Log.d(TAG, ""+idEventiCalendar.size());
+                mCallback.done(response, idEventiCalendar);
             }
             else{
                 Toast.makeText(context, "Operazione non riuscita", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            AggiungiTerapia.mProgress.hide();
+            if (mLastError != null) {
+                if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
+                    showGooglePlayServicesAvailabilityErrorDialog(
+                            ((GooglePlayServicesAvailabilityIOException) mLastError)
+                                    .getConnectionStatusCode());
+                } else if (mLastError instanceof UserRecoverableAuthIOException) {
+                    startActivityForResult(
+                            ((UserRecoverableAuthIOException) mLastError).getIntent(),
+                            AppConstants.REQUEST_AUTHORIZATION);
+                } else {
+                    Toast.makeText(context, "The following error occurred:\n"
+                            + mLastError.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.d("ERRORE CALENDAR", mLastError.getMessage());
+                }
+            } else {
+                Toast.makeText(context, "Request cancelled.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    /*private class EliminaEventiCalendar  extends AsyncTask<Void, Void, Boolean> {
+        private Context context;
+        private TaskCallbackCalendarElimina mCallback;
+
+        private final static String TAG = "ELIMINA_EVENTO";
+
+        //per inserire gli id degli eventi che creo sul calendario (vuota se non aggiungo eventi)
+        private LinkedList<String> idEventiCalendar;
+
+        private com.google.api.services.calendar.Calendar mService = null;
+        private Exception mLastError = null;
+
+        public EliminaEventiCalendar(GoogleAccountCredential credential, Context context, TaskCallbackCalendarElimina c,
+                                     LinkedList<String> idEventi) {
+            HttpTransport transport = AndroidHttp.newCompatibleTransport();
+            JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+            mService = new com.google.api.services.calendar.Calendar.Builder(
+                    transport, jsonFactory, credential)
+                    .setApplicationName("RecipeX")
+                    .build();
+            this.context=context;
+            this.mCallback=c;
+            idEventiCalendar=idEventi;
+        }
+
+        /**
+         * Background task to call Google Calendar API.
+         * @param params no parameters needed for this task.
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            SharedPreferences pref=context.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+
+            try {
+                String idCalendar=pref.getString("calendar", "");
+                Events events = mService.events().list(idCalendar)
+                        .setOrderBy("startTime")
+                        .setSingleEvents(true)
+                        .execute();
+                List<Event> items = events.getItems();
+                Iterator<Event> i=items.iterator();
+                while(i.hasNext()){
+                    Event e=(Event)i.next();
+                    if(idEventiCalendar.contains(e.getId()))
+                        mService.events().delete(idCalendar, e.getId()).execute();
+                }
+                return true;
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d("ECCEZIONE CALENDAR", e.getCause().toString());
+                mLastError = e;
+                cancel(true);
+                return false;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean response) {
+            if(response){
+                Log.d(TAG, ""+idEventiCalendar.size());
+                mCallback.done(true, "");
+            }
+            else{
+                mCallback.done(false, "");
             }
         }
 
@@ -823,7 +1054,9 @@ public class AggiungiTerapia extends AppCompatActivity implements EasyPermission
                 Toast.makeText(context, "Request cancelled.", Toast.LENGTH_SHORT).show();
             }
         }
-    }
+
+    }*/
+
 
     @Override
     public void onClick(View v) {
