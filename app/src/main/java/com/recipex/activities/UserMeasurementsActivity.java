@@ -87,7 +87,7 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
         else {
             if (profileId != 0 && checkNetwork()) {
                 apiHandler = AppConstants.getApiServiceHandle(credential);
-                new GetMeasurementsUser(profileId, this, this, apiHandler, 0, null).execute();
+                new GetMeasurementsUser(profileId, this, this, apiHandler, 0, 0).execute();
                 progressView.startAnimation();
                 progressView.setVisibility(View.VISIBLE);
             } else {

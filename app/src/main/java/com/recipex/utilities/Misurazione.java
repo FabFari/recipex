@@ -11,7 +11,6 @@ public class Misurazione {
     public String dato2long;
     public String datodouble;
     public String nota;
-    public long id;
     public String idCalendar;
 
     public Misurazione(){}

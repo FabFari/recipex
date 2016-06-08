@@ -41,6 +41,7 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
+        <!--
         <ImageView
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/elimina"
@@ -49,6 +50,7 @@
             android:layout_marginLeft="@dimen/control_size"
             android:layout_width="40dp"
             android:layout_height="40dp"/>
+        -->
 
         <View
             android:id="@+id/divider"
