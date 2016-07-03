@@ -18,20 +18,23 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.recipex.AppConstants;
 import com.recipex.activities.AddMeasurement;
-import com.recipex.activities.AggiungiTerapia;
-import com.recipex.taskcallbacks.TaskCallbackCalendarElimina;
+import com.recipex.activities.AddPrescription;
+import com.recipex.taskcallbacks.CalendarDeleteTC;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Created by Sara on 07/06/2016.
  */
-public class EliminaEventiCalendar  extends AsyncTask<Void, Void, Boolean> {
+
+/**
+ * deletes event from the user's calendar
+ */
+public class DeleteEventsCalendarAT extends AsyncTask<Void, Void, Boolean> {
     private Context context;
-    private TaskCallbackCalendarElimina mCallback;
+    private CalendarDeleteTC mCallback;
 
     private final static String TAG = "ELIMINA_EVENTO";
 
@@ -41,8 +44,8 @@ public class EliminaEventiCalendar  extends AsyncTask<Void, Void, Boolean> {
     private com.google.api.services.calendar.Calendar mService = null;
     private Exception mLastError = null;
 
-    public EliminaEventiCalendar(GoogleAccountCredential credential, Context context, TaskCallbackCalendarElimina c,
-                                 ArrayList<String> idEventi) {
+    public DeleteEventsCalendarAT(GoogleAccountCredential credential, Context context, CalendarDeleteTC c,
+                                  ArrayList<String> idEventi) {
         HttpTransport transport = AndroidHttp.newCompatibleTransport();
         JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
         mService = new com.google.api.services.calendar.Calendar.Builder(
@@ -109,8 +112,8 @@ public class EliminaEventiCalendar  extends AsyncTask<Void, Void, Boolean> {
                     ((AddMeasurement)context).showGooglePlayServicesAvailabilityErrorDialog(
                         ((GooglePlayServicesAvailabilityIOException) mLastError)
                                 .getConnectionStatusCode());
-                else if (mCallback instanceof AggiungiTerapia)
-                    ((AggiungiTerapia)context).showGooglePlayServicesAvailabilityErrorDialog(
+                else if (mCallback instanceof AddPrescription)
+                    ((AddPrescription)context).showGooglePlayServicesAvailabilityErrorDialog(
                             ((GooglePlayServicesAvailabilityIOException) mLastError)
                                     .getConnectionStatusCode());
                 //ADD ALL ACTIVITIES THAT CALL ELIMINAEVENTICALENDAR

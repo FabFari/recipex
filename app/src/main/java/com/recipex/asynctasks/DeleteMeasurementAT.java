@@ -15,6 +15,10 @@ import java.io.IOException;
 /**
  * Created by Fabrizio on 03/06/2016.
  */
+
+/**
+ * deletes a measurement
+ */
 public class DeleteMeasurementAT extends AsyncTask<Void, Void, MainDefaultResponseMessage> {
     public static String TAG = "SEND_REQUEST_AT";
     RecipexServerApi apiHandler;

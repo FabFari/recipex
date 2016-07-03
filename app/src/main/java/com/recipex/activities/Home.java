@@ -1,27 +1,16 @@
 package com.recipex.activities;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapShader;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -33,14 +22,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.AdapterView;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.github.clans.fab.FloatingActionMenu;
 import com.recipex.AppConstants;
-import com.appspot.recipex_1281.recipexServerApi.model.MainUserPrescriptionsMessage;
 import com.recipex.CircleTransform;
 import com.recipex.R;
 import com.recipex.fragments.CaregiversFragment;
@@ -49,17 +35,15 @@ import com.recipex.fragments.MisurazioniFragment;
 import com.recipex.fragments.TabFragment;
 import com.recipex.fragments.TerapieFragment;
 import com.recipex.fragments.UserRequestFragment;
-import com.recipex.utilities.Terapia;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Transformation;
-
-import java.io.InputStream;
-import java.util.List;
 
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 
+/**
+ * Main activity
+ */
 public class Home extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -128,18 +112,7 @@ public class Home extends AppCompatActivity
 
 
         fab = (FloatingActionButton) findViewById(R.id.fab_tutorial);
-        /*
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Change Fabrizio
-                Intent myIntent = new Intent(Home.this, AddMeasurement.class);
-                Activity activity = (Activity) view.getContext();
-                activity.startActivity(myIntent);
-                activity.finish();
-            }
-        });
-        */
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.setDrawerListener(toggle);
@@ -148,21 +121,14 @@ public class Home extends AppCompatActivity
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
 
+        //chack if user is a caregiver or a patient
         utenteSemplice=pref.getBoolean("utenteSemplice", true);
-
         Log.d("UTENTESEMPLICE ", " "+utenteSemplice);
         mFragmentManager = getSupportFragmentManager();
         mFragmentTransaction = mFragmentManager.beginTransaction();
         if(utenteSemplice)
             mFragmentTransaction.replace(R.id.containerView, new MisurazioniFragment()).commit();
         else mFragmentTransaction.replace(R.id.containerView, new TabFragment()).commit();
-
-        /*String nome = new StringBuilder(getIntent().getStringExtra("nome")).append(" ").append(getIntent().getStringExtra("cognome")).toString();
-
-        String email = new StringBuilder(getIntent().getStringExtra("email")).toString();
-
-        String photo = new StringBuilder(getIntent().getStringExtra("foto")).toString();
-        System.out.println(photo);*/
 
         // Change Fabrizio
         final Long userId=pref.getLong("userId", 0L);
@@ -221,12 +187,15 @@ public class Home extends AppCompatActivity
 
         Log.d(TAG, "MENU");
         if (id == R.id.action_logout) {
-            //Login.signOutFromGplus();
-            pref.edit().remove("email").commit();
+            //pref.edit().remove("email").commit();
+
+            //remove calendar id if there is one
             if(!pref.getString("calendar", "").equals("")) {
                 Log.d(TAG, "idCalendar "+pref.getString("calendar", ""));
                 pref.edit().remove("calendar").commit();
             }
+            if(pref.getStringSet("emailcaregivers", null)!=null)
+                pref.edit().remove("emailcaregivers").commit();
 
             pref.edit().putBoolean("token", true).commit();
             // Fabrizio Change
@@ -244,7 +213,6 @@ public class Home extends AppCompatActivity
             Intent i = new Intent(Home.this, Login.class);
             i.putExtra("hasLogOut", true);
             this.startActivity(i);
-            //Toast.makeText(getApplicationContext(), "Logout eseguito!", Toast.LENGTH_LONG).show();
             this.finish();
             return true;
         }
@@ -268,7 +236,7 @@ public class Home extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        //containerView è il FrameLayout del layout della home
+        //containerView is Home FrameLayout
 
         if (id == R.id.home) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
@@ -276,7 +244,6 @@ public class Home extends AppCompatActivity
                 fragmentTransaction.replace(R.id.containerView, new MisurazioniFragment()).commit();
             else fragmentTransaction.replace(R.id.containerView, new TabFragment()).commit();
         }
-        //ora fanno tutti la stessa cosa poi cambio
         else if (id == R.id.nav_infermieri) {
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.containerView, new CaregiversFragment()).commit();
@@ -284,8 +251,7 @@ public class Home extends AppCompatActivity
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.containerView,new FamiliariFragment()).commit();
         } else if (id == R.id.nav_requests) {
-            //Intent myIntent = new Intent(getApplicationContext(), UserRequests.class);
-            //startActivity(myIntent);
+
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.containerView,new UserRequestFragment()).commit();
         } else if (id == R.id.nav_aiuto) {
@@ -319,28 +285,11 @@ public class Home extends AppCompatActivity
     }
 
     private void presentShowcaseView(int withDelay){
-//        new MaterialShowcaseView.Builder(this)
-//                .setTarget(mSlidingTabLayoutTabs)
-//                .setTitleText("Hello")
-//                .setDismissText("Ho Capito")
-//                .setContentText("Queste solo ne zezioni thell'applicazione! \n Geeftory è la sezione in cui puoi trovare le sotrie degli oggetti \n Geeft è dove puoi vedere gli oggeti presenti su geeft e prenotare quello a cui sei interessato!")
-//                .setDelay(withDelay) // optional but starting animations immediately in onCreate can make them choppy
-//                .singleUse(SHOWCASE_ID_MAIN) // provide a unique ID used to ensure it is only shown once
-//                .show();
-
-
 
         ShowcaseConfig config = new ShowcaseConfig();
         config.setDelay(withDelay); // half second between each showcase view
 
         MaterialShowcaseSequence sequence = new MaterialShowcaseSequence(this, SHOWCASE_ID_MAIN);
-
-//        sequence.setOnItemShownListener(new MaterialShowcaseSequence.OnSequenceItemShownListener() {
-//            @Override
-//            public void onShow(MaterialShowcaseView itemView, int position) {
-//                Toast.makeText(itemView.getContext(), "Item #" + position, Toast.LENGTH_SHORT).show();
-//            }
-//        });
 
         sequence.setConfig(config);
 
@@ -364,21 +313,15 @@ public class Home extends AppCompatActivity
                         .withRectangleShape()
                         .build()
         );
-        /*
-        sequence.addSequenceItem(
-                new MaterialShowcaseView.Builder(this)
-                        .setTarget((TabLayout)findViewById(R.id.tabs))
-                        .setDismissText("HO CAPITO")
-                        .setMaskColour(fetchPrimaryDarkColor())
-                        .setDismissTextColor(fetchAccentColor())
-                        .setContentText("Qui puoi vedere i tuoi assistiti, le tue misurazioni e i tuoi bisogni")
-                        .withRectangleShape()
-                        .build()
-        );
-        */
+
         sequence.start();
 
     }
+
+    /**
+     * color for tutorial
+     * @return
+     */
     private int fetchAccentColor() {
         TypedValue typedValue = new TypedValue();
 
@@ -389,6 +332,11 @@ public class Home extends AppCompatActivity
 
         return color;
     }
+
+    /**
+     * color for tutorial
+     * @return
+     */
     private int fetchPrimaryDarkColor() {
         TypedValue typedValue = new TypedValue();
 

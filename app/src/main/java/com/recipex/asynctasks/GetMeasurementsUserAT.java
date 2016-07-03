@@ -1,7 +1,6 @@
 package com.recipex.asynctasks;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Looper;
 import android.util.Log;
@@ -9,28 +8,28 @@ import android.widget.Toast;
 
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserMeasurementsMessage;
-import com.appspot.recipex_1281.recipexServerApi.model.MainUserPrescriptionsMessage;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.recipex.AppConstants;
-import com.recipex.taskcallbacks.TaskCallbackGetMeasurements;
-import com.recipex.taskcallbacks.TaskCallbackGetTerapie;
+import com.recipex.taskcallbacks.GetMeasurementsTC;
 
 import java.io.IOException;
 
 /**
  * Created by Sara on 11/05/2016.
  */
-public class GetMeasurementsUser extends AsyncTask<Void, Void, MainUserMeasurementsMessage> {
+
+/**
+ * gets measurements of the user
+ */
+public class GetMeasurementsUserAT extends AsyncTask<Void, Void, MainUserMeasurementsMessage> {
     long id;
     Context mContext;
-    TaskCallbackGetMeasurements mCallback;
+    GetMeasurementsTC mCallback;
     RecipexServerApi apiHandler;
     int scroll;
 
     long idmes;
 
-    public GetMeasurementsUser(long id, Context context, TaskCallbackGetMeasurements t, RecipexServerApi handler, int scroll,
-                               long idmes){
+    public GetMeasurementsUserAT(long id, Context context, GetMeasurementsTC t, RecipexServerApi handler, int scroll,
+                                 long idmes){
         this.id=id;
         mContext=context;
         mCallback=t;

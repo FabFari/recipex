@@ -13,6 +13,9 @@ import com.recipex.utilities.AlertDialogManager;
 
 import java.io.IOException;
 
+/**
+ * gets user's information
+ */
 public class GetUserAT extends AsyncTask<Void, Void, MainUserInfoMessage> {
     public static String TAG = "GET_USER_AT";
     RecipexServerApi apiHandler;

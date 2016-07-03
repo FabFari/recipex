@@ -1,13 +1,12 @@
 package com.recipex.activities;
 
 import android.accounts.AccountManager;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -26,10 +25,9 @@ import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.recipex.AppConstants;
 import com.recipex.R;
-import com.recipex.adapters.RVAdapter;
-import com.recipex.asynctasks.GetMeasurementsUser;
-import com.recipex.fragments.MisurazioniFragment;
-import com.recipex.taskcallbacks.TaskCallbackGetMeasurements;
+import com.recipex.adapters.MisurazioniAdapter;
+import com.recipex.asynctasks.GetMeasurementsUserAT;
+import com.recipex.taskcallbacks.GetMeasurementsTC;
 import com.recipex.utilities.ConnectionDetector;
 import com.recipex.utilities.Misurazione;
 
@@ -38,7 +36,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class UserMeasurementsActivity extends AppCompatActivity implements TaskCallbackGetMeasurements{
+/**
+ * from user's own profile, if he is a caregiver, he can see measurements taken by his patients
+ */
+public class UserMeasurementsActivity extends AppCompatActivity implements GetMeasurementsTC {
 
     private static final String TAG = "USER_MEASUREMENTS_ACT";
     private static final int REQUEST_ACCOUNT_PICKER = 2;
@@ -87,25 +88,21 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
         settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
         credential = GoogleAccountCredential.usingAudience(this, AppConstants.AUDIENCE);
         Log.d(TAG, "Credential: " + credential);
-        setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+        //setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+        accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this);
 
         if (credential.getSelectedAccountName() == null) {
             Log.d(TAG, "AccountName == null: startActivityForResult.");
             startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
         }
         else {
-            if (profileId != 0 && checkNetwork()) {
-                /*apiHandler = AppConstants.getApiServiceHandle(credential);
-                new GetMeasurementsUser(profileId, this, this, apiHandler, 0, 0).execute();
-                progressView.startAnimation();
-                progressView.setVisibility(View.VISIBLE);*/
-
-
-
+            if (profileId != 0 && AppConstants.checkNetwork(this)) {
                 apiHandler = AppConstants.getApiServiceHandle(credential);
 
-                //SCROLL
-                final TaskCallbackGetMeasurements t=this;
+                //SCROLL listener
+                //variables to use in listener
+                final GetMeasurementsTC t=this;
+                final Activity a=this;
                 curRecView.setOnScrollListener(new RecyclerView.OnScrollListener() {
                     @Override
                     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -128,13 +125,12 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
                                 <= (firstVisibleItem + visibleThreshold)) {
                             // End has been reached
 
-                            //https://github.com/codepath/android_guides/wiki/Endless-Scrolling-with-AdapterViews
                             Log.i(TAG, "end called");
 
-                            if(checkNetwork() && !misurazioni.isEmpty()){
+                            if(AppConstants.checkNetwork(a) && !misurazioni.isEmpty()){
                                 Log.d(TAG, "scrollll");
                                 Log.d(TAG, misurazioni.get(misurazioni.size()-1).data);
-                                new GetMeasurementsUser(profileId, getApplicationContext(), t, apiHandler, scrollnum,
+                                new GetMeasurementsUserAT(profileId, getApplicationContext(), t, apiHandler, scrollnum,
                                         misurazioni.get(misurazioni.size()-1).id).execute();
                             }
 
@@ -145,7 +141,7 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
                 });
 
 
-                new GetMeasurementsUser(profileId, getApplicationContext(), this, apiHandler, scrollnum, 0).execute();
+                new GetMeasurementsUserAT(profileId, getApplicationContext(), this, apiHandler, scrollnum, 0).execute();
                 progressView.startAnimation();
                 progressView.setVisibility(View.VISIBLE);
 
@@ -159,6 +155,9 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
 
     }
 
+    /**
+     * setup layout elements
+     */
     private void bindActivity() {
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator);
         progressView = (CircularProgressView) findViewById(R.id.home_progress_view);
@@ -185,14 +184,15 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
                             data.getExtras().getString(
                                     AccountManager.KEY_ACCOUNT_NAME);
                     if (accountName != null) {
-                        setSelectedAccountName(accountName);
+                        //setSelectedAccountName(accountName);
+                        accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this);
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
                         editor.apply();
                         // User is authorized
                         apiHandler = AppConstants.getApiServiceHandle(credential);
-                        if (checkNetwork()) {
-                            new GetMeasurementsUser(profileId, this, this, apiHandler, scrollnum, 0).execute();
+                        if (AppConstants.checkNetwork(this)) {
+                            new GetMeasurementsUserAT(profileId, this, this, apiHandler, scrollnum, 0).execute();
                             progressView.startAnimation();
                             progressView.setVisibility(View.VISIBLE);
                         }
@@ -202,8 +202,11 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
             }
         }
 
-    // setSelectedAccountName definition
-    private void setSelectedAccountName(String accountName) {
+    /**
+     * sets name of the account which performs the operation
+     * @param accountName
+     */
+    /*private void setSelectedAccountName(String accountName) {
         SharedPreferences settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
@@ -211,31 +214,13 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
         Log.d(TAG, "ACCOUNT NAME: " + accountName);
         credential.setSelectedAccountName(accountName);
         this.accountName = accountName;
-    }
+    }*/
 
-    public boolean checkNetwork() {
-        cd = new ConnectionDetector(getApplicationContext());
-        // Check if Internet present
-        if (cd.isConnectingToInternet()) {
-            return true;
-        }else{
-            Snackbar snackbar = Snackbar
-                    .make(coordinatorLayout,
-                            "Nessuna connesione a internet!", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("ESCI", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            finish();
-                        }
-                    });
 
-            // Changing message text color
-            snackbar.setActionTextColor(Color.RED);
-            snackbar.show();
-        }
-        return false;
-    }
-
+    /**
+     * done from GetMeasurementsUserAT. Populates the list of measurements and sets the adapter
+     * @param response from the server
+     */
     public void done(MainUserMeasurementsMessage response){
         if((response!=null && response.getMeasurements()!=null) || !misurazioni.isEmpty()) {
             Log.e(TAG, "Nel done di getMisurazioni");
@@ -280,7 +265,7 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
 
                 misurazioni.add(mcur);
             }
-            RVAdapter adapter = new RVAdapter(misurazioni, this, null, profileId, apiHandler);
+            MisurazioniAdapter adapter = new MisurazioniAdapter(misurazioni, this, null, profileId, apiHandler);
             curRecView.setAdapter(adapter);
             Log.d(TAG, "itemCount: "+ adapter.getItemCount());
             if(adapter.getItemViewType(0) == EMPTY_VIEW) {
@@ -291,7 +276,7 @@ public class UserMeasurementsActivity extends AppCompatActivity implements TaskC
             }
         }
         else {
-            RVAdapter adapter = new RVAdapter(new ArrayList<Misurazione>(), this, null, profileId, apiHandler);
+            MisurazioniAdapter adapter = new MisurazioniAdapter(new ArrayList<Misurazione>(), this, null, profileId, apiHandler);
             curRecView.setAdapter(adapter);
         }
 

@@ -11,16 +11,19 @@ import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.appspot.recipex_1281.recipexServerApi.model.MainDefaultResponseMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainRegisterUserMessage;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.recipex.AppConstants;
-import com.recipex.taskcallbacks.TaskCallbackLogin;
+import com.recipex.taskcallbacks.LoginTC;
 import java.io.IOException;
 
 /**
  * Created by Sara on 26/04/2016.
  */
-public class Register extends AsyncTask<Void, Void, MainDefaultResponseMessage> {
+
+/**
+ * chacks if user is already registered. If it is not, and he wants to, he is registered.
+ */
+public class RegisterAT extends AsyncTask<Void, Void, MainDefaultResponseMessage> {
     Context mContext;
-    TaskCallbackLogin mCallback;
+    LoginTC mCallback;
     String email;
     String nome;
     String cognome;
@@ -41,20 +44,14 @@ public class Register extends AsyncTask<Void, Void, MainDefaultResponseMessage> 
 
     RecipexServerApi apiHandler;
 
-    GoogleAccountCredential credential;
-
-    SharedPreferences settings;
-
-    SharedPreferences pref;
-
-    public Register(Context context) {
+    public RegisterAT(Context context) {
         mContext = context;
     }
 
-    public Register(Context context, String email, String nome, String cognome, String photo, String bio, String birth,
-                     String sesso, String città, String indirizzo, String numeri, String campoSpecializzazione,
-                    Long anniEsperienza, String postoLavoro,String numeriBusiness, String disponibilità,
-                    TaskCallbackLogin mCallback, RecipexServerApi apiHandler, boolean wantToRegister) {
+    public RegisterAT(Context context, String email, String nome, String cognome, String photo, String bio, String birth,
+                      String sesso, String città, String indirizzo, String numeri, String campoSpecializzazione,
+                      Long anniEsperienza, String postoLavoro, String numeriBusiness, String disponibilità,
+                      LoginTC mCallback, RecipexServerApi apiHandler, boolean wantToRegister) {
         mContext = context;
         this.mCallback = mCallback;
         this.email = email;
@@ -112,8 +109,6 @@ public class Register extends AsyncTask<Void, Void, MainDefaultResponseMessage> 
                 reg.setField(campoSpecializzazione);
                 reg.setYearsExp(anniEsperienza);
                 reg.setBio(bio);
-                //ed.putBoolean("utenteSemplice", false);
-                //ed.commit();
             }
 
 
@@ -130,16 +125,6 @@ public class Register extends AsyncTask<Void, Void, MainDefaultResponseMessage> 
             // System.out.println("RESPONSE " + response.getMessage());
             Log.d("RESPONSE ", response.getMessage());
 
-            /*
-            // Change Fabrizio
-            if(response.getPayload() != null)
-                userId = Long.parseLong(response.getPayload());
-
-            if(response.getMessage().equals("User already existent."))
-                return response;
-            else
-                return null;
-            */
             return response;
 
         } catch (IOException e) {
@@ -157,17 +142,6 @@ public class Register extends AsyncTask<Void, Void, MainDefaultResponseMessage> 
         SharedPreferences.Editor editor = pref.edit();
 
         if(response != null) {
-
-            /*
-            // Change Fabrizio
-            if (response.getPayload() != null) {
-                // Registrazione Avvenuta
-                userId = Long.parseLong(response.getPayload());
-                Log.d("REGISTER_AT", "userId: " + userId);
-                editor.putLong("userId", userId);
-                editor.apply();
-            }
-            */
 
             if(!wantToRegister) {
                 // Vuole loggarsi

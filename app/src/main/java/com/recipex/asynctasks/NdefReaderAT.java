@@ -5,22 +5,24 @@ import android.nfc.NdefRecord;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.os.AsyncTask;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.View;
 
-import com.recipex.taskcallbacks.NdefReaderTaskCallback;
+import com.recipex.taskcallbacks.NdefReaderTC;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
-public class NdefReaderTask extends AsyncTask<Tag, Void, String> {
+/**
+ * manages nfc devices
+ */
+public class NdefReaderAT extends AsyncTask<Tag, Void, String> {
 
     private final static String TAG = "NDEF_READER_TASK";
     private View mainView;
-    private NdefReaderTaskCallback taskCallback;
+    private NdefReaderTC taskCallback;
 
-    public NdefReaderTask(View mainView, NdefReaderTaskCallback taskCallback) {
+    public NdefReaderAT(View mainView, NdefReaderTC taskCallback) {
         this.mainView = mainView;
         this.taskCallback = taskCallback;
     }

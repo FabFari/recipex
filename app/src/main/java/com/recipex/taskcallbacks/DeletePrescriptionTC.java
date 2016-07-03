@@ -5,6 +5,9 @@ import com.appspot.recipex_1281.recipexServerApi.model.MainDefaultResponseMessag
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-public interface RimuoviTerapiaTC {
+/**
+ * callback from DeletePrescriptionAT
+ */
+public interface DeletePrescriptionTC {
     void done(boolean res, ArrayList<String> ids, MainDefaultResponseMessage response);
 }

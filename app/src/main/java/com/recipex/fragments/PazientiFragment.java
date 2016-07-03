@@ -50,7 +50,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-
+/**
+ * fragment holding patients' info (only for caregivers)
+ */
 
 public class PazientiFragment extends Fragment implements GetUserTC, UpdateRelationInfoTC {
     static RecyclerView curRecView;
@@ -83,6 +85,10 @@ public class PazientiFragment extends Fragment implements GetUserTC, UpdateRelat
         return rootView;
     }
 
+    /**
+     * setup layout elements
+     * @param rootView
+     */
     private void initUI(View rootView) {
         progressView = (CircularProgressView) rootView.findViewById(R.id.home_progress_view);
         FloatingActionButton fab=(FloatingActionButton)rootView.findViewById(R.id.fabfragment);
@@ -100,51 +106,37 @@ public class PazientiFragment extends Fragment implements GetUserTC, UpdateRelat
         id=pref.getLong("userId", 0L);
 
 
-        if(id!=0 && checkNetwork()){
+        if(id!=0 && AppConstants.checkNetwork(getActivity())){
             settings = getActivity().getSharedPreferences(AppConstants.PREFS_NAME, 0);
             credential = GoogleAccountCredential.usingAudience(getContext(), AppConstants.AUDIENCE);
             Log.d("Caregivers", "Credential: " + credential);
-            setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+            //setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+            accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this.getActivity());
 
             if (credential.getSelectedAccountName() == null) {
                 Log.d("Caregivers", "AccountName == null: startActivityForResult.");
                 startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
             } else {
                 apiHandler = AppConstants.getApiServiceHandle(credential);
-                if (checkNetwork()) {
+                if (AppConstants.checkNetwork(getActivity())) {
                     progressView.startAnimation();
                     progressView.setVisibility(View.VISIBLE);
                     new GetUserAT(this, getActivity(), id, apiHandler).execute();
                 }
             }
         }
-        else Toast.makeText(getActivity(), "Si è verificato un errore.", Toast.LENGTH_SHORT).show();
-    }
+        else{
+            progressView.stopAnimation();
+            progressView.setVisibility(View.GONE);
 
-    public boolean checkNetwork() {
-        cd = new ConnectionDetector(getActivity().getApplicationContext());
-        // Check if Internet present
-        if (cd.isConnectingToInternet()) {
-            return true;
-        }else{
-            Snackbar snackbar = Snackbar
-                    .make(getActivity().getWindow().getDecorView().getRootView(),
-                            "Nessuna connesione a internet!", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("ESCI", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            getActivity().finish();
-                        }
-                    });
-
-            // Changing message text color
-            snackbar.setActionTextColor(Color.RED);
-            snackbar.show();
         }
-        return false;
     }
 
-    //callback from GetUser
+    /**
+     * callback from GetUserAT
+     * @param res to check it is all ok
+     * @param message from server, containing patients
+     */
     public void done(boolean res, final MainUserInfoMessage message) {
         if(message!=null && message.getPatients()!=null && !message.getPatients().isEmpty()) {
             List<MainUserMainInfoMessage> m=message.getPatients();
@@ -163,8 +155,12 @@ public class PazientiFragment extends Fragment implements GetUserTC, UpdateRelat
         progressView.stopAnimation();
         progressView.setVisibility(View.GONE);
     }
-    // setSelectedAccountName definition
-    private void setSelectedAccountName(String accountName) {
+
+    /**
+     * sets name of the account which performs the operation
+     * @param accountName
+     */
+    /*private void setSelectedAccountName(String accountName) {
         settings = getActivity().getSharedPreferences(AppConstants.PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
@@ -172,8 +168,13 @@ public class PazientiFragment extends Fragment implements GetUserTC, UpdateRelat
         Log.d("Caregivers", "ACCOUNT NAME: " + accountName);
         credential.setSelectedAccountName(accountName);
         this.accountName = accountName;
-    }
+    }*/
 
+    /**
+     * callback from UpdateRelationInfoAT
+     * @param resp boolean to check it is all ok
+     * @param response from the server
+     */
     @Override
     public void done(boolean resp, MainDefaultResponseMessage response) {
         if(resp) {
@@ -189,18 +190,20 @@ public class PazientiFragment extends Fragment implements GetUserTC, UpdateRelat
             snackbar.show();
         }
 
-        if(checkNetwork()){
+        if(AppConstants.checkNetwork(getActivity())){
             settings = getActivity().getSharedPreferences(AppConstants.PREFS_NAME, 0);
             credential = GoogleAccountCredential.usingAudience(getContext(), AppConstants.AUDIENCE);
             Log.d("Caregivers", "Credential: " + credential);
-            setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+            //setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+            accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this.getActivity());
 
             if (credential.getSelectedAccountName() == null) {
                 Log.d("Caregivers", "AccountName == null: startActivityForResult.");
                 startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
             } else {
                 apiHandler = AppConstants.getApiServiceHandle(credential);
-                if (checkNetwork()) {
+                //refresh patients
+                if (AppConstants.checkNetwork(getActivity())) {
                     progressView.startAnimation();
                     progressView.setVisibility(View.VISIBLE);
                     new GetUserAT(this, getActivity(), id, apiHandler).execute();

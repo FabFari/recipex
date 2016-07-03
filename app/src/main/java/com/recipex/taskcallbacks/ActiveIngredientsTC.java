@@ -5,6 +5,10 @@ import com.appspot.recipex_1281.recipexServerApi.model.MainActiveIngredientsMess
 /**
  * Created by Sara on 08/05/2016.
  */
-public interface TaskCallbackActiveIngredients {
+
+/**
+ * callback from GetMainIngredientsAT
+ */
+public interface ActiveIngredientsTC {
     void done(MainActiveIngredientsMessage m);
 }

@@ -19,6 +19,10 @@ import java.io.IOException;
 /**
  * Created by Fabrizio on 04/05/2016.
  */
+
+/**
+ * adds a measurement to the user
+ */
 public class AddMeasurementAT extends AsyncTask<Void, Void, MainDefaultResponseMessage>{
 
     public static String TAG = "GET_USER_AT";

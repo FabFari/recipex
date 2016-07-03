@@ -21,6 +21,10 @@ import java.util.List;
 /**
  * Created by Fabrizio on 18/05/2016.
  */
+
+/**
+ * adapter for list of hours
+ */
 public class DateItemAdapter extends BaseAdapter {
 
     private Context context;

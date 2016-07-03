@@ -1,66 +1,66 @@
 package com.recipex.asynctasks;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Looper;
+import android.support.design.widget.Snackbar;
+import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.appspot.recipex_1281.recipexServerApi.model.MainActiveIngredientsMessage;
-import com.appspot.recipex_1281.recipexServerApi.model.MainUserPrescriptionsMessage;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.recipex.AppConstants;
-import com.recipex.taskcallbacks.TaskCallbackActiveIngredients;
-import com.recipex.taskcallbacks.TaskCallbackGetTerapie;
+import com.recipex.taskcallbacks.ActiveIngredientsTC;
 
 import java.io.IOException;
 
 /**
  * Created by Sara on 08/05/2016.
  */
+
+/**
+ * get list of ingredients for medicines used in prescriptions
+ */
 public class GetMainIngredientsAT extends AsyncTask<Void, Void, MainActiveIngredientsMessage> {
-    Context mContext;
-    TaskCallbackActiveIngredients mCallback;
+    ActiveIngredientsTC mCallback;
+    Activity activity;
+    RecipexServerApi apihandler;
+    View view;
 
-    GoogleAccountCredential credential;
-    SharedPreferences settings;
-    SharedPreferences pref;
-
-
-    public GetMainIngredientsAT(Context context, TaskCallbackActiveIngredients t){
-        mContext=context;
+    public GetMainIngredientsAT(RecipexServerApi apihandler, Activity a, ActiveIngredientsTC t, View v){
         mCallback=t;
+        activity=a;
+        this.apihandler=apihandler;
+        view=v;
     }
 
-    // setSelectedAccountName definition
-    private void setSelectedAccountName(String accountName) {
-        settings = mContext.getSharedPreferences(AppConstants.PREFS_NAME, 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString("account", accountName);
-        editor.commit();
-        credential.setSelectedAccountName(accountName);
-    }
 
     protected MainActiveIngredientsMessage doInBackground(Void... unused) {
 
-        // Retrieve service handle.
-        credential = GoogleAccountCredential.usingAudience(mContext,
-                AppConstants.AUDIENCE);
-        pref = mContext.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
-        String email = pref.getString("email", "");
-        setSelectedAccountName(email);
-
-        RecipexServerApi apiServiceHandle = AppConstants.getApiServiceHandle(credential);
-
         try {
-            RecipexServerApi.ActiveIngredient.GetActiveIngredients get = apiServiceHandle.activeIngredient().getActiveIngredients();
+            RecipexServerApi.ActiveIngredient.GetActiveIngredients get = apihandler.activeIngredient().getActiveIngredients();
             MainActiveIngredientsMessage response = get.execute();
 
             return response;
-        } catch (IOException e) {
-            Looper.prepare();
-            Toast.makeText(mContext, "Exception during API call! " + e.getMessage(), Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Log.d("GetMainIngredientsAT", e.getMessage());
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    activity.runOnUiThread(new Runnable(){
+                        @Override
+                        public void run(){
+                            Snackbar snackbar = Snackbar
+                                    .make(view, "Operazione non riuscita!", Snackbar.LENGTH_SHORT);
+                            snackbar.show();
+                        }
+                    });
+                }
+            });
         }
         return null;
     }

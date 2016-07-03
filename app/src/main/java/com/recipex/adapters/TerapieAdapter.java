@@ -2,13 +2,9 @@ package com.recipex.adapters;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.AppCompatAutoCompleteTextView;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,38 +16,38 @@ import android.widget.TextView;
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.recipex.AppConstants;
 import com.recipex.R;
-import com.recipex.asynctasks.RimuoviTerapiaAT;
-import com.recipex.asynctasks.UpdateRelationInfoAT;
-import com.recipex.taskcallbacks.RimuoviTerapiaTC;
+import com.recipex.asynctasks.DeletePrescriptionAT;
+import com.recipex.taskcallbacks.DeletePrescriptionTC;
 import com.recipex.utilities.ConnectionDetector;
-import com.recipex.utilities.Terapia;
-
-import org.w3c.dom.Text;
+import com.recipex.utilities.Prescription;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Created by Sara on 07/05/2016.
  */
+
+/**
+ * adapter for prescriptions
+ */
 public class TerapieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
-    List<Terapia> terapie;
+    List<Prescription> terapie;
     RecipexServerApi apiHandler;
     Fragment fragment;
     ConnectionDetector cd;
-    RimuoviTerapiaTC taskCallbak;
+    DeletePrescriptionTC taskCallbak;
     Long user_id;
     private static final String TAG = "TERAPIE_ADAPTER";
     private static final int EMPTY_VIEW = 10;
 
-    public TerapieAdapter(List<Terapia> data, Fragment fragment, RecipexServerApi apiHandler,
-                          RimuoviTerapiaTC taskCallback, Long user_id){
+    public TerapieAdapter(List<Prescription> data, Fragment fragment, RecipexServerApi apiHandler,
+                          DeletePrescriptionTC taskCallback, Long user_id){
         if(data != null)
             this.terapie = data;
         else
-            this.terapie = new ArrayList<Terapia>();
+            this.terapie = new ArrayList<Prescription>();
         this.fragment = fragment;
         this.apiHandler = apiHandler;
         this.taskCallbak =taskCallback;
@@ -141,7 +137,7 @@ public class TerapieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
             if (terapie.get(i).caregiver != null && terapie.get(i).caregiver.equals(""))
                 terapieViewHolder.foglio.setText(terapie.get(i).caregiver);
-            //else terapieViewHolder.foglio.setVisibility(View.INVISIBLE);
+
             terapieViewHolder.remove.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -151,10 +147,10 @@ public class TerapieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     // Add the buttons
                     builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            if(checkNetwork()) {
+                            if(AppConstants.checkNetwork(fragment.getActivity())) {
                                 //Log.d(TAG, "ID: "+user_id);
                                 //Log.d(TAG, "CAREGIVER ID: "+caregivers.get(pos).getId());
-                                new RimuoviTerapiaAT(taskCallbak, fragment.getActivity(),
+                                new DeletePrescriptionAT(taskCallbak, fragment.getActivity(),
                                         fragment.getActivity().getWindow().getDecorView().getRootView(),
                                         terapie.get(pos).id, user_id, terapie.get(pos).idsCalendar, apiHandler).execute();
                             }
@@ -184,6 +180,9 @@ public class TerapieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         super.onAttachedToRecyclerView(recyclerView);
     }
 
+    /**
+     * calss holding relevant information on prescriptions
+     */
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         ImageView icon;
         TextView nome;
@@ -220,28 +219,4 @@ public class TerapieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             super(itemView);
         }
     }
-
-    public boolean checkNetwork() {
-        cd = new ConnectionDetector(fragment.getActivity().getApplicationContext());
-        // Check if Internet present
-        if (cd.isConnectingToInternet()) {
-            return true;
-        }else{
-            Snackbar snackbar = Snackbar
-                    .make(fragment.getActivity().getWindow().getDecorView().getRootView(),
-                            "Nessuna connesione a internet!", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("ESCI", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            fragment.getActivity().finish();
-                        }
-                    });
-
-            // Changing message text color
-            snackbar.setActionTextColor(Color.RED);
-            snackbar.show();
-        }
-        return false;
-    }
-
 }

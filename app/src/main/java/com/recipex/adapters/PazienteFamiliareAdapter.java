@@ -34,6 +34,10 @@ import java.util.Locale;
 /**
  * Created by Sara on 07/05/2016.
  */
+
+/**
+ * adapter for patients and relatives
+ */
 public class PazienteFamiliareAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     private static final int EMPTY_VIEW = 10;
@@ -47,7 +51,7 @@ public class PazienteFamiliareAdapter extends RecyclerView.Adapter<RecyclerView.
     Long user_id;
     RecipexServerApi apiHandler;
 
-    //boolean: true paziente, false familiare
+    //boolean: true patient, false familiar
     public PazienteFamiliareAdapter(List<MainUserMainInfoMessage> pazienti, Home activity, boolean pazientefamiliare,
                                     UpdateRelationInfoTC taskCallback, CircularProgressView progressView,
                                     Long user_id, RecipexServerApi apiHandler){
@@ -125,16 +129,12 @@ public class PazienteFamiliareAdapter extends RecyclerView.Adapter<RecyclerView.
                         // Add the buttons
                         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                if (checkNetwork()) {
-                                    if (pazientefamiliare) {
-                                        new UpdateRelationInfoAT(user_id, pazienti.get(pos).getId(), AppConstants.FAMILIARE,
-                                                activity.getWindow().getDecorView().getRootView(), activity, taskCallback,
-                                                apiHandler, AppConstants.ASSISTENTE).execute();
-                                    } else {
-                                        new UpdateRelationInfoAT(user_id, pazienti.get(pos).getId(), AppConstants.FAMILIARE,
+                                if (AppConstants.checkNetwork(activity)) {
+
+                                    new UpdateRelationInfoAT(user_id, pazienti.get(pos).getId(), AppConstants.FAMILIARE,
                                                 activity.getWindow().getDecorView().getRootView(), activity, taskCallback,
                                                 apiHandler).execute();
-                                    }
+
                                 }
                             }
                         });
@@ -145,11 +145,7 @@ public class PazienteFamiliareAdapter extends RecyclerView.Adapter<RecyclerView.
                             }
                         });
 
-                        String msg;
-                        if (pazientefamiliare)
-                            msg = "pazienti";
-                        else
-                            msg = "familiari";
+                        String msg="familiari";
 
                         // 2. Chain together various setter methods to set the dialog characteristics
                         builder.setMessage("Vuoi rimuovere " + personViewHolder.nome.getText().toString()
@@ -178,6 +174,9 @@ public class PazienteFamiliareAdapter extends RecyclerView.Adapter<RecyclerView.
         }
     }
 
+    /**
+     * class holding information about the patient or the familiar (the information showed is the same)
+     */
     public static class MyViewHolderPaziente extends RecyclerView.ViewHolder {
         CardView cv;
         TextView nome;
@@ -191,29 +190,6 @@ public class PazienteFamiliareAdapter extends RecyclerView.Adapter<RecyclerView.
             foto =(ImageView)itemView.findViewById(R.id.fotoPaziente);
             remove =(ImageView)itemView.findViewById(R.id.remove);
         }
-    }
-
-    public boolean checkNetwork() {
-        cd = new ConnectionDetector(activity.getApplicationContext());
-        // Check if Internet present
-        if (cd.isConnectingToInternet()) {
-            return true;
-        }else{
-            Snackbar snackbar = Snackbar
-                    .make(activity.getWindow().getDecorView().getRootView(),
-                            "Nessuna connesione a internet!", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("ESCI", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            activity.finish();
-                        }
-                    });
-
-            // Changing message text color
-            snackbar.setActionTextColor(Color.RED);
-            snackbar.show();
-        }
-        return false;
     }
 
 }

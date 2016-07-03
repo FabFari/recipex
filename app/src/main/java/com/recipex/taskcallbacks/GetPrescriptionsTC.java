@@ -5,6 +5,10 @@ import com.appspot.recipex_1281.recipexServerApi.model.MainUserPrescriptionsMess
 /**
  * Created by Sara on 08/05/2016.
  */
-public interface TaskCallbackGetTerapie {
+
+/**
+ * callback from GetPrescriptionsUserAT
+ */
+public interface GetPrescriptionsTC {
     void done(boolean b, MainUserPrescriptionsMessage m);
 }

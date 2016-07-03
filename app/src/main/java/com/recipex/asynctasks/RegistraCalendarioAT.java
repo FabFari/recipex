@@ -10,26 +10,27 @@ import android.support.design.widget.Snackbar;
 import android.view.View;
 
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
-import com.appspot.recipex_1281.recipexServerApi.model.MainAddMeasurementMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainDefaultResponseMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUpdateUserMessage;
 import com.recipex.AppConstants;
-import com.recipex.taskcallbacks.AddMeasurementTC;
-import com.recipex.taskcallbacks.TaskCallbackRegistraCalendario;
+import com.recipex.taskcallbacks.RegisterCalendarTC;
 
 import java.io.IOException;
 
+/**
+ * registers users's calendar id in the server.
+ */
 public class RegistraCalendarioAT extends AsyncTask<Void, Void, MainDefaultResponseMessage> {
 
     public static String TAG = "GET_USER_AT";
     RecipexServerApi apiHandler;
     Activity activity;
     View mainView;
-    TaskCallbackRegistraCalendario taskCallback;
+    RegisterCalendarTC taskCallback;
     Long user_id;
     MainUpdateUserMessage content;
 
-    public RegistraCalendarioAT(TaskCallbackRegistraCalendario taskCallback, Activity activity, View mainView, Long user_id,
+    public RegistraCalendarioAT(RegisterCalendarTC taskCallback, Activity activity, View mainView, Long user_id,
                                 MainUpdateUserMessage content, RecipexServerApi apiHandler) {
         this.taskCallback = taskCallback;
         this.activity = activity;

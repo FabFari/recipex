@@ -4,18 +4,11 @@ package com.recipex.activities;
  * Created by Sara on 24/04/2016.
  */
 import android.accounts.AccountManager;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -24,10 +17,8 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
-import com.appspot.recipex_1281.recipexServerApi.model.MainUserPrescriptionsMessage;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -41,20 +32,18 @@ import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListe
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.plus.People;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
-import com.google.android.gms.plus.model.people.PersonBuffer;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.recipex.AppConstants;
 import com.recipex.R;
-import com.recipex.asynctasks.GetTerapieUser;
-import com.recipex.asynctasks.Register;
-import com.recipex.taskcallbacks.TaskCallbackGetTerapie;
-import com.recipex.taskcallbacks.TaskCallbackLogin;
+import com.recipex.asynctasks.RegisterAT;
+import com.recipex.taskcallbacks.LoginTC;
 
-
-public class Login extends AppCompatActivity implements TaskCallbackLogin, OnClickListener, ConnectionCallbacks, OnConnectionFailedListener {
+/**
+ * Login activity
+ */
+public class Login extends AppCompatActivity implements LoginTC, OnClickListener, ConnectionCallbacks, OnConnectionFailedListener {
 
     private static final int RC_SIGN_IN = 0;
     private static final int REQUEST_ACCOUNT_PICKER = 2;
@@ -117,23 +106,10 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
         String f=pref.getString("foto", null);
 
 
+        //if I already have data of the user, I do not need Google+.
         if(e!=null && n!=null && c!=null && f!=null && !id.equals(0L))
             avviaHome();
 
-        /*
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this).addApi(Plus.API)
-                .addScope(Plus.SCOPE_PLUS_LOGIN)
-                .addScope(Plus.SCOPE_PLUS_PROFILE).build();
-        */
-        /*mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity ,
-                        this  OnConnectionFailedListener )
-                        this  OnConnectionFailedListener )
-                .addApi(Plus.API)
-                .addScope(Plus.SCOPE_PLUS_PROFILE)
-                .build();*/
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(AppConstants.WEB_CLIENT_ID)
@@ -155,12 +131,11 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
                     .make(mainRelative, "Logout eseguito con successo!", Snackbar.LENGTH_SHORT);
             snackbar.show();
         }
-
-        // Sign out from previous sessions
-        //signOut();
-
     }
 
+    /**
+     * go to home activity
+     */
     private void avviaHome(){
         Intent myIntent = new Intent(Login.this, Home.class);
         this.startActivity(myIntent);
@@ -168,17 +143,24 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
         this.finish();
     }
 
+    /**
+     * start google api client
+     */
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
     }
 
-
+    /**
+     * when client is connected
+     * @param arg0
+     */
     @Override
     public void onConnected(Bundle arg0) {
         mSignInClicked = false;
         token = pref.getBoolean("token",false);
 
+        //if token is false, I want to disconnect
         if(token){
             disconnetti();
         }else{
@@ -195,6 +177,9 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
         }
     }
 
+    /**
+     * disconnect google client
+     */
     public void disconnetti(){
 
         if (mGoogleApiClient.isConnected()) {
@@ -238,23 +223,6 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
 
     }
 
-    /*
-    @Override
-    protected void onActivityResult(int requestCode, int responseCode, Intent intent) {
-        if (requestCode == RC_SIGN_IN) {
-            if (responseCode != RESULT_OK) {
-                System.out.println("Response not ok");
-                mSignInClicked = false;
-            }
-
-            mIntentInProgress = false;
-
-            if (!mGoogleApiClient.isConnecting()) {
-                mGoogleApiClient.connect();
-            }
-        }
-    }
-    */
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -274,25 +242,33 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
                             data.getExtras().getString(
                                     AccountManager.KEY_ACCOUNT_NAME);
                     if (accountName != null) {
-                        setSelectedAccountName(accountName);
+                        //setSelectedAccountName(accountName);
+                        accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this);
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
                         editor.apply();
                         // User is authorized
                         RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-                        if (checkNetwork()) executeAsyncTask(apiHandler);
+                        if (AppConstants.checkNetwork(this)) executeAsyncTask(apiHandler);
                     }
                 }
                 break;
             }
         }
 
+    /**
+     * calls async task RegisterAT that checks if user is already registered
+     * @param apiHandler for Google App Engine api
+     */
     private void executeAsyncTask(RecipexServerApi apiHandler) {
         Log.e(TAG, "Lancio Async Task");
-        new Register(getApplicationContext(), email, nome, cognome, personPhotoUrl, "", birth,
+        new RegisterAT(getApplicationContext(), email, nome, cognome, personPhotoUrl, "", birth,
                 sesso, "", "", "", "", (long) 0, "", "", "", this, apiHandler, false).execute();
     }
 
+    /**
+     * launch registration activity
+     */
     private void lauchRegisterActivity() {
         Intent myIntent = new Intent(Login.this, Registration.class);
         myIntent.putExtra("nome", nome);
@@ -306,6 +282,9 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
         this.finish();
     }
 
+    /**
+     * retrieve data of the user from Google+
+     */
     private void getProfileInformation() {
         Log.e(TAG, "Result: "+ result.isSuccess());
         Log.e(TAG, "Result: "+ result.getStatus());
@@ -313,8 +292,6 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
 
         if (result.isSuccess()) {
             GoogleSignInAccount acct = result.getSignInAccount();
-            //acct.getPhotoUrl();
-            //acct.getId();
             Log.e(TAG, "Account Name: "+ acct.getDisplayName());
             Log.e(TAG, "Account Email: "+acct.getEmail());
             email = acct.getEmail();
@@ -324,17 +301,7 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
             SharedPreferences.Editor editor = settings.edit();
             editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
             editor.commit();
-                    /*
-                    Plus.PeopleApi.load(mGoogleApiClient, "signed_in_user_account_id")
-                        .setResultCallback(new ResultCallback<People.LoadPeopleResult>() {
-                            @Override
-                            public void onResult(@NonNull People.LoadPeopleResult loadPeopleResult) {
-                                Log.e(TAG, "Nell'onResult!!");
-                                PersonBuffer personBuffer = loadPeopleResult.getPersonBuffer();
-                                Log.e(TAG, "personBuffer: "+personBuffer);
-                                if (personBuffer != null && personBuffer.getCount() > 0) {
-                                    Log.e(TAG, "Prendo le info!!");
-                                    */
+
             if (Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null) {
                 Person currentPerson = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
                 //Person currentPerson = personBuffer.get(0);
@@ -357,20 +324,21 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
                 Log.e(TAG, "sesso: "+sesso);
                 Log.e(TAG, "birth: "+birth);
 
-                if (tokenLogin) { //E' stato cliccato il bottone per effettuare il Login
+                if (tokenLogin) { //login button was clicked
                     tokenLogin = false;
-                    if (checkNetwork()) {
-                        //metto come vuoti i campi già registrati, non li posso recuperare dalla classe Person.
-                        //Register registra se l'email non è presente nel db, altrimenti restituisce true e fa il login
+                    if (AppConstants.checkNetwork(this)) {
+                        //check if user is present in the database: if not, it registers him
+
                         if (birth == null) {
-                            //data default: tanto in register non viene contata se l'utente è giù registrato
+                            //debug date, not used.
                             birth = "1994-01-12";
                         }
 
                         settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
                         credential = GoogleAccountCredential.usingAudience(this, AppConstants.AUDIENCE);
                         Log.d(TAG, "Credential: " + credential);
-                        setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+                        //setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+                        accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this);
 
                         if (credential.getSelectedAccountName() == null) {
                             Log.d(TAG, "AccountName == null: startActivityForResult.");
@@ -378,115 +346,16 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
                         } else {
                             progressView.startAnimation();
                             RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-                            if (checkNetwork()) executeAsyncTask(apiHandler);
+                            if (AppConstants.checkNetwork(this)) executeAsyncTask(apiHandler);
                         }
                     }
 
                 } else
                     lauchRegisterActivity();
             }
-                                /*
-                                }
-                            }
-                        });
-                        */
         }
     }
 
-    /*
-    private void getProfileInformation() {
-        progressView.startAnimation();
-        progressView.setVisibility(View.VISIBLE);
-        try {
-            if (Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null) {
-                Person currentPerson = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-                personPhotoUrl = currentPerson.getImage().getUrl();
-                email = Plus.AccountApi.getAccountName(mGoogleApiClient);
-
-                cognome = currentPerson.getName().getFamilyName();
-                nome = currentPerson.getName().getGivenName();
-
-                String birth=currentPerson.getBirthday();
-
-                int sex=currentPerson.getGender();
-                String sesso = "";
-                if (sex == 1)
-                    sesso = "F";
-                else sesso = "M";
-
-                personPhotoUrl = personPhotoUrl.substring(0, personPhotoUrl.length() - 6);
-
-                if (tokenLogin) { //E' stato cliccato il bottone per effettuare il Login
-                    tokenLogin = false;
-                    //Devo verificare che la mail con cui l'utente ha effettuato l'accesso è presente nel nostro DB come artista
-                    if (checkNetwork()) {
-                        /*metto come vuoti i campi già registrati, non li posso recuperare dalla classe Person.
-                        Register registra se l'email non è presente nel db, altrimenti restituisce true e fa il login
-
-                        if (birth == null) {
-                            //data default: tanto in register non viene contata se l'utente è giù registrato
-                            birth = "1994-01-12";
-                        }
-
-                        new Register(getApplicationContext(), email, nome, cognome, personPhotoUrl, "", birth, sesso, "", "",
-                                "", "", (long) 0, "", "", "", this, false).execute();
-                    }
-
-                } else {
-                    Intent myIntent = new Intent(Login.this, Registration.class);
-                    myIntent.putExtra("nome", nome);
-                    myIntent.putExtra("cognome", cognome);
-                    myIntent.putExtra("email", email);
-                    myIntent.putExtra("foto", personPhotoUrl);
-                    myIntent.putExtra("data", birth);
-                    myIntent.putExtra("sesso", sesso);
-                    this.startActivity(myIntent);
-                    this.finish();
-                }
-            }else{
-
-                    // SOLO PER DEBUG
-                    nome = "Sara";
-                    cognome = "Veterini";
-                    email = "saraveterini@gmail.com";
-                    String personPhotoUrl = "http://www.dis.uniroma1.it/sites/default/files/pictures/picture-1521-1424796678.jpg";
-                    String birth="1994-01-12";
-                    System.out.println("SONO QUI");
-                    /*Intent myIntent = new Intent(Login.this, Home.class);
-                    myIntent.putExtra("nome", nome);
-                    myIntent.putExtra("cognome", cognome);
-                    myIntent.putExtra("email", email);
-                    myIntent.putExtra("foto", personPhotoUrl);
-                    this.startActivity(myIntent);
-                    Toast.makeText(getApplicationContext(), "Login in debug mode", Toast.LENGTH_LONG).show();
-                    this.finish();
-                if (tokenLogin) { //E' stato cliccato il bottone per effettuare il Login
-                    tokenLogin = false;
-                    //Devo verificare che la mail con cui l'utente ha effettuato l'accesso è presente nel nostro DB come artista
-                    if (checkNetwork())
-                        /*metto come vuoti i campi già registrati, non li posso recuperare dalla classe Person.
-                        Register registra se l'email non è presente nel db, altrimenti restituisce true e fa il login
-                        new Register(getApplicationContext(), email, nome, cognome, personPhotoUrl, "", birth, "", "", "",
-                                new ArrayList<String>(), "", (long)0, "", new ArrayList<String>(), "", this).execute();
-                } else { /* E' stato cliccato il bottone per la registrazione
-                    Intent myIntent = new Intent(Login.this, Registration.class);
-                    myIntent.putExtra("nome", nome);
-                    myIntent.putExtra("cognome", cognome);
-                    myIntent.putExtra("email", email);
-                    myIntent.putExtra("foto", personPhotoUrl);
-                    myIntent.putExtra("data", birth);
-                    this.startActivity(myIntent);
-                    this.finish();
-                }
-
-                Toast.makeText(getApplicationContext(), "Non è stato possibile effetture il login. Riprovare in un secondo momento", Toast.LENGTH_LONG).show();
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    */
 
     @Override
     public void onConnectionSuspended(int arg0) {
@@ -528,28 +397,17 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
         }
     }
 
-
-/*
-    public void onBackPressed(){
-        //System.exit(0);
-        //return;
-        if(progressView.getVisibility() == View.VISIBLE) {
-            progressView.stopAnimation();
-            progressView.setVisibility(View.GONE);
-        }
-        else
-            super.onBackPressed();
-    }
-*/
-
+    /**
+     * callback from RegisterAT task.
+     * @param canLogIn
+     * @param email
+     * @param idCalendar
+     */
     @Override
     public void done(boolean canLogIn, String email, String idCalendar) {
-        //if(x){ //Utente può accedere
-        //Toast.makeText(getApplicationContext(), "Login eseguito con successo!", Toast.LENGTH_LONG).show();
         progressView.stopAnimation();
         progressView.setVisibility(View.GONE);
         if(canLogIn) {
-            //System.out.println("DONE LOGIN");
             Log.d(TAG,"done login");
             pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
@@ -573,7 +431,7 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
             startActivity(i);
             this.finish();
         }
-        else{ //Login fallito perchè email non è registrata
+        else{ //Login failed because email was not registered
             pref = getApplicationContext().getSharedPreferences("MyPref", MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
             editor.putLong("userId", 0L);
@@ -586,31 +444,12 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
             Snackbar snackbar = Snackbar
                     .make(mainRelative, "Login fallito! Utente non registrato!", Snackbar.LENGTH_SHORT);
             snackbar.show();
-            //signOut();
         }
     }
 
-    public boolean checkNetwork() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        boolean isOnline = (netInfo != null && netInfo.isConnectedOrConnecting());
-        if(isOnline) {
-            return true;
-        }else{
-            new AlertDialog.Builder(this)
-                    .setTitle("Ops..qualcosa è andato storto!")
-                    .setMessage("Sembra che tu non sia collegato ad internet! ")
-                    .setPositiveButton("Impostazioni", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            // continue with delete
-                            Intent callGPSSettingIntent = new Intent(Settings.ACTION_SETTINGS);
-                            startActivityForResult(callGPSSettingIntent,0);
-                        }
-                    }).show();
-            return false;
-        }
-    }
-
+    /**
+     * latest sign in method
+     */
     private void latestGooglePlus() {
 
         Log.e(TAG, "Using: "+ AppConstants.GOOGLE_SIGN_WEB_CLIENT);
@@ -619,8 +458,11 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
-    // setSelectedAccountName definition
-    private void setSelectedAccountName(String accountName) {
+    /**
+     * sets name of the account which performs the operation
+     * @param accountName
+     */
+    /*private void setSelectedAccountName(String accountName) {
         SharedPreferences settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
@@ -629,9 +471,11 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
         credential.setSelectedAccountName(accountName);
         Log.e(TAG, "Credentials.getSelectedAccountName: "+credential.getSelectedAccountName());
         this.accountName = accountName;
-    }
+    }*/
 
-    // [START signOut]
+    /**
+     * sign out
+     */
     private void signOut() {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
                 new ResultCallback<Status>() {
@@ -643,9 +487,8 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
                     }
                 });
     }
-    // [END signOut]
 
-    // [START revokeAccess]
+
     private void revokeAccess() {
         Log.e(TAG, "Provo a revocare l'accesso");
         Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(
@@ -658,6 +501,5 @@ public class Login extends AppCompatActivity implements TaskCallbackLogin, OnCli
                     }
                 });
     }
-    // [END revokeAccess]
 
 }

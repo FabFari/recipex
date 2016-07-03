@@ -3,6 +3,6 @@ package com.recipex.taskcallbacks;
 /**
  * Created by Sara on 28/05/2016.
  */
-public interface TaskCallbackCalendarElimina {
+public interface CalendarDeleteTC {
     void done(boolean b, String g);
 }

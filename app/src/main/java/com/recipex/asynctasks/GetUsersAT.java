@@ -13,6 +13,9 @@ import com.recipex.taskcallbacks.GetUsersTC;
 
 import java.io.IOException;
 
+/**
+ * gets list of all users
+ */
 public class GetUsersAT extends AsyncTask<Void, Void, MainUserListOfUsersMessage>{
     public static String TAG = "GET_USERS_AT";
     RecipexServerApi apiHandler;

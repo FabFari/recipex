@@ -12,6 +12,9 @@ import com.recipex.taskcallbacks.CheckUserRelationsTC;
 
 import java.io.IOException;
 
+/**
+ * finds what is the relation with a caregiver
+ */
 public class CheckUserRelationsAT extends AsyncTask<Void, Void, MainUserRelationsMessage> {
 
     public static String TAG = "CHECK_USER_RELATION_AT";

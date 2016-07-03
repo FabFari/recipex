@@ -14,6 +14,9 @@ import com.recipex.taskcallbacks.GetUserRequestsTC;
 
 import java.io.IOException;
 
+/**
+ * gets list of user's requests
+ */
 public class GetUserRequestsAT extends AsyncTask<Void, Void, MainUserRequestsMessage>{
     public static String TAG = "GET_USER_REQUESTS_AT";
     RecipexServerApi apiHandler;

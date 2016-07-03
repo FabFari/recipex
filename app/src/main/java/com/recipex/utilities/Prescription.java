@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by Sara on 07/05/2016.
  */
-public class Terapia {
+public class Prescription {
     public String nome;
     public long dose;
     public String tipo;
@@ -21,8 +21,8 @@ public class Terapia {
     public ArrayList<String> idsCalendar;
 
 
-    public Terapia(String nome, long dose, String tipo, boolean ricetta, String ingrediente, String unità,
-                   long quantità, String foglio,String caregiver, long id){
+    public Prescription(String nome, long dose, String tipo, boolean ricetta, String ingrediente, String unità,
+                        long quantità, String foglio, String caregiver, long id){
         this.nome=nome;
         this.dose=dose;
         this.tipo=tipo;

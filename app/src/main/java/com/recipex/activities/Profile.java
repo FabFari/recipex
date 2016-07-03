@@ -7,11 +7,8 @@ import com.appspot.recipex_1281.recipexServerApi.model.MainUserInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserRelationsMessage;
 import com.github.clans.fab.FloatingActionMenu;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
@@ -19,23 +16,19 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecovera
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.AclRule;
 import com.recipex.AppConstants;
-import com.recipex.AppConstants.*;
 import com.recipex.R;
 import com.recipex.adapters.ContactAdapter;
 import com.recipex.asynctasks.CheckUserRelationsAT;
 import com.recipex.asynctasks.GetUserAT;
-import com.recipex.asynctasks.GetUserRequestsAT;
 import com.recipex.asynctasks.SendRequestAT;
-import com.recipex.fragments.ContactFragment;
 import com.recipex.taskcallbacks.CheckUserRelationsTC;
 import com.recipex.taskcallbacks.GetUserTC;
 import com.recipex.taskcallbacks.SendRequestTC;
-import com.recipex.taskcallbacks.TaskCallbackCalendar;
+import com.recipex.taskcallbacks.CalendarTC;
 import com.recipex.utilities.AlertDialogManager;
 import com.recipex.utilities.ConnectionDetector;
 import com.recipex.utilities.ContactItem;
@@ -43,29 +36,20 @@ import com.squareup.picasso.Picasso;
 
 import android.Manifest;
 import android.accounts.AccountManager;
-import android.app.ActionBar;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
-import android.net.Credentials;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -77,10 +61,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -88,15 +69,17 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
+/**
+ * Profile Activity
+ */
 public class Profile extends AppCompatActivity
         implements AppBarLayout.OnOffsetChangedListener, GetUserTC, CheckUserRelationsTC,
-        SendRequestTC, View.OnClickListener, TaskCallbackCalendar, EasyPermissions.PermissionCallbacks {
+        SendRequestTC, View.OnClickListener, CalendarTC, EasyPermissions.PermissionCallbacks {
 
     public static final String TAG = "PROFILE";
     private static final float PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR = 0.9f;
@@ -133,7 +116,6 @@ public class Profile extends AppCompatActivity
     //private FloatingActionButton fab;
 
     // As a visitor
-    // TODO Aggiungere un fab per aggiungere paziente se caregiver
     private FloatingActionMenu fab_menu;
     private com.github.clans.fab.FloatingActionButton fab_relatives;
     private com.github.clans.fab.FloatingActionButton fab_pc_physician;
@@ -211,7 +193,7 @@ public class Profile extends AppCompatActivity
     private int fabPressed;
     private boolean utente_semplice;
 
-    //per calendario
+    //for calendar
     GoogleAccountCredential mCredential;
     public static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
@@ -254,7 +236,8 @@ public class Profile extends AppCompatActivity
         settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
         credential = GoogleAccountCredential.usingAudience(this, AppConstants.AUDIENCE);
         Log.d(TAG, "Credential: " + credential);
-        setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+        //setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+        accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this);
 
         if (credential.getSelectedAccountName() == null) {
             Log.d(TAG, "AccountName == null: startActivityForResult.");
@@ -262,7 +245,7 @@ public class Profile extends AppCompatActivity
         } else {
             progressView.startAnimation();
             RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-            if (checkNetwork()) {
+            if (AppConstants.checkNetwork(this)) {
                 new GetUserAT(this, this, profile_id, apiHandler).execute();
                 new CheckUserRelationsAT(this, this, coordinatorLayout, user_id, profile_id, apiHandler).execute();
             }
@@ -270,6 +253,9 @@ public class Profile extends AppCompatActivity
 
     }
 
+    /**
+     * setup layout elements
+     */
     private void bindActivity() {
         mToolbar = (Toolbar) findViewById(R.id.profile_toolbar);
         mTitle = (TextView) findViewById(R.id.profile_textview_title);
@@ -334,6 +320,11 @@ public class Profile extends AppCompatActivity
         return true;
     }
 
+    /**
+     * setup scrolling of profile
+     * @param appBarLayout
+     * @param offset
+     */
     @Override
     public void onOffsetChanged(AppBarLayout appBarLayout, int offset) {
         int maxScroll = appBarLayout.getTotalScrollRange();
@@ -398,13 +389,15 @@ public class Profile extends AppCompatActivity
                             data.getExtras().getString(
                                     AccountManager.KEY_ACCOUNT_NAME);
                     if (accountName != null) {
-                        setSelectedAccountName(accountName);
+                        //setSelectedAccountName(accountName);
+                        accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this);
+
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
                         editor.apply();
                         // User is authorized
                         RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-                        if (checkNetwork()) {
+                        if (AppConstants.checkNetwork(this)) {
                             new GetUserAT(this, this, user_id, apiHandler).execute();
                             new CheckUserRelationsAT(this, this, coordinatorLayout, user_id, profile_id, apiHandler).execute();
                         }
@@ -419,7 +412,8 @@ public class Profile extends AppCompatActivity
                     settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
                     credential = GoogleAccountCredential.usingAudience(this, AppConstants.AUDIENCE);
 
-                    setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+                    //setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+                    accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this);
 
                     if (credential.getSelectedAccountName() == null)
                         startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
@@ -427,7 +421,7 @@ public class Profile extends AppCompatActivity
                         Log.d(TAG, "Nell'else.");
                         progressView.startAnimation();
                         RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-                        if (checkNetwork())
+                        if (AppConstants.checkNetwork(this))
                             new GetUserAT(this, this, profile_id, apiHandler).execute();
                     }
                 }
@@ -435,7 +429,7 @@ public class Profile extends AppCompatActivity
             case ADD_THERAPY:
                 if(resultCode == RESULT_OK) {
                     Snackbar snackbar = Snackbar
-                            .make(coordinatorLayout, "Terapia aggiunta con successo!", Snackbar.LENGTH_SHORT);
+                            .make(coordinatorLayout, "Prescription aggiunta con successo!", Snackbar.LENGTH_SHORT);
                     snackbar.show();
                 }
                 break;
@@ -475,30 +469,13 @@ public class Profile extends AppCompatActivity
         }
     }
 
+    /**
+     * done from GetUserAT
+     * @param res boolean to check it is all ok
+     * @param message from the server
+     */
     @Override
     public void done(boolean res, final MainUserInfoMessage message) {
-        /*
-        if(res)
-            runOnUiThread(new Runnable(){
-                @Override
-                public void run(){
-                    //Toast.makeText(getApplicationContext(), "User Info retrived: "+ message.getBirth(), Toast.LENGTH_SHORT).show();
-                    Snackbar snackbar = Snackbar
-                            .make(coordinatorLayout, "User Info retrived: "+ message.getBirth(), Snackbar.LENGTH_LONG);
-                    snackbar.show();
-                }
-            });
-        else
-            runOnUiThread(new Runnable(){
-                @Override
-                public void run(){
-                    //Toast.makeText(getApplicationContext(), "Errore. "+ message.getBirth(), Toast.LENGTH_SHORT).show();
-                    Snackbar snackbar = Snackbar
-                            .make(coordinatorLayout, "Errore", Snackbar.LENGTH_LONG);
-                    snackbar.show();
-                }
-            });
-        */
 
         // USER
         // Required
@@ -647,6 +624,11 @@ public class Profile extends AppCompatActivity
 
     }
 
+    /**
+     * done from CheckUserRelationsAT
+     * @param res boolean to check it is all ok
+     * @param response from the server
+     */
     @Override
     public void done(boolean res, final MainUserRelationsMessage response) {
         if (response != null) {
@@ -716,8 +698,11 @@ public class Profile extends AppCompatActivity
         relations_checked = true;
     }
 
-    // setSelectedAccountName definition
-    private void setSelectedAccountName(String accountName) {
+    /**
+     * sets name of the account which performs the operation
+     * @param accountName
+     */
+    /*private void setSelectedAccountName(String accountName) {
         SharedPreferences settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
@@ -725,37 +710,18 @@ public class Profile extends AppCompatActivity
         Log.d(TAG, "ACCOUNT NAME: " + accountName);
         credential.setSelectedAccountName(accountName);
         this.accountName = accountName;
-    }
+    }*/
 
-    public boolean checkNetwork() {
-        cd = new ConnectionDetector(getApplicationContext());
-        // Check if Internet present
-        if (cd.isConnectingToInternet()) {
-            return true;
-        } else {
-            Snackbar snackbar = Snackbar
-                    .make(coordinatorLayout, "Nessuna connesione a internet!", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("ESCI", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            finish();
-                        }
-                    });
-
-            // Changing message text color
-            snackbar.setActionTextColor(Color.RED);
-            snackbar.show();
-        }
-        return false;
-    }
-
+    /**
+     * actions to be taken when clicking on the type of assistance (caregiver, nurse etc.) you want to receive from this person
+     * @param v
+     */
     @Override
     public void onClick(View v) {
         MainRequestSendMessage content = new MainRequestSendMessage();
         content.setSender(user_id);
         SharedPreferences pref=getSharedPreferences("MyPref", MODE_PRIVATE);
         fabPressed = v.getId();
-        // TODO Aggiungere Dialog per inserimento messaggio
         switch (v.getId()) {
             case R.id.profile_fab_menu_item1:
                 content.setKind(AppConstants.FAMILIARE);
@@ -777,11 +743,18 @@ public class Profile extends AppCompatActivity
         progressView.startAnimation();
         progressView.setVisibility(View.VISIBLE);
         RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-        if (checkNetwork())
+
+        //if you want this person to be your caregiver, or doctor etc., you send a request
+        if (AppConstants.checkNetwork(this))
             new SendRequestAT(this, this, coordinatorLayout, profile_id, content, apiHandler).execute();
 
     }
 
+    /**
+     * done from SendRequestAT
+     * @param resp to check it is all ok
+     * @param response from the server
+     */
     @Override
     public void done(boolean resp, MainDefaultResponseMessage response) {
         if (response != null) {
@@ -794,7 +767,7 @@ public class Profile extends AppCompatActivity
                 fab_pressed.setEnabled(false);
                 SharedPreferences pref=getSharedPreferences("MyPref", MODE_PRIVATE);
 
-                //aggiungo caregiver al mio calendario
+                //add caregiver to my calendar
                 if(!pref.getString("calendar", "").equals("")) {
                     mCredential = GoogleAccountCredential.usingOAuth2(
                             getApplicationContext(), Arrays.asList(SCOPES))
@@ -874,22 +847,9 @@ public class Profile extends AppCompatActivity
 
                 contactDialog.create();
                 contactDialog.show();
-                /*
-                Bundle bundle = new Bundle();
-                bundle.putString("user_mail", user_email);
-                if(user_phone != null)
-                    bundle.putString("user_phone", user_phone);
-                if(crgv_phone != null)
-                    bundle.putString("crgv_phone", crgv_phone);
-                mFragmentManager = getSupportFragmentManager();
-                ContactFragment dialogFragment = new ContactFragment();
-                dialogFragment.setArguments(bundle);
-                dialogFragment.show(mFragmentManager, "Contact fragment");
-                break;
-                */
                 break;
             case R.id.profile_add_therapy:
-                Intent addTerapyIntent = new Intent(Profile.this, AggiungiTerapia.class);
+                Intent addTerapyIntent = new Intent(Profile.this, AddPrescription.class);
                 addTerapyIntent.putExtra("caregiverId", user_id);
                 addTerapyIntent.putExtra("patientId", profile_id);
                 this.startActivityForResult(addTerapyIntent, ADD_THERAPY);
@@ -903,17 +863,9 @@ public class Profile extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    /*
-    // A method to find height of the status bar
-    public int getStatusBarHeight() {
-        int result = 0;
-        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            result = getResources().getDimensionPixelSize(resourceId);
-        }
-        return result;
-    }
-    */
+    /**
+     * gives caregiver permission to see my calendar
+     */
     private void getResultsFromApi() {
         if (! isGooglePlayServicesAvailable()) {
             acquireGooglePlayServices();
@@ -1065,7 +1017,10 @@ public class Profile extends AppCompatActivity
         return (networkInfo != null && networkInfo.isConnected());
     }
 
-    //callback from Calendar
+    /**
+     * callback from AggiungiCaregiverCalendar
+     * @param b
+     */
     public void done(boolean b){
         if(b){
             Log.d(TAG, "DONE_TASKCALLBACK_CALENDAR");
@@ -1073,17 +1028,20 @@ public class Profile extends AppCompatActivity
     }
 
 
+    /**
+     * Async task to give caregiver permission to see my calendar
+     */
     private class AggiungiCaregiverCalendar extends AsyncTask<Void, Void, Boolean> {
 
         private Context context;
-        private TaskCallbackCalendar mCallback;
+        private CalendarTC mCallback;
         private String idCalendar;
         private String emailCaregiver;
 
         private com.google.api.services.calendar.Calendar mService = null;
         private Exception mLastError = null;
 
-        public AggiungiCaregiverCalendar(GoogleAccountCredential credential, Context context, TaskCallbackCalendar c,
+        public AggiungiCaregiverCalendar(GoogleAccountCredential credential, Context context, CalendarTC c,
                                          String id, String e) {
             HttpTransport transport = AndroidHttp.newCompatibleTransport();
             JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
@@ -1120,7 +1078,6 @@ public class Profile extends AppCompatActivity
 
             } catch (Exception e) {
                 e.printStackTrace();
-                //Log.d("ECCEZIONE CALENDAR", e.getCause().toString());
                 mLastError = e;
                 cancel(true);
                 return false;

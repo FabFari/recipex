@@ -22,6 +22,9 @@ import com.recipex.taskcallbacks.AnswerRequestTC;
 import java.io.IOException;
 import java.util.Arrays;
 
+/**
+ * answers user's request
+ */
 public class AnswerRequestAT extends AsyncTask<Void, Void, MainDefaultResponseMessage> {
     public static String TAG = "SEND_REQUEST_AT";
     RecipexServerApi apiHandler;

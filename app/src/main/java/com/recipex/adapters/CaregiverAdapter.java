@@ -36,7 +36,15 @@ import java.util.Locale;
 /**
  * Created by Sara on 12/05/2016.
  */
+
+/**
+ * Adapter for Caregivers fragment
+ */
 public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
+
+    /**
+     * class containing parameters to be shown in the cardview
+     */
     public static class UserViewHolder extends RecyclerView.ViewHolder {
         CardView cardView;
         ImageView userPic;
@@ -55,6 +63,7 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             remove = (ImageView)itemView.findViewById(R.id.user_search_remove);
         }
     }
+
     public class EmptyViewHolder extends RecyclerView.ViewHolder {
         public EmptyViewHolder(View itemView) {
             super(itemView);
@@ -83,6 +92,8 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             this.caregivers = new ArrayList<MainUserMainInfoMessage>();
         this.activity = activity;
         this.progressView = progressView;
+
+        //check if there is a physician or a nurse (not present in the list of caregivers)
         if(physician!=null && nurse!=null){
             caregivers.add(0, physician);
             caregivers.add(1, nurse);
@@ -120,6 +131,7 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         View v;
 
+        //no elements present
         if (viewType == EMPTY_VIEW) {
             v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.content_caregivers_empty, viewGroup, false);
             EmptyViewHolder evh = new EmptyViewHolder(v);
@@ -136,8 +148,8 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         final int pos = i;
         if(viewHolder instanceof UserViewHolder) {
             final UserViewHolder userViewHolder=(UserViewHolder)viewHolder;
-            //significa che ho aggiunto il medico di base, quindi sarà sicuramente alla prima posizione
             if(physician!=null){
+                //there is a physician at first position. Set listeners for clicking and removal
                 if(i==0) {
                     userViewHolder.crgvIcon.setImageResource(R.drawable.ic_pc_physician_accent);
                     userViewHolder.crgvIcon.setVisibility(View.VISIBLE);
@@ -168,7 +180,7 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                             // Add the buttons
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    if(checkNetwork()) {
+                                    if(AppConstants.checkNetwork(activity)) {
                                         new UpdateRelationInfoAT(user_id, physician.getId(), AppConstants.MEDICO_BASE,
                                                 activity.getWindow().getDecorView().getRootView(), activity, taskCallback,
                                                 apiHandler, AppConstants.ASSISTITO).execute();
@@ -194,7 +206,7 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                     });
 
                 }
-                //se ho anche l'infermiera, sarà alla seconda posizione
+                //if I have also the nurse, there will be at second position
                 if(i==1 && nurse!=null){
                     userViewHolder.crgvIcon.setImageResource(R.drawable.ic_visiting_nurse_accent);
                     userViewHolder.crgvIcon.setVisibility(View.VISIBLE);
@@ -225,7 +237,7 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                             // Add the buttons
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    if(checkNetwork()) {
+                                    if(AppConstants.checkNetwork(activity)) {
                                         new UpdateRelationInfoAT(user_id, nurse.getId(), AppConstants.INF_DOMICILIARE,
                                                 activity.getWindow().getDecorView().getRootView(), activity, taskCallback,
                                                 apiHandler, AppConstants.ASSISTITO).execute();
@@ -252,7 +264,7 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
                 }
             }
-            //se ho solo l'infermiera sarà alla prima posizione
+            //if I have only the nurse, there will be at first position
             else if(physician==null && nurse!=null && i==0){
                 userViewHolder.crgvIcon.setImageResource(R.drawable.ic_visiting_nurse_accent);
                 userViewHolder.crgvIcon.setVisibility(View.VISIBLE);
@@ -283,7 +295,7 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                         // Add the buttons
                         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                if(checkNetwork()) {
+                                if(AppConstants.checkNetwork(activity)) {
                                     new UpdateRelationInfoAT(user_id, nurse.getId(), AppConstants.INF_DOMICILIARE,
                                             activity.getWindow().getDecorView().getRootView(), activity, taskCallback,
                                             apiHandler, AppConstants.ASSISTITO).execute();
@@ -343,7 +355,7 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                         // Add the buttons
                         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                if(checkNetwork()) {
+                                if(AppConstants.checkNetwork(activity)) {
                                     //Log.d(TAG, "ID: "+user_id);
                                     //Log.d(TAG, "CAREGIVER ID: "+caregivers.get(pos).getId());
                                     new UpdateRelationInfoAT(user_id, caregivers.get(pos).getId(), AppConstants.CAREGIVER,
@@ -378,32 +390,4 @@ public class CaregiverAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
     }
-
-    public void setDataset(List<MainUserMainInfoMessage> updatedUsers) {
-        this.caregivers = updatedUsers;
-    }
-
-    public boolean checkNetwork() {
-        cd = new ConnectionDetector(activity.getApplicationContext());
-        // Check if Internet present
-        if (cd.isConnectingToInternet()) {
-            return true;
-        }else{
-            Snackbar snackbar = Snackbar
-                    .make(activity.getWindow().getDecorView().getRootView(),
-                            "Nessuna connesione a internet!", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("ESCI", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            activity.finish();
-                        }
-                    });
-
-            // Changing message text color
-            snackbar.setActionTextColor(Color.RED);
-            snackbar.show();
-        }
-        return false;
-    }
-
 }
