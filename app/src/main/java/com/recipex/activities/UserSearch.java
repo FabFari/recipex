@@ -1,5 +1,6 @@
 package com.recipex.activities;
 
+import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -32,9 +33,13 @@ import com.recipex.taskcallbacks.GetUserTC;
 import com.recipex.taskcallbacks.GetUsersTC;
 import com.recipex.utilities.ConnectionDetector;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * activity to search users registered in the application
+ */
 public class UserSearch extends AppCompatActivity implements GetUsersTC {
 
     private final static String TAG = "USER_SEARCH";
@@ -66,17 +71,21 @@ public class UserSearch extends AppCompatActivity implements GetUsersTC {
 
         settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
         credential = GoogleAccountCredential.usingAudience(this, AppConstants.AUDIENCE);
-        setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+        //setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+        accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this);
 
         if(credential.getSelectedAccountName() == null)
             startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
         else {
             RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-            if(checkNetwork()) new GetUsersAT(this, this, coordinator, apiHandler).execute();
+            if(AppConstants.checkNetwork(this)) new GetUsersAT(this, this, coordinator, apiHandler).execute();
         }
 
     }
 
+    /**
+     * setup layout elements
+     */
     private void bindActivity() {
         coordinator = (CoordinatorLayout) findViewById(R.id.user_search_coordinator);
         recycler = (RecyclerView) findViewById(R.id.user_search_recycler);
@@ -88,38 +97,25 @@ public class UserSearch extends AppCompatActivity implements GetUsersTC {
         emptyText = (TextView) findViewById(R.id.user_search_empty_message);
     }
 
-    // setSelectedAccountName definition
-    private void setSelectedAccountName(String accountName) {
+    /**
+     * sets name of the account which performs the operation
+     * @param accountName
+     */
+    /*private void setSelectedAccountName(String accountName) {
         SharedPreferences settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
         editor.apply();
         credential.setSelectedAccountName(accountName);
         this.accountName = accountName;
-    }
+    }*/
 
-    public boolean checkNetwork() {
-        cd = new ConnectionDetector(getApplicationContext());
-        // Check if Internet present
-        if (cd.isConnectingToInternet()) {
-            return true;
-        }else{
-            Snackbar snackbar = Snackbar
-                    .make(coordinator, "Nessuna connesione a internet!", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("ESCI", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            finish();
-                        }
-                    });
 
-            // Changing message text color
-            snackbar.setActionTextColor(Color.RED);
-            snackbar.show();
-        }
-        return false;
-    }
-
+    /**
+     * done from GetUsersAT
+     * @param res to check it is all ok
+     * @param response from the server
+     */
     @Override
     public void done(boolean res, final MainUserListOfUsersMessage response) {
         if (response != null) {
@@ -181,5 +177,4 @@ public class UserSearch extends AppCompatActivity implements GetUsersTC {
             emptyText.setVisibility(View.VISIBLE);
 
     }
-
 }

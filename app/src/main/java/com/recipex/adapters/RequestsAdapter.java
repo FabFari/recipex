@@ -1,12 +1,7 @@
 package com.recipex.adapters;
 
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,21 +10,21 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.appspot.recipex_1281.recipexServerApi.model.MainRequestInfoMessage;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.activities.Profile;
-import com.recipex.activities.UserRequests;
 import com.recipex.fragments.UserRequestFragment;
-import com.recipex.utilities.ConnectionDetector;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * adapter for pending requests of the caregiver
+ */
 public class RequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public class EmptyViewHolder extends RecyclerView.ViewHolder {
@@ -38,6 +33,9 @@ public class RequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
+    /**
+     * class containing all relevant information of requests
+     */
     public static class RequestViewHolder extends RecyclerView.ViewHolder {
         CardView cardView;
         ImageView senderPic;

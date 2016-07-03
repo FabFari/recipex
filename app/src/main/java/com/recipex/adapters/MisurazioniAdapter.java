@@ -31,7 +31,11 @@ import java.util.List;
 /**
  * Created by Sara on 07/05/2016.
  */
-public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
+
+/**
+ * adapter for measurements
+ */
+public class MisurazioniAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     List<Misurazione> misurazioni;
     RecipexServerApi apiHandler;
@@ -40,10 +44,10 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     DeleteMeasurementTC taskCallback;
     private static final int EMPTY_VIEW = 10;
     ConnectionDetector cd;
-    private final static String TAG = "RVAdapter";
+    private final static String TAG = "MisurazioniAdapter";
     String email;
 
-    public RVAdapter(List<Misurazione> data, Activity activity, DeleteMeasurementTC taskCallback,
+    public MisurazioniAdapter(List<Misurazione> data, Activity activity, DeleteMeasurementTC taskCallback,
                      Long user_id, RecipexServerApi apiHandler){
         if(data == null)
             misurazioni = new ArrayList<Misurazione>();
@@ -66,7 +70,7 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
         v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.misurazione_item, viewGroup, false);
         email=v.getContext().getSharedPreferences("MyPref", Context.MODE_PRIVATE).getString("email","");
-        RVAdapter.MyViewHolder pvh = new RVAdapter.MyViewHolder(v);
+        MisurazioniAdapter.MyViewHolder pvh = new MisurazioniAdapter.MyViewHolder(v);
         return pvh;
     }
 
@@ -164,7 +168,7 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                         // Add the buttons
                         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                if (checkNetwork()) {
+                                if (AppConstants.checkNetwork(activity)) {
                                     //Log.d(TAG, "ID: "+user_id);
                                     //Log.d(TAG, "CAREGIVER ID: "+caregivers.get(pos).getId());
                                     new DeleteMeasurementAT(taskCallback, activity,
@@ -199,6 +203,9 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         super.onAttachedToRecyclerView(recyclerView);
     }
 
+    /**
+     * class containing all data relevant for measurements
+     */
     public class MyViewHolder extends RecyclerView.ViewHolder {
         TextView data;
         TextView ora;
@@ -230,29 +237,6 @@ public class RVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         public EmptyViewHolder(View itemView) {
             super(itemView);
         }
-    }
-
-    public boolean checkNetwork() {
-        cd = new ConnectionDetector(activity.getApplicationContext());
-        // Check if Internet present
-        if (cd.isConnectingToInternet()) {
-            return true;
-        }else{
-            Snackbar snackbar = Snackbar
-                    .make(activity.getWindow().getDecorView().getRootView(),
-                            "Nessuna connesione a internet!", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("ESCI", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            activity.finish();
-                        }
-                    });
-
-            // Changing message text color
-            snackbar.setActionTextColor(Color.RED);
-            snackbar.show();
-        }
-        return false;
     }
 
 }

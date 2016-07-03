@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    tools:context="com.recipex.activities.UserRequests"
+    tools:context="com.recipex.fragments.UserRequestFragment"
     tools:showIn="@layout/activity_user_requests" >
 
         <android.support.v7.widget.RecyclerView

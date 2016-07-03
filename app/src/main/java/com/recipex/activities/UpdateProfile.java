@@ -44,6 +44,9 @@ import java.util.Calendar;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+/**
+ * Activity to update profile information.
+ */
 public class UpdateProfile extends AppCompatActivity implements View.OnClickListener, UpdateUserTC {
 
     private final static String TAG = "UPDATE_PROFILE";
@@ -209,7 +212,8 @@ public class UpdateProfile extends AppCompatActivity implements View.OnClickList
             settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
             credential = GoogleAccountCredential.usingAudience(this, AppConstants.AUDIENCE);
             Log.d(TAG, "Credential: "+credential);
-            setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+            //setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+            accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this);
 
             if(credential.getSelectedAccountName() == null) {
                 Log.d(TAG, "AccountName == null: startActivityForResult.");
@@ -222,6 +226,9 @@ public class UpdateProfile extends AppCompatActivity implements View.OnClickList
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * setup layout elements
+     */
     private void bindActivity() {
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.update_profile_coordinator);
         caregiverCard = (CardView) findViewById(R.id.update_profile_crgv_card);
@@ -246,6 +253,9 @@ public class UpdateProfile extends AppCompatActivity implements View.OnClickList
         bio = (TextView) findViewById(R.id.update_profile_crgv_bio);
     }
 
+    /**
+     * complete textviews with values taken from extras in onCreate
+     */
     private void setupUI() {
         // USER
         // REQUIRED
@@ -284,6 +294,9 @@ public class UpdateProfile extends AppCompatActivity implements View.OnClickList
         progressView.setVisibility(View.GONE);
     }
 
+    /**
+     * call async task to save the modifications
+     */
     private void executeAsyncTask() {
         MainUpdateUserMessage message = new MainUpdateUserMessage();
         message.setName(name.getText().toString());
@@ -311,9 +324,13 @@ public class UpdateProfile extends AppCompatActivity implements View.OnClickList
         }
         progressView.startAnimation();
         RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-        if (checkNetwork()) new UpdateUserAT(this, this, coordinatorLayout, user_id, message, apiHandler).execute();
+        if (AppConstants.checkNetwork(this)) new UpdateUserAT(this, this, coordinatorLayout, user_id, message, apiHandler).execute();
     }
 
+    /**
+     * actions to be taken when changing user birth date
+     * @param v
+     */
     @Override
     public void onClick(View v) {
         final Calendar c = Calendar.getInstance();
@@ -351,31 +368,11 @@ public class UpdateProfile extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    public boolean checkNetwork() {
-        cd = new ConnectionDetector(getApplicationContext());
-        // Check if Internet present
-        if (cd.isConnectingToInternet()) {
-            return true;
-        }else{
-            Snackbar snackbar = Snackbar
-                    .make(coordinatorLayout, "Nessuna connesione a internet!", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("ESCI", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            setResult(RESULT_CANCELED);
-                            finish();
-                        }
-                    });
-
-            // Changing message text color
-            snackbar.setActionTextColor(Color.RED);
-            snackbar.show();
-        }
-        return false;
-    }
-
-    // setSelectedAccountName definition
-    private void setSelectedAccountName(String accountName) {
+    /**
+     * sets name of the account which performs the operation
+     * @param accountName
+     */
+    /*private void setSelectedAccountName(String accountName) {
         SharedPreferences settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
@@ -383,7 +380,7 @@ public class UpdateProfile extends AppCompatActivity implements View.OnClickList
         Log.d(TAG, "ACCOUNT NAME: "+ accountName);
         credential.setSelectedAccountName(accountName);
         this.accountName = accountName;
-    }
+    }*/
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -395,7 +392,9 @@ public class UpdateProfile extends AppCompatActivity implements View.OnClickList
                             data.getExtras().getString(
                                     AccountManager.KEY_ACCOUNT_NAME);
                     if (accountName != null) {
-                        setSelectedAccountName(accountName);
+                        //setSelectedAccountName(accountName);
+                        accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this);
+
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
                         editor.apply();
@@ -407,6 +406,11 @@ public class UpdateProfile extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    /**
+     * done from UpdateUserAT
+     * @param res to cehck if is all ok
+     * @param response from the server
+     */
     @Override
     public void done(boolean res, MainDefaultResponseMessage response) {
         if(response != null) {

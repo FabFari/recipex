@@ -22,8 +22,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * adapter for users' info
+ */
 public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHolder> {
 
+    /**
+     * class containing user's relevant data
+     */
     public static class UserViewHolder extends RecyclerView.ViewHolder {
         CardView cardView;
         ImageView userPic;

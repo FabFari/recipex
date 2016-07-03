@@ -14,17 +14,23 @@ import android.accounts.AccountManager;
 
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.recipex.utilities.ConnectionDetector;
 
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.Settings;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
 
 import javax.annotation.Nullable;
 
@@ -45,15 +51,22 @@ public class AppConstants extends AppCompatActivity{
      */
     public static final String AUDIENCE = "server:client_id:" + WEB_CLIENT_ID;
 
-    // Costanti App
+    /**
+     * Constants for app
+      */
     public static final String DEFAULT_ACCOUNT = "PREF_ACCOUNT_NAME";
     public static final String PREFS_NAME = "com.recipex.RecipeXPrefs";
 
-    //codice per calendario
+    /**
+     * code for the calendar operations
+     */
     public static final int REQUEST_AUTHORIZATION = 1001;
 
 
-    // Codici server
+    /**
+     * Codes for server
+     */
+
     public static final String CREATED = "201 Created";
     public static final String OK = "200 OK";
     public static final String PRECONDITION_FAILED = "412 Precondition Failed";
@@ -154,4 +167,67 @@ public class AppConstants extends AppCompatActivity{
         });
     }
 
+    /**
+     * this method checks if there is network available, to avoid calling asynctasks that require network if there is no network
+     */
+    public static boolean checkNetwork(final Activity a) {
+        ConnectionDetector cd = new ConnectionDetector(a.getApplicationContext());
+        // Check if Internet present
+        if (cd.isConnectingToInternet()) {
+            return true;
+        }else{
+            Log.d("AppConstants", a.getWindow().getDecorView().getRootView().toString() );
+            Snackbar snackbar = Snackbar
+                    .make(a.getWindow().getDecorView().getRootView(), "Nessuna connessione a internet!", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("ESCI", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            a.finish();
+                        }
+                    });
+
+            // Changing message text color
+            snackbar.setActionTextColor(Color.RED);
+            snackbar.show();
+        }
+        return false;
+    }
+
+    /**
+     * sets name of the account which performs the operation
+     * @param accountName
+     */
+    public static String setSelectedAccountName(String accountName, GoogleAccountCredential credential, Activity a) {
+        SharedPreferences settings = a.getSharedPreferences(AppConstants.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
+        editor.apply();
+        credential.setSelectedAccountName(accountName);
+        return accountName;
+    }
+
+    /**
+     * returns type of measurement from its symbol
+     * @param s
+     * @return
+     */
+    public static String getTipo(String s){
+        if(s.equals(PRESSIONE))
+            return "Pressione arteriosa";
+        else if(s.equals(FREQ_CARDIACA))
+            return "Frequenza cardiaca";
+        else if(s.equals(FREQ_RESPIRAZIONE))
+            return "Frequenza respiratoria";
+        else if(s.equals(SPO2))
+            return "Ossigenazione sanguigna";
+        else if(s.equals(GLUCOSIO))
+            return "Glicemia";
+        else if(s.equals(TEMP_CORPOREA))
+            return "Temperatura corporea";
+        else if(s.equals(DOLORE))
+            return "Scala del dolore";
+        else if(s.equals(COLESTEROLO))
+            return "Colesterolo";
+        return "";
+    }
 }

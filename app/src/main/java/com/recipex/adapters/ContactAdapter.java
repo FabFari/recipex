@@ -21,6 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Adapter for list of ways you can contact a caregiver
+ */
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactViewHolder> {
 
     private final static String TAG = "CONTACT_ADAPTER";
@@ -75,7 +78,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
     public void onBindViewHolder(final ContactViewHolder contactViewHolder, int i) {
         contactViewHolder.icon.setImageResource(contact_items.get(i).getIcon_id());
         contactViewHolder.label.setText(contact_items.get(i).getLabel());
-        // Log.d(TAG, "ICON: " + contact_items.get(i).getIcon_id() + " LABEL: " + contact_items.get(i).getLabel());
+
         switch(contact_items.get(i).getIcon_id()) {
             case R.drawable.ic_email:
                 contactViewHolder.cardView.setOnClickListener(new View.OnClickListener() {
@@ -123,5 +126,4 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
     }
-
 }

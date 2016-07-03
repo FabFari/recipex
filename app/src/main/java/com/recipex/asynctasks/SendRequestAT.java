@@ -13,6 +13,9 @@ import com.recipex.taskcallbacks.SendRequestTC;
 
 import java.io.IOException;
 
+/**
+ * sends a request to a caregiver
+ */
 public class SendRequestAT extends AsyncTask<Void, Void, MainDefaultResponseMessage> {
 
     public static String TAG = "SEND_REQUEST_AT";

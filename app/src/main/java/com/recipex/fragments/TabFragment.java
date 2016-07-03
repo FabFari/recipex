@@ -21,6 +21,9 @@ import com.recipex.R;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * fragment holding the 2 fragments of the home activity for the caregivers: patients and measurements
+ */
 public class TabFragment extends Fragment {
 
     public static TabLayout tabLayout;
@@ -47,14 +50,6 @@ public class TabFragment extends Fragment {
          *Set an Apater for the View Pager
          */
         viewPager.setAdapter(new MyAdapter(getChildFragmentManager()));
-        //setupViewPager(viewPager);
-
-        /**
-         * Now , this is a workaround ,
-         * The setupWithViewPager dose't works without the runnable .
-         * Maybe a Support Library Bug .
-         */
-
         tabLayout.post(new Runnable() {
             @Override
             public void run() {
@@ -62,19 +57,9 @@ public class TabFragment extends Fragment {
             }
         });
 
-        //tabLayout.setupWithViewPager(viewPager);
-
         return x;
 
     }
-    /*
-    private void setupViewPager(ViewPager viewPager) {
-        MyAdapter adapter = new MyAdapter(getFragmentManager());
-        adapter.addFragment(new PazientiFragment(), "Assistiti");
-        adapter.addFragment(new MisurazioniFragment(), "Misurazioni");
-        viewPager.setAdapter(adapter);
-    }
-    */
 
     class MyAdapter extends FragmentPagerAdapter{
         // private final List<Fragment> mFragmentList = new ArrayList<>();
@@ -98,26 +83,12 @@ public class TabFragment extends Fragment {
             return null;
         }
 
-        /*
-        @Override
-        public Fragment getItem(int position) {
-            return mFragmentList.get(position);
-        }
-        */
-
         @Override
         public int getCount() {
 
             return int_items;
 
         }
-
-        /*
-        @Override
-        public int getCount() {
-            return mFragmentList.size();
-        }
-        */
 
         /**
          * This method returns the title of the tab according to the position.
@@ -134,18 +105,6 @@ public class TabFragment extends Fragment {
             }
             return null;
         }
-
-        /*
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mFragmentTitleList.get(position);
-        }
-
-        public void addFragment(Fragment fragment, String title) {
-            mFragmentList.add(fragment);
-            mFragmentTitleList.add(title);
-        }
-        */
 
     }
 

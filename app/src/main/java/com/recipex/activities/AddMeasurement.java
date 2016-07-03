@@ -3,23 +3,18 @@ package com.recipex.activities;
 import android.Manifest;
 import android.accounts.AccountManager;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.AsyncTask;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,7 +37,6 @@ import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
-import com.google.api.client.googleapis.media.MediaHttpDownloader;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -54,29 +48,25 @@ import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.EventReminder;
-import com.google.api.services.calendar.model.Events;
 import com.recipex.AppConstants;
 import com.recipex.asynctasks.AddMeasurementAT;
-import com.recipex.asynctasks.EliminaEventiCalendar;
-import com.recipex.asynctasks.NdefReaderTask;
+import com.recipex.asynctasks.DeleteEventsCalendarAT;
+import com.recipex.asynctasks.NdefReaderAT;
 import com.recipex.asynctasks.RegistraCalendarioAT;
 import com.recipex.taskcallbacks.AddMeasurementTC;
-import com.recipex.taskcallbacks.NdefReaderTaskCallback;
-import com.recipex.taskcallbacks.TaskCallbackCalendar;
-import com.recipex.taskcallbacks.TaskCallbackCalendarAdd;
-import com.recipex.taskcallbacks.TaskCallbackCalendarElimina;
-import com.recipex.taskcallbacks.TaskCallbackRegistraCalendario;
+import com.recipex.taskcallbacks.NdefReaderTC;
+import com.recipex.taskcallbacks.CalendarAddTC;
+import com.recipex.taskcallbacks.CalendarDeleteTC;
+import com.recipex.taskcallbacks.RegisterCalendarTC;
 import com.recipex.utilities.ConnectionDetector;
 import com.vi.swipenumberpicker.OnValueChangeListener;
 import com.vi.swipenumberpicker.SwipeNumberPicker;
 
 import com.recipex.R;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -85,10 +75,14 @@ import me.angrybyte.numberpicker.view.ActualNumberPicker;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
+/**
+ * This activity adds a measurement for a user, by showing all fields that must be filled for the measurement. Then it automatically
+ * adds the measurement to the user's calendar
+ */
 public class AddMeasurement extends AppCompatActivity
-        implements TaskCallbackCalendarAdd, EasyPermissions.PermissionCallbacks, AddMeasurementTC,
-        me.angrybyte.numberpicker.listener.OnValueChangeListener, TaskCallbackCalendarElimina, TaskCallbackRegistraCalendario,
-        NdefReaderTaskCallback {
+        implements CalendarAddTC, EasyPermissions.PermissionCallbacks, AddMeasurementTC,
+        me.angrybyte.numberpicker.listener.OnValueChangeListener, CalendarDeleteTC, RegisterCalendarTC,
+        NdefReaderTC {
 
     GoogleAccountCredential mCredential;
     private static final String PREF_ACCOUNT_NAME = "accountName";
@@ -129,16 +123,15 @@ public class AddMeasurement extends AppCompatActivity
     private ConnectionDetector cd;
 
     private CircularProgressView progressView;
-    // Input
-    // Long user_id = 5724160613416960L;
+
     private Long user_id;
     private boolean has_change = false;
 
     private SharedPreferences pref;
-    // String measurement_kind = AppConstants.COLESTEROLO;
     private String measurement_kind;
 
     private NfcAdapter mNfcAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,7 +153,7 @@ public class AddMeasurement extends AppCompatActivity
         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
             Log.d(TAG, "Sono nell'OnCreate!!!");
             Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-            new NdefReaderTask(main_relative, this).execute(tag);
+            new NdefReaderAT(main_relative, this).execute(tag);
             progressView.startAnimation();
             progressView.setVisibility(View.VISIBLE);
         }
@@ -198,14 +191,6 @@ public class AddMeasurement extends AppCompatActivity
 
     }
 
-    /*
-    @Override
-    public void onBackPressed(){
-        Intent myIntent = new Intent(getApplicationContext(), Home.class);
-        startActivity(myIntent);
-        this.finish();
-    }
-    */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -213,6 +198,11 @@ public class AddMeasurement extends AppCompatActivity
         return true;
     }
 
+    /**
+     *
+     * @param oldValue selected
+     * @param newValue selected
+     */
     @Override
     public void onValueChanged(int oldValue, int newValue) {
         has_change = true;
@@ -238,6 +228,9 @@ public class AddMeasurement extends AppCompatActivity
         }
     }
 
+    /**
+     * calculate final value of float picker
+     */
     private void get_float_value() {
         if(measurement_kind.equals(AppConstants.SPO2)) {
             float_value = ((double) float_picker.getValue() / (double) (float_picker.getMaxValue() - float_picker.getMinValue()))*100.0;
@@ -261,6 +254,9 @@ public class AddMeasurement extends AppCompatActivity
         }
     }
 
+    /**
+     * set layouts elements
+     */
     private void bindActivity() {
         picker1 = (SwipeNumberPicker) findViewById(R.id.measurement_number_picker_1);
         picker2 = (SwipeNumberPicker) findViewById((R.id.measurement_number_picker_2));
@@ -278,6 +274,9 @@ public class AddMeasurement extends AppCompatActivity
         main_relative = (RelativeLayout) findViewById(R.id.measurement_main_relative);
     }
 
+    /**
+     * specific elements of layout
+     */
     private void bind_specific() {
         if(measurement_kind.equals(AppConstants.SPO2))
             float_picker = (ActualNumberPicker) findViewById(R.id.measurement_spo2_number_picker);
@@ -289,6 +288,10 @@ public class AddMeasurement extends AppCompatActivity
             float_picker = (ActualNumberPicker) findViewById(R.id.measurement_chl_number_picker);
     }
 
+    /**
+     * set ui depending on measurement kind selected
+     * @param measurement_kind
+     */
     private void setupUI(String measurement_kind) {
         if(measurement_kind.equals(AppConstants.PRESSIONE)) {
             text_picker2.setVisibility(View.VISIBLE);
@@ -386,29 +389,21 @@ public class AddMeasurement extends AppCompatActivity
         int id = item.getItemId();
 
         if(id == R.id.measurement_confirm) {
-            /*settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
-            credential = GoogleAccountCredential.usingAudience(this, AppConstants.AUDIENCE);
-            setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
-
-            if(credential.getSelectedAccountName() == null) {
-                Log.d(TAG, "AccountName == null: startActivityForResult.");
-                startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
-            }
-            else {
-                RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-                executeAddMeasurementAT(apiHandler);
-            }*/
+            //When the measurement is confirmed, it will be first added in the calendar.
 
             // Initialize credentials and service object.
             mCredential = GoogleAccountCredential.usingOAuth2(
                     getApplicationContext(), Arrays.asList(SCOPES))
                     .setBackOff(new ExponentialBackOff());
             Log.d(TAG, "Inizio calendario");
-            if(checkNetwork()) getResultsFromApi();
+            if(AppConstants.checkNetwork(this)) getResultsFromApi();
         }
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * calls asynctask that adds the event on the calendar
+     */
     private void getResultsFromApi() {
         if (! isGooglePlayServicesAvailable()) {
             acquireGooglePlayServices();
@@ -416,24 +411,82 @@ public class AddMeasurement extends AppCompatActivity
             //setto come account la mail con cui ho fatto il login (c'è per forza)
             mCredential.setSelectedAccountName(getSharedPreferences("MyPref", MODE_PRIVATE).getString("email", ""));
             Log.d("CALENDARgetres", "account");
-            new AggiungiMisurazioneCalendar(mCredential, getApplicationContext(), this, measurement_kind).execute();
+            new AggiungiMisurazioneCalendar(mCredential, getApplicationContext(), this, measurement_kind,
+                    getDescription(measurement_kind)).execute();
             //chooseAccount();
         } else if (! isDeviceOnline()) {
             Toast.makeText(AddMeasurement.this, "No network connection available.", Toast.LENGTH_SHORT).show();
         } else {
             Log.d("CALENDARgetres", "task");
-            new AggiungiMisurazioneCalendar(mCredential, getApplicationContext(), this, measurement_kind).execute();
+            new AggiungiMisurazioneCalendar(mCredential, getApplicationContext(), this, measurement_kind,
+                    getDescription(measurement_kind)).execute();
         }
     }
 
-    //callback from Calendar
+    /**
+     * gets value of the measurement, as a description of the event to be put on the calendar
+     * @param tipo
+     * @return
+     */
+    private String getDescription(String tipo){
+        String description=new String();
+        switch(measurement_kind) {
+            case AppConstants.PRESSIONE:
+                description = "Sistolica: " + picker_res1.getText().toString() + "\n" +
+                        "Diastolica: " + picker_res2.getText().toString();
+                break;
+            case AppConstants.FREQ_CARDIACA:
+                description = "Numero battiti: " + picker_res1.getText().toString();
+                break;
+            case AppConstants.FREQ_RESPIRAZIONE:
+                description = "Atti Respiri: " + picker_res1.getText().toString();
+                break;
+            case AppConstants.SPO2:
+                if (!has_change)
+                    get_float_value();
+                description = "Concentrazione di ossigeno: " + float_value;
+                break;
+            case AppConstants.GLUCOSIO:
+                if (!has_change)
+                    get_float_value();
+                description = "HGT: " + float_value;
+                break;
+            case AppConstants.TEMP_CORPOREA:
+                if (!has_change)
+                    get_float_value();
+                description = "Temperatura corporea: " + float_value;
+                break;
+            case AppConstants.DOLORE:
+                description = "Dolore: " + picker_res1.getText().toString();
+                break;
+            case AppConstants.COLESTEROLO:
+                if (!has_change)
+                    get_float_value();
+                description = "Colesterolo totale: " + float_value;
+                break;
+            default:
+                Snackbar snackbar = Snackbar
+                        .make(main_relative, "Tipo misurazione non esistente!!", Snackbar.LENGTH_SHORT);
+                snackbar.show();
+                break;
+        }
+        return description;
+    }
+
+    /**
+     * callback from calendar
+     * @param b boolean to check it is all ok
+     * @param s ids of the events created on the calendar (for the measurement just one)
+     */
     public void done(boolean b, ArrayList<String> s){
         SharedPreferences pref=getSharedPreferences("MyPref", MODE_PRIVATE);
-        //vuol dire che devo registrare il calendario
+
+        //if a new calendar was created, I have to save its id in our server.
         if(pref.getBoolean("nuovocalendario", false) && !pref.getString("calendar", "").equals("")){
             settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
             credential = GoogleAccountCredential.usingAudience(this, AppConstants.AUDIENCE);
-            setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+            //setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+            accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this);
 
             if(credential.getSelectedAccountName() == null) {
                 Log.d(TAG, "AccountName == null: startActivityForResult.");
@@ -443,25 +496,18 @@ public class AddMeasurement extends AppCompatActivity
                 RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
                 MainUpdateUserMessage m=new MainUpdateUserMessage();
                 m.setCalendarId(pref.getString("calendar", ""));
-                if(checkNetwork()) new RegistraCalendarioAT(this, this, main_relative, pref.getLong("userId", 0L), m, apiHandler).execute();
+                if(AppConstants.checkNetwork(this)) new RegistraCalendarioAT(this, this, main_relative, pref.getLong("userId", 0L), m, apiHandler).execute();
             }
         }
 
+        //if the measurement was correctly saved in the calendar, I add it in the server.
         if(b){
-            /*Log.d(TAG, "DONE_TASKCALLBACK_CALENDAR");
-			progressView.stopAnimation();
-			progressView.setVisibility(View.GONE);
-            //Intent i=new Intent(AddMeasurement.this, Home.class);
-            //startActivity(i);
-            this.setResult(RESULT_OK);
-            finish();*/
-
-            //potrebbe anche essere vuota
             idEventi=s;
 
             settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
             credential = GoogleAccountCredential.usingAudience(this, AppConstants.AUDIENCE);
-            setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+            //setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+            accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this);
 
             if(credential.getSelectedAccountName() == null) {
                 Log.d(TAG, "AccountName == null: startActivityForResult.");
@@ -474,9 +520,15 @@ public class AddMeasurement extends AppCompatActivity
         }
     }
 
+    /**
+     * calls asynctask to add measurement on the server, with values depending on the measurement kind
+     * @param apiHandler parameter for AppEngine server
+     */
     private void executeAddMeasurementAT(RecipexServerApi apiHandler) {
         MainAddMeasurementMessage content = new MainAddMeasurementMessage();
         content.setKind(measurement_kind);
+
+        //there will be always an event for the measurement in the calendar. The measure is always added to the calendar
         if(!idEventi.isEmpty()) content.setCalendarId(idEventi.get(0));
         switch(measurement_kind) {
             case AppConstants.PRESSIONE:
@@ -528,14 +580,19 @@ public class AddMeasurement extends AppCompatActivity
         if(note.getText().toString().length() > 0)
             content.setNote(note.getText().toString());
 
-        if (checkNetwork()) {
+        if (AppConstants.checkNetwork(this)) {
             progressView.startAnimation();
             progressView.setVisibility(View.VISIBLE);
             new AddMeasurementAT(this, this, main_relative, user_id, content, apiHandler).execute();
         }
     }
 
-    //callback registra calendario
+
+    /**
+     * callback register calendar
+     * @param b boolean to check it is all ok
+     * @param i to distinguish from other done methods
+     */
     public void done(boolean b, int i){
         if(b){
             SharedPreferences pref=getSharedPreferences("MyPref", MODE_PRIVATE);
@@ -546,6 +603,11 @@ public class AddMeasurement extends AppCompatActivity
         }
     }
 
+    /**
+     * callback from AddMeasurementAT
+     * @param resp boolean to check it is all ok
+     * @param response from the server
+     */
     @Override
     public void done(boolean resp, MainDefaultResponseMessage response) {
         if(response != null) {
@@ -557,15 +619,15 @@ public class AddMeasurement extends AppCompatActivity
                 finish();
             }
         }
+        //if the operation was not performed, I have to delete the event on the calendar, for consistency.
         else {
-            //Toast.makeText(this, "Operazione non riuscita", Toast.LENGTH_LONG).show();
             Snackbar snackbar = Snackbar
                     .make(main_relative, "Operazione non riuscita", Snackbar.LENGTH_SHORT);
             snackbar.show();
 
-            //elimina dal calendario la terapia che hai già inserito
-            if(checkNetwork()){
-                new EliminaEventiCalendar( mCredential, this.getApplicationContext(), this, idEventi).execute();
+            //delete from the calendar
+            if(AppConstants.checkNetwork(this)){
+                new DeleteEventsCalendarAT( mCredential, this.getApplicationContext(), this, idEventi).execute();
             }
         }
         progressView.stopAnimation();
@@ -573,8 +635,11 @@ public class AddMeasurement extends AppCompatActivity
     }
 
 
-
-    //callback elimina eventi calendar
+    /**
+     * callback elimina eventi calendar
+     * @param b boolean from the server
+     * @param inutile to distinguish from other done methods
+     */
     public void done(boolean b, String inutile){
         if(!b){
             Snackbar snackbar = Snackbar
@@ -588,28 +653,6 @@ public class AddMeasurement extends AppCompatActivity
     }
 
 
-    public boolean checkNetwork() {
-        cd = new ConnectionDetector(getApplicationContext());
-        // Check if Internet present
-        if (cd.isConnectingToInternet()) {
-            return true;
-        }else{
-            Snackbar snackbar = Snackbar
-                    .make(main_relative, "Nessuna connesione a internet!", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("ESCI", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            finish();
-                        }
-                    });
-
-            // Changing message text color
-            snackbar.setActionTextColor(Color.RED);
-            snackbar.show();
-        }
-        return false;
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -620,7 +663,8 @@ public class AddMeasurement extends AppCompatActivity
                             data.getExtras().getString(
                                     AccountManager.KEY_ACCOUNT_NAME);
                     if (accountName != null) {
-                        setSelectedAccountName(accountName);
+                        //setSelectedAccountName(accountName);
+                        accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this);
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
                         editor.apply();
@@ -636,7 +680,8 @@ public class AddMeasurement extends AppCompatActivity
                             data.getExtras().getString(
                                     AccountManager.KEY_ACCOUNT_NAME);
                     if (accountName != null) {
-                        setSelectedAccountName(accountName);
+                        //setSelectedAccountName(accountName);
+                        accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this);
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
                         editor.apply();
@@ -645,7 +690,7 @@ public class AddMeasurement extends AppCompatActivity
                         RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
                         MainUpdateUserMessage m=new MainUpdateUserMessage();
                         m.setCalendarId(pref.getString("calendar", ""));
-                        if(checkNetwork()) new RegistraCalendarioAT(this, this, main_relative, pref.getLong("userId", 0L), m, apiHandler).execute();
+                        if(AppConstants.checkNetwork(this)) new RegistraCalendarioAT(this, this, main_relative, pref.getLong("userId", 0L), m, apiHandler).execute();
                     }
                 }
                 break;
@@ -689,15 +734,18 @@ public class AddMeasurement extends AppCompatActivity
         }
     }
 
-    // setSelectedAccountName definition
-    private void setSelectedAccountName(String accountName) {
+    /**
+     * sets name of the account which performs the operation
+     * @param accountName
+     */
+    /*private void setSelectedAccountName(String accountName) {
         SharedPreferences settings = getSharedPreferences(AppConstants.PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
         editor.apply();
         credential.setSelectedAccountName(accountName);
         this.accountName = accountName;
-    }
+    }*/
 
 
     @Override
@@ -708,12 +756,17 @@ public class AddMeasurement extends AppCompatActivity
         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
             Log.d(TAG, "Sono nell'OnResume!!!");
             Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-            new NdefReaderTask(main_relative, this).execute(tag);
+            new NdefReaderAT(main_relative, this).execute(tag);
             progressView.startAnimation();
             progressView.setVisibility(View.VISIBLE);
         }
     }
 
+
+    /**
+     * callback from NdefReaderAT
+     * @param result measurement kind associated with a nfc
+     */
     @Override
     public void done(String result) {
         if(result != null) {
@@ -865,20 +918,26 @@ public class AddMeasurement extends AppCompatActivity
         dialog.show();
     }
 
+
+
+    /**
+     * Async task to add an event to the user's calendar
+     */
     private class AggiungiMisurazioneCalendar extends AsyncTask<Void, Void, Boolean> {
 
         private Context context;
-        private TaskCallbackCalendarAdd mCallback;
+        private CalendarAddTC mCallback;
         private String tipo;
+        private String descrizione;
 
-        //per inserire gli id degli eventi che creo sul calendario (vuota se non aggiungo eventi)
+        //insert here the ids of the events I create (in this case one)
         private ArrayList<String> idEventiCalendar;
 
         private com.google.api.services.calendar.Calendar mService = null;
         private Exception mLastError = null;
 
-        public AggiungiMisurazioneCalendar(GoogleAccountCredential credential, Context context, TaskCallbackCalendarAdd c,
-                                       String tipo) {
+        public AggiungiMisurazioneCalendar(GoogleAccountCredential credential, Context context, CalendarAddTC c,
+                                           String tipo, String descrizione) {
             HttpTransport transport = AndroidHttp.newCompatibleTransport();
             JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
             mService = new com.google.api.services.calendar.Calendar.Builder(
@@ -888,6 +947,7 @@ public class AddMeasurement extends AppCompatActivity
             this.context=context;
             this.mCallback=c;
             this.tipo=tipo;
+            this.descrizione=descrizione;
             idEventiCalendar=new ArrayList<>();
         }
 
@@ -901,7 +961,7 @@ public class AddMeasurement extends AppCompatActivity
 
             try {
                 String idCalendar=pref.getString("calendar", "");
-                //creo calendario se non c'è
+                //create a calendar if there is not
                 if(idCalendar.equals("")) {
                     Log.d("CALENDAR", "creo nuovo calendario");
                     // Create a new calendar
@@ -918,7 +978,7 @@ public class AddMeasurement extends AppCompatActivity
                     editor.commit();
 
 
-                    //se creo un nuovo calendario lo devo pubblicare a tutti i miei caregivers.
+                    //if I create a new calendar I have to publish it to all my caregivers.
                     if(pref.getStringSet("emailcaregivers",null)!=null) {
                         Set<String> emailcaregivers = pref.getStringSet("emailcaregivers", null);
 
@@ -939,26 +999,11 @@ public class AddMeasurement extends AppCompatActivity
                         }
 
                     }
-                    //DEBUG
-                    /*else{
-                        Log.d("DEBUG", "rule");
-                        AclRule rule = new AclRule();
-                        AclRule.Scope scope = new AclRule.Scope();
-                        scope.setType("user").setValue("recipex.app@gmail.com");
-                        rule.setScope(scope).setRole("writer");
-
-                        // Insert new access rule
-                        try {
-                            AclRule createdRule = mService.acl().insert(idCalendar, rule).execute();
-                        }
-                        catch (Exception e){Log.d("TAG",e.getMessage());}
-                        Log.d("DEBUG", "rule EXEC");
-                    }*/
                 }
-                //aggiungo la terapia
-                System.out.println("arrivo");
+                //add measurement
+
                 Event event = new Event()
-                        .setSummary(tipo);
+                        .setSummary(AppConstants.getTipo(tipo)).setDescription(descrizione);
 
                 java.util.Calendar c = java.util.Calendar.getInstance();
                 int second = c.get(java.util.Calendar.SECOND);
@@ -1035,7 +1080,6 @@ public class AddMeasurement extends AppCompatActivity
 
             } catch (Exception e) {
                 e.printStackTrace();
-                //Log.d("ECCEZIONE CALENDAR", e.getCause().toString());
                 mLastError = e;
                 cancel(true);
                 return false;
@@ -1074,96 +1118,5 @@ public class AddMeasurement extends AppCompatActivity
             }
         }
     }
-
-    /*public class EliminaEventiCalendar  extends AsyncTask<Void, Void, Boolean> {
-        private Context context;
-        private TaskCallbackCalendarElimina mCallback;
-
-        private final static String TAG = "ELIMINA_EVENTO";
-
-        //per inserire gli id degli eventi che creo sul calendario (vuota se non aggiungo eventi)
-        private LinkedList<String> idEventiCalendar;
-
-        private com.google.api.services.calendar.Calendar mService = null;
-        private Exception mLastError = null;
-
-        public EliminaEventiCalendar(GoogleAccountCredential credential, Context context, TaskCallbackCalendarElimina c,
-                                     LinkedList<String> idEventi) {
-            HttpTransport transport = AndroidHttp.newCompatibleTransport();
-            JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-            mService = new com.google.api.services.calendar.Calendar.Builder(
-                    transport, jsonFactory, credential)
-                    .setApplicationName("RecipeX")
-                    .build();
-            this.context=context;
-            this.mCallback=c;
-            idEventiCalendar=idEventi;
-        }
-
-        /**
-         * Background task to call Google Calendar API.
-         * @param params no parameters needed for this task.
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            SharedPreferences pref=context.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
-
-            try {
-                String idCalendar=pref.getString("calendar", "");
-                Events events = mService.events().list(idCalendar)
-                        .setOrderBy("startTime")
-                        .setSingleEvents(true)
-                        .execute();
-                List<Event> items = events.getItems();
-                Iterator<Event> i=items.iterator();
-                while(i.hasNext()){
-                    Event e=(Event)i.next();
-                    if(idEventiCalendar.contains(e.getId()))
-                        mService.events().delete(idCalendar, e.getId()).execute();
-                }
-                return true;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.d("ECCEZIONE CALENDAR", e.getCause().toString());
-                mLastError = e;
-                cancel(true);
-                return false;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Boolean response) {
-            if(response){
-                Log.d(TAG, ""+idEventiCalendar.size());
-                mCallback.done(true, "");
-            }
-            else{
-                mCallback.done(false, "");
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            if (mLastError != null) {
-                if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
-                    showGooglePlayServicesAvailabilityErrorDialog(
-                            ((GooglePlayServicesAvailabilityIOException) mLastError)
-                                    .getConnectionStatusCode());
-                } else if (mLastError instanceof UserRecoverableAuthIOException) {
-                    startActivityForResult(
-                            ((UserRecoverableAuthIOException) mLastError).getIntent(),
-                            AppConstants.REQUEST_AUTHORIZATION);
-                } else {
-                    Toast.makeText(context, "The following error occurred:\n"
-                            + mLastError.getMessage(), Toast.LENGTH_SHORT).show();
-                    Log.d("ERRORE CALENDAR", mLastError.getMessage());
-                }
-            } else {
-                Toast.makeText(context, "Request cancelled.", Toast.LENGTH_SHORT).show();
-            }
-        }
-
-    }*/
 
 }

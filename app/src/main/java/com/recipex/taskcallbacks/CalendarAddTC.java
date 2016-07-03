@@ -8,6 +8,10 @@ import java.util.List;
 /**
  * Created by Sara on 26/05/2016.
  */
-public interface TaskCallbackCalendarAdd {
+
+/**
+ * callback from AggiungiMisurazioneCalendar and AggiungiTerapiaCalendar
+ */
+public interface CalendarAddTC {
     void done(boolean b, ArrayList<String> l);
 }

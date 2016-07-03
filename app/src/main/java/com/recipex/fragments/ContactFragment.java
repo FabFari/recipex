@@ -15,6 +15,9 @@ import com.recipex.utilities.ContactItem;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * fragment to contact the caregiver
+ */
 public class ContactFragment extends DialogFragment {
     private RecyclerView mRecyclerView;
     private ContactAdapter adapter;
@@ -23,7 +26,9 @@ public class ContactFragment extends DialogFragment {
     private String user_phone;
     private String crgv_phone;
 
-    // this method create view for your Dialog
+    /**
+     * this method creates view for your Dialog
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

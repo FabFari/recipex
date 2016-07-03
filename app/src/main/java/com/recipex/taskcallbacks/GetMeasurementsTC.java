@@ -5,6 +5,10 @@ import com.appspot.recipex_1281.recipexServerApi.model.MainUserMeasurementsMessa
 /**
  * Created by Sara on 11/05/2016.
  */
-public interface TaskCallbackGetMeasurements {
+
+/**
+ * callback from GetMeasurementsUserAT
+ */
+public interface GetMeasurementsTC {
     void done(MainUserMeasurementsMessage m);
 }

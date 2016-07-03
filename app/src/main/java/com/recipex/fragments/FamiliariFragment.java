@@ -92,47 +92,29 @@ public class FamiliariFragment extends Fragment implements GetUserTC, UpdateRela
         id = pref.getLong("userId", 0L);
 
 
-        if(id!=0 && checkNetwork()){
+        if(id!=0 && AppConstants.checkNetwork(getActivity())){
             settings = getActivity().getSharedPreferences(AppConstants.PREFS_NAME, 0);
             credential = GoogleAccountCredential.usingAudience(getContext(), AppConstants.AUDIENCE);
             Log.d("Caregivers", "Credential: " + credential);
-            setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+            //setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+            accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this.getActivity());
 
             if (credential.getSelectedAccountName() == null) {
                 Log.d("Caregivers", "AccountName == null: startActivityForResult.");
                 startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
             } else {
                 apiHandler = AppConstants.getApiServiceHandle(credential);
-                if (checkNetwork()) {
+                if (AppConstants.checkNetwork(getActivity())) {
                     progressView.startAnimation();
                     progressView.setVisibility(View.VISIBLE);
                     new GetUserAT(this, getActivity(), id, apiHandler).execute();
                 }
             }
         }
-        else Toast.makeText(getActivity(), "Si è verificato un errore.", Toast.LENGTH_SHORT).show();
-    }
-    public boolean checkNetwork() {
-        cd = new ConnectionDetector(getActivity().getApplicationContext());
-        // Check if Internet present
-        if (cd.isConnectingToInternet()) {
-            return true;
-        }else{
-            Snackbar snackbar = Snackbar
-                    .make(getActivity().getWindow().getDecorView().getRootView(),
-                            "Nessuna connesione a internet!", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("ESCI", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            getActivity().finish();
-                        }
-                    });
-
-            // Changing message text color
-            snackbar.setActionTextColor(Color.RED);
-            snackbar.show();
+        else {
+            progressView.stopAnimation();
+            progressView.setVisibility(View.GONE);
         }
-        return false;
     }
 
     //callback from GetUser
@@ -155,7 +137,7 @@ public class FamiliariFragment extends Fragment implements GetUserTC, UpdateRela
         progressView.setVisibility(View.GONE);
     }
     // setSelectedAccountName definition
-    private void setSelectedAccountName(String accountName) {
+    /*private void setSelectedAccountName(String accountName) {
         settings = getActivity().getSharedPreferences(AppConstants.PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
@@ -163,7 +145,7 @@ public class FamiliariFragment extends Fragment implements GetUserTC, UpdateRela
         Log.d("Caregivers", "ACCOUNT NAME: " + accountName);
         credential.setSelectedAccountName(accountName);
         this.accountName = accountName;
-    }
+    }*/
 
     @Override
     public void done(boolean resp, MainDefaultResponseMessage response) {
@@ -180,18 +162,19 @@ public class FamiliariFragment extends Fragment implements GetUserTC, UpdateRela
             snackbar.show();
         }
 
-        if(checkNetwork()){
+        if(AppConstants.checkNetwork(getActivity())){
             settings = getActivity().getSharedPreferences(AppConstants.PREFS_NAME, 0);
             credential = GoogleAccountCredential.usingAudience(getContext(), AppConstants.AUDIENCE);
             Log.d("Caregivers", "Credential: " + credential);
-            setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+            //setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+            accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this.getActivity());
 
             if (credential.getSelectedAccountName() == null) {
                 Log.d("Caregivers", "AccountName == null: startActivityForResult.");
                 startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
             } else {
                 apiHandler = AppConstants.getApiServiceHandle(credential);
-                if (checkNetwork()) {
+                if (AppConstants.checkNetwork(getActivity())) {
                     progressView.startAnimation();
                     progressView.setVisibility(View.VISIBLE);
                     new GetUserAT(this, getActivity(), id, apiHandler).execute();

@@ -5,6 +5,10 @@ import com.appspot.recipex_1281.recipexServerApi.model.MainDefaultResponseMessag
 /**
  * Created by Sara on 04/05/2016.
  */
-public interface TaskCallbackAggiungiTerapia {
+
+/**
+ * callback from AddPrescriptionAT
+ */
+public interface AddPrescriptionTC {
     void done(boolean b, MainDefaultResponseMessage m);
 }

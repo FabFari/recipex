@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.recipex.activities.UserRequests">
+    tools:context="com.recipex.fragments.UserRequestFragment">
     <!--
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"

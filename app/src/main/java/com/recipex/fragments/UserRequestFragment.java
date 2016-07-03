@@ -3,32 +3,22 @@ package com.recipex.fragments;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.appspot.recipex_1281.recipexServerApi.model.MainDefaultResponseMessage;
-import com.appspot.recipex_1281.recipexServerApi.model.MainUserInfoMessage;
-import com.appspot.recipex_1281.recipexServerApi.model.MainUserMainInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserRequestsMessage;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -37,22 +27,19 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.calendar.model.AclRule;
 import com.recipex.AppConstants;
 import com.recipex.R;
-import com.recipex.activities.Home;
-import com.recipex.activities.UserRequests;
-import com.recipex.adapters.PazienteFamiliareAdapter;
 import com.recipex.adapters.RequestsAdapter;
 import com.recipex.asynctasks.AnswerRequestAT;
-import com.recipex.asynctasks.GetUserAT;
 import com.recipex.asynctasks.GetUserRequestsAT;
 import com.recipex.taskcallbacks.AnswerRequestTC;
 import com.recipex.taskcallbacks.GetUserRequestsTC;
-import com.recipex.taskcallbacks.GetUserTC;
 import com.recipex.utilities.ConnectionDetector;
-
-import java.util.List;
 
 /**
  * Created by Sara on 14/05/2016.
+ */
+
+/**
+ * fragment holding pending requests for the user
  */
 public class UserRequestFragment extends Fragment implements GetUserRequestsTC, AnswerRequestTC {
 
@@ -80,14 +67,6 @@ public class UserRequestFragment extends Fragment implements GetUserRequestsTC, 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView;
-        /*
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-            // only for lollipop and newer versions
-            rootView = inflater.inflate(R.layout.recyclerview, container, false);
-        else
-            rootView = inflater.inflate(R.layout.recyclerview2, container, false);
-        */
-
         rootView = inflater.inflate(R.layout.activity_user_requests, container, false);
 
         initUI(rootView);
@@ -95,6 +74,10 @@ public class UserRequestFragment extends Fragment implements GetUserRequestsTC, 
         return rootView;
     }
 
+    /**
+     * setup layout elements
+     * @param rootView
+     */
     private void initUI(View rootView) {
         coordinator = (CoordinatorLayout) rootView.findViewById(R.id.requests_coordinator);
         recycler = (RecyclerView) rootView.findViewById(R.id.requests_recyclerview);
@@ -108,50 +91,32 @@ public class UserRequestFragment extends Fragment implements GetUserRequestsTC, 
 
         Log.e(TAG, "userId: "+userId);
 
-        if(userId!=0 && checkNetwork()){
+        if(userId!=0 && AppConstants.checkNetwork(getActivity())){
             settings = getActivity().getSharedPreferences(AppConstants.PREFS_NAME, 0);
             credential = GoogleAccountCredential.usingAudience(getContext(), AppConstants.AUDIENCE);
             Log.d("Caregivers", "Credential: " + credential);
-            setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+            //setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null));
+            accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this.getActivity());
 
             if(credential.getSelectedAccountName() == null)
                 startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
             else {
                 RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-                if(checkNetwork()) new GetUserRequestsAT(this, this.getActivity(), coordinator, userId, apiHandler).execute();
+                //retrieve user's pending requests
+                if(AppConstants.checkNetwork(getActivity())) new GetUserRequestsAT(this, this.getActivity(), coordinator, userId, apiHandler).execute();
             }
         }
         else {
-            Snackbar snackbar = Snackbar
-                    .make(getActivity().getWindow().getDecorView().getRootView(),
-                            "Operazione non riuscita!", Snackbar.LENGTH_SHORT);
-            snackbar.show();
+            progressView.stopAnimation();
+            progressView.setVisibility(View.GONE);
         }
     }
 
-    public boolean checkNetwork() {
-        cd = new ConnectionDetector(getActivity().getApplicationContext());
-        // Check if Internet present
-        if (cd.isConnectingToInternet()) {
-            return true;
-        }else{
-            Snackbar snackbar = Snackbar
-                    .make(getActivity().getWindow().getDecorView().getRootView(),
-                            "Nessuna connesione a internet!", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("ESCI", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            getActivity().finish();
-                        }
-                    });
-
-            // Changing message text color
-            snackbar.setActionTextColor(Color.RED);
-            snackbar.show();
-        }
-        return false;
-    }
-
+    /**
+     * callback from GetUserRequests
+     * @param res to check it is all ok
+     * @param response from server, containing user's requests
+     */
     public void done(boolean res, MainUserRequestsMessage response) {
         if (response != null) {
             if (res) {
@@ -167,8 +132,12 @@ public class UserRequestFragment extends Fragment implements GetUserRequestsTC, 
             progressView.setVisibility(View.GONE);
         }
     }
-    // setSelectedAccountName definition
-    private void setSelectedAccountName(String accountName) {
+
+    /**
+     * sets name of the account which performs the operation
+     * @param accountName
+     */
+    /*private void setSelectedAccountName(String accountName) {
         settings = getActivity().getSharedPreferences(AppConstants.PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
@@ -176,11 +145,16 @@ public class UserRequestFragment extends Fragment implements GetUserRequestsTC, 
         Log.d("Caregivers", "ACCOUNT NAME: " + accountName);
         credential.setSelectedAccountName(accountName);
         this.accountName = accountName;
-    }
+    }*/
 
+    /**
+     * calls async task to confirm or reject a request. It is called from the adapter.
+     * @param requestId
+     * @param answer
+     */
     public void executeAsyncTask(Long requestId, Boolean answer) {
         RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-        if(checkNetwork()) new AnswerRequestAT(this, this.getActivity(), coordinator, userId, requestId, answer, apiHandler).execute();
+        if(AppConstants.checkNetwork(getActivity())) new AnswerRequestAT(this, this.getActivity(), coordinator, userId, requestId, answer, apiHandler).execute();
     }
 
     @Override
@@ -193,19 +167,25 @@ public class UserRequestFragment extends Fragment implements GetUserRequestsTC, 
                             data.getExtras().getString(
                                     AccountManager.KEY_ACCOUNT_NAME);
                     if (accountName != null) {
-                        setSelectedAccountName(accountName);
+                        //setSelectedAccountName(accountName);
+                        accountName= AppConstants.setSelectedAccountName(settings.getString(AppConstants.DEFAULT_ACCOUNT, null), credential, this.getActivity());
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
                         editor.apply();
                         // User is authorized
                         RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-                        if(checkNetwork()) new GetUserRequestsAT(this, this.getActivity(), coordinator, userId, apiHandler).execute();
+                        if(AppConstants.checkNetwork(getActivity())) new GetUserRequestsAT(this, this.getActivity(), coordinator, userId, apiHandler).execute();
                     }
                 }
                 break;
         }
     }
 
+    /**
+     * callback from AnswerRequestAT
+     * @param res to check it is all ok
+     * @param response from the server
+     */
     @Override
     public void done(boolean res, MainDefaultResponseMessage response) {
         if (response != null) {
@@ -217,9 +197,9 @@ public class UserRequestFragment extends Fragment implements GetUserRequestsTC, 
                 RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
 
                 SharedPreferences pref = getActivity().getSharedPreferences("MyPref", Activity.MODE_PRIVATE);
-                if(pref.getString("email", "").equals("")) {
+                /*if(pref.getString("email", "").equals("")) {
 
-                    // Dò accesso al calendario dell'utente
+                    // if the request is accepted, the calendar is published to the new caregiver
                     com.google.api.services.calendar.Calendar mService = new com.google.api.services.calendar.Calendar.Builder(
                             AndroidHttp.newCompatibleTransport(), JacksonFactory.getDefaultInstance(), credential)
                             .setApplicationName("RecipeX")
@@ -241,9 +221,10 @@ public class UserRequestFragment extends Fragment implements GetUserRequestsTC, 
                     snackbar = Snackbar.make(getActivity().getWindow().getDecorView().getRootView(),
                             "Operazione non riuscita: " + response.getCode(), Snackbar.LENGTH_SHORT);
                     snackbar.show();
-                }
+                }*/
 
-                if(checkNetwork()) new GetUserRequestsAT(this, this.getActivity(), coordinator, userId, apiHandler).execute();
+                //Update user's requests
+                if(AppConstants.checkNetwork(getActivity())) new GetUserRequestsAT(this, this.getActivity(), coordinator, userId, apiHandler).execute();
 
             } else {
                 Snackbar snackbar = Snackbar

@@ -15,6 +15,10 @@ import java.io.IOException;
 /**
  * Created by Fabrizio on 26/05/2016.
  */
+
+/**
+ * updates or removes a relation between two users.
+ */
 public class UpdateRelationInfoAT extends AsyncTask<Void, Void, MainDefaultResponseMessage> {
     public static String TAG = "UPDATE_RELATION_INFO_AT";
     RecipexServerApi apiHandler;

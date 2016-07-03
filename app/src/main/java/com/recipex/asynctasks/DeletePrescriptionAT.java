@@ -8,28 +8,30 @@ import android.view.View;
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.appspot.recipex_1281.recipexServerApi.model.MainDefaultResponseMessage;
 import com.recipex.AppConstants;
-import com.recipex.taskcallbacks.RimuoviTerapiaTC;
-import com.recipex.taskcallbacks.SendRequestTC;
+import com.recipex.taskcallbacks.DeletePrescriptionTC;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 /**
  * Created by Fabrizio on 30/05/2016.
  */
-public class RimuoviTerapiaAT extends AsyncTask<Void, Void, MainDefaultResponseMessage> {
+
+/**
+ * deletes a prescription
+ */
+public class DeletePrescriptionAT extends AsyncTask<Void, Void, MainDefaultResponseMessage> {
     public static String TAG = "SEND_REQUEST_AT";
     RecipexServerApi apiHandler;
     Activity activity;
     View mainView;
-    RimuoviTerapiaTC taskCallback;
+    DeletePrescriptionTC taskCallback;
     Long id;
     Long user_id;
     ArrayList<String> idCal;
 
-    public RimuoviTerapiaAT(RimuoviTerapiaTC taskCallback, Activity activity, View mainView, Long id,
-                            Long user_id, ArrayList<String> idsCal, RecipexServerApi apiHandler) {
+    public DeletePrescriptionAT(DeletePrescriptionTC taskCallback, Activity activity, View mainView, Long id,
+                                Long user_id, ArrayList<String> idsCal, RecipexServerApi apiHandler) {
         this.taskCallback = taskCallback;
         this.activity = activity;
         this.mainView = mainView;

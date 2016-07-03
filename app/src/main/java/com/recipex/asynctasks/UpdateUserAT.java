@@ -13,6 +13,9 @@ import com.recipex.taskcallbacks.UpdateUserTC;
 
 import java.io.IOException;
 
+/**
+ * updates user's info.
+ */
 public class UpdateUserAT extends AsyncTask<Void, Void, MainDefaultResponseMessage> {
 
     public static String TAG = "GET_USER_AT";
