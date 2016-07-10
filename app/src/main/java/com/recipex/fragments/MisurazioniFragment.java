@@ -31,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.appspot.recipex_1281.recipexServerApi.model.MainDefaultResponseMessage;
+import com.appspot.recipex_1281.recipexServerApi.model.MainUserUnseenInfoMessage;
 import com.github.clans.fab.FloatingActionMenu;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.google.android.gms.common.ConnectionResult;
@@ -49,9 +50,13 @@ import com.appspot.recipex_1281.recipexServerApi.model.MainMeasurementInfoMessag
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserMeasurementsMessage;
 import com.recipex.asynctasks.DeleteEventsCalendarAT;
 import com.recipex.asynctasks.GetMeasurementsUserAT;
+import com.recipex.asynctasks.GetUnseenInfoAT;
+import com.recipex.asynctasks.RemoveCalendarAccess;
 import com.recipex.taskcallbacks.CalendarDeleteTC;
+import com.recipex.taskcallbacks.CalendarTC;
 import com.recipex.taskcallbacks.DeleteMeasurementTC;
 import com.recipex.taskcallbacks.GetMeasurementsTC;
+import com.recipex.taskcallbacks.GetUnseenInfoTC;
 import com.recipex.utilities.ConnectionDetector;
 import com.recipex.utilities.Misurazione;
 
@@ -72,7 +77,7 @@ import pub.devrel.easypermissions.EasyPermissions;
  * fragment holding measurements of the user
  */
 public class MisurazioniFragment extends Fragment implements GetMeasurementsTC,
-        DeleteMeasurementTC, CalendarDeleteTC/*, Toolbar.OnMenuItemClickListener*/ {
+        DeleteMeasurementTC, CalendarDeleteTC, GetUnseenInfoTC, CalendarTC/*, Toolbar.OnMenuItemClickListener*/ {
 
     private final static String TAG = "MISURAZIONI_FRAGMENT";
     private final static int ADD_MEASUREMENT = 1;
@@ -85,12 +90,19 @@ public class MisurazioniFragment extends Fragment implements GetMeasurementsTC,
     private ConnectionDetector cd;
 
 
+    //for calendar
     GoogleAccountCredential mCredential;
+    //2 operations for calendar
+    static final int REQUEST_PERMISSION_GET_ACCOUNTS_ACCESS = 1;
+    static final int REQUEST_PERMISSION_GET_ACCOUNTS_DELETE= 0;
     private static final String[] SCOPES = { CalendarScopes.CALENDAR };
+    String emailremove;
+
     public ArrayList<String> idEventi;
-    static final int REQUEST_ACCOUNT_PICKER2 = 1000;
+    static final int REQUEST_ACCOUNT_PICKER_CALENDAR_DELETE = 1000;
+    static final int REQUEST_ACCOUNT_PICKER_CALENDAR_ACCESS =1004;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
-    static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
+
 
 
     private final int scrollnum=6;
@@ -207,7 +219,7 @@ public class MisurazioniFragment extends Fragment implements GetMeasurementsTC,
                     }
                 }
                 break;
-            case REQUEST_ACCOUNT_PICKER2:
+            case REQUEST_ACCOUNT_PICKER_CALENDAR_DELETE:
                 if (resultCode == getActivity().RESULT_OK && data != null &&
                         data.getExtras() != null) {
                     Log.d("CALENDARres", "entro in res");
@@ -223,7 +235,27 @@ public class MisurazioniFragment extends Fragment implements GetMeasurementsTC,
                         editor.apply();
                         mCredential.setSelectedAccountName(accountName);
                         Log.d("CALENDARres", accountName);
-                        getResultsFromApi();
+                        getResultsFromApi(false);
+                    }
+                }
+                break;
+            case REQUEST_ACCOUNT_PICKER_CALENDAR_ACCESS:
+                if (resultCode == getActivity().RESULT_OK && data != null &&
+                        data.getExtras() != null) {
+                    Log.d("CALENDARres", "entro in res");
+
+                    String accountName =
+                            data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                    if (accountName != null) {
+                        SharedPreferences settings =
+                                getContext().getSharedPreferences(AppConstants.PREFS_NAME,Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = settings.edit();
+                        //editor.putString(PREF_ACCOUNT_NAME, accountName);
+                        editor.putString(AppConstants.DEFAULT_ACCOUNT, accountName);
+                        editor.apply();
+                        mCredential.setSelectedAccountName(accountName);
+                        Log.d("CALENDARres", accountName);
+                        getResultsFromApi(true);
                     }
                 }
                 break;
@@ -393,6 +425,7 @@ public class MisurazioniFragment extends Fragment implements GetMeasurementsTC,
                 });
 
                 new GetMeasurementsUserAT(userId, getContext(), this, apiHandler, scrollnum, 0).execute();
+                new GetUnseenInfoAT(this, getActivity(), userId, apiHandler).execute();
                 progressView.startAnimation();
                 progressView.setVisibility(View.VISIBLE);
             }else {
@@ -514,7 +547,8 @@ public class MisurazioniFragment extends Fragment implements GetMeasurementsTC,
             mCredential = GoogleAccountCredential.usingOAuth2(
                     getContext(), Arrays.asList(SCOPES))
                     .setBackOff(new ExponentialBackOff());
-            getResultsFromApi();
+            //true:remove calendar access; false: delete events calendar
+            getResultsFromApi(false);
         }
         else {
             Snackbar snackbar = Snackbar
@@ -547,12 +581,13 @@ public class MisurazioniFragment extends Fragment implements GetMeasurementsTC,
     /**
      * calls async task to delete events from the calendar
      */
-    private void getResultsFromApi() {
+    private void getResultsFromApi(boolean operation) {
         if (! isGooglePlayServicesAvailable()) {
             acquireGooglePlayServices();
         } else if (mCredential.getSelectedAccountName() == null) {
             Log.d("CALENDARgetres", "account");
-            chooseAccount();
+            if(operation) chooseAccount();
+            else chooseAccountDelete();
         } else if (! isDeviceOnline()) {
             Snackbar snackbar = Snackbar
                     .make(getActivity().getWindow().getDecorView().getRootView(),
@@ -560,7 +595,8 @@ public class MisurazioniFragment extends Fragment implements GetMeasurementsTC,
             snackbar.show();
         } else {
             Log.d("CALENDARgetres", "task");
-            new DeleteEventsCalendarAT(mCredential, getContext(), this, idEventi).execute();
+            if(operation) new RemoveCalendarAccess(mCredential, getContext(), this, pref.getString("calendar", ""), emailremove).execute();
+            else new DeleteEventsCalendarAT(mCredential, getContext(), this, idEventi).execute();
         }
     }
     /**
@@ -585,7 +621,7 @@ public class MisurazioniFragment extends Fragment implements GetMeasurementsTC,
      * function will be rerun automatically whenever the GET_ACCOUNTS permission
      * is granted.
      */
-    @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
+    @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS_ACCESS)
     private void chooseAccount() {
         if (EasyPermissions.hasPermissions(getContext(), Manifest.permission.GET_ACCOUNTS)) {
 
@@ -599,14 +635,14 @@ public class MisurazioniFragment extends Fragment implements GetMeasurementsTC,
                 Log.d("CALENDARcho", "account");
 
                 mCredential.setSelectedAccountName(accountName);
-                getResultsFromApi();
+                getResultsFromApi(true);
             } else {
                 Log.d("CALENDARcho", "choose");
 
                 // Start a dialog from which the user can choose an account
                 startActivityForResult(
                         mCredential.newChooseAccountIntent(),
-                        REQUEST_ACCOUNT_PICKER2);
+                        REQUEST_ACCOUNT_PICKER_CALENDAR_ACCESS);
             }
         } else {
             Log.d("CALENDARcho", "noperm");
@@ -615,7 +651,52 @@ public class MisurazioniFragment extends Fragment implements GetMeasurementsTC,
             EasyPermissions.requestPermissions(
                     this,
                     "This app needs to access your Google account (via Contacts).",
-                    REQUEST_PERMISSION_GET_ACCOUNTS,
+                    REQUEST_PERMISSION_GET_ACCOUNTS_ACCESS,
+                    Manifest.permission.GET_ACCOUNTS);
+        }
+    }
+
+    /**
+     * Attempts to set the account used with the API credentials. If an account
+     * name was previously saved it will use that one; otherwise an account
+     * picker dialog will be shown to the user. Note that the setting the
+     * account to use with the credentials object requires the app to have the
+     * GET_ACCOUNTS permission, which is requested here if it is not already
+     * present. The AfterPermissionGranted annotation indicates that this
+     * function will be rerun automatically whenever the GET_ACCOUNTS permission
+     * is granted.
+     */
+    @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS_DELETE)
+    private void chooseAccountDelete() {
+        if (EasyPermissions.hasPermissions(getContext(), Manifest.permission.GET_ACCOUNTS)) {
+
+            /*
+            String accountName = getSharedPreferences(AppConstants.PREFS_NAME,Context.MODE_PRIVATE)
+                    .getString(PREF_ACCOUNT_NAME, null);
+            */
+            String accountName = getContext().getSharedPreferences(AppConstants.PREFS_NAME,Context.MODE_PRIVATE)
+                    .getString(AppConstants.DEFAULT_ACCOUNT, null);
+            if (accountName != null) {
+                Log.d("CALENDARcho", "account");
+
+                mCredential.setSelectedAccountName(accountName);
+                getResultsFromApi(false);
+            } else {
+                Log.d("CALENDARcho", "choose");
+
+                // Start a dialog from which the user can choose an account
+                startActivityForResult(
+                        mCredential.newChooseAccountIntent(),
+                        REQUEST_ACCOUNT_PICKER_CALENDAR_DELETE);
+            }
+        } else {
+            Log.d("CALENDARcho", "noperm");
+
+            // Request the GET_ACCOUNTS permission via a user dialog
+            EasyPermissions.requestPermissions(
+                    this,
+                    "This app needs to access your Google account (via Contacts).",
+                    REQUEST_PERMISSION_GET_ACCOUNTS_DELETE,
                     Manifest.permission.GET_ACCOUNTS);
         }
     }
@@ -681,5 +762,51 @@ public class MisurazioniFragment extends Fragment implements GetMeasurementsTC,
         Intent i =new Intent(getActivity(), Home.class);
         startActivity(i);
         getActivity().finish();
+    }
+
+    /**
+     * callback from GetUnseenInfoAT
+     * @param response
+     */
+    public void done(MainUserUnseenInfoMessage response){
+        if(response!=null){
+            Log.d(TAG, "arrivo nel done di unseen info");
+            if(!pref.getString("calendar", "").equals("")) {
+                List<String> emails = response.getToRemove();
+                if(emails!=null) {
+                    Iterator<String> i = emails.iterator();
+                    while (i.hasNext()) {
+                        emailremove = (String) i.next();
+                        Log.d(TAG, emailremove);
+                        mCredential = GoogleAccountCredential.usingOAuth2(
+                                getActivity().getApplicationContext(), Arrays.asList(SCOPES))
+                                .setBackOff(new ExponentialBackOff());
+                        Log.d("CaregiverFragment", "Inizio calendario");
+                        getResultsFromApi(true);
+                    }
+                }
+            }
+        }
+        else{
+            Snackbar snackbar = Snackbar
+                    .make(coordinatorLayout, "Errore nel recupero delle informazioni.", Snackbar.LENGTH_SHORT);
+            snackbar.show();
+        }
+    }
+
+    /**
+     * callback from RemoveCalendarAccess
+     * @param b
+     */
+    public void done(boolean b){
+        if(b){
+            Log.d("MisurazioniFragment", "DONE_TASKCALLBACK_CALENDAR");
+        }
+        else{
+            Snackbar snackbar = Snackbar
+                    .make(getActivity().getWindow().getDecorView().getRootView(),
+                            "Errore nella rimozione dell'accesso al calendario", Snackbar.LENGTH_SHORT);
+            snackbar.show();
+        }
     }
 }

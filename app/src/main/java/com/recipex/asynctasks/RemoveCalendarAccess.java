@@ -1,5 +1,10 @@
 package com.recipex.asynctasks;
 
+/**
+ * Created by Sara on 04/07/2016.
+ */
+
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -14,38 +19,29 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecovera
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.Events;
+import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.model.Acl;
+import com.google.api.services.calendar.model.AclRule;
 import com.recipex.AppConstants;
-import com.recipex.activities.AddMeasurement;
-import com.recipex.activities.AddPrescription;
-import com.recipex.taskcallbacks.CalendarDeleteTC;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import com.recipex.activities.Home;
+import com.recipex.fragments.CaregiversFragment;
+import com.recipex.taskcallbacks.CalendarTC;
 
 /**
- * Created by Sara on 07/06/2016.
+ * Async task to give caregiver permission to see my calendar
  */
+public class RemoveCalendarAccess extends AsyncTask<Void, Void, Boolean> {
 
-/**
- * deletes event from the user's calendar
- */
-public class DeleteEventsCalendarAT extends AsyncTask<Void, Void, Boolean> {
     private Context context;
-    private CalendarDeleteTC mCallback;
-
-    private final static String TAG = "ELIMINA_EVENTO";
-
-    //per inserire gli id degli eventi che creo sul calendario (vuota se non aggiungo eventi)
-    private ArrayList<String> idEventiCalendar;
+    private CalendarTC mCallback;
+    private String idCalendar;
+    private String emailCaregiver;
 
     private com.google.api.services.calendar.Calendar mService = null;
     private Exception mLastError = null;
 
-    public DeleteEventsCalendarAT(GoogleAccountCredential credential, Context context, CalendarDeleteTC c,
-                                  ArrayList<String> idEventi) {
+    public RemoveCalendarAccess(GoogleAccountCredential credential, Context context, CalendarTC c,
+                                     String id, String e) {
         HttpTransport transport = AndroidHttp.newCompatibleTransport();
         JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
         mService = new com.google.api.services.calendar.Calendar.Builder(
@@ -54,7 +50,8 @@ public class DeleteEventsCalendarAT extends AsyncTask<Void, Void, Boolean> {
                 .build();
         this.context=context;
         this.mCallback=c;
-        idEventiCalendar=idEventi;
+        this.idCalendar=id;
+        this.emailCaregiver=e;
     }
 
     /**
@@ -66,41 +63,44 @@ public class DeleteEventsCalendarAT extends AsyncTask<Void, Void, Boolean> {
         SharedPreferences pref=context.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
 
         try {
-            String idCalendar=pref.getString("calendar", "");
-            Log.d(TAG, "calendario"+idCalendar);
-            Events events = mService.events().list(idCalendar)
-                    .setSingleEvents(false)
-                    .execute();
-            List<Event> items = events.getItems();
-            Iterator<Event> i=items.iterator();
-            Log.d(TAG, "idevento"+idEventiCalendar.get(0));
-            while(i.hasNext()){
-                Event e=(Event)i.next();
-                Log.d(TAG, "ideventoit"+e.getId());
-                if(idEventiCalendar.contains(e.getId())) {
-                    Log.d(TAG, "elimina");
-                    mService.events().delete(idCalendar, e.getId()).execute();
-                }
+            Log.d("Removeaccess", idCalendar);
+
+            // Iterate over a list of access rules
+            Acl acl = mService.acl().list(idCalendar).execute();
+
+            for (AclRule rule : acl.getItems()) {
+                System.out.println(rule.getId() + ": " + rule.getRole());
+                if(rule.getScope().getValue().equals(emailCaregiver))
+                    mService.acl().delete(idCalendar, rule.getId()).execute();
             }
+
+            // Create access rule with associated scope
+            AclRule rule = new AclRule();
+            AclRule.Scope scope = new AclRule.Scope();
+            scope.setType("user").setValue(emailCaregiver);
+            rule.setScope(scope).setRole("none");
+
+            // Insert new access rule
+            AclRule createdRule = mService.acl().insert(idCalendar, rule).execute();
+            System.out.println(createdRule.getId());
             return true;
 
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d("ECCEZIONE CALENDAR", e.getCause().toString());
             mLastError = e;
             cancel(true);
             return false;
         }
     }
 
+
     @Override
     protected void onPostExecute(Boolean response) {
         if(response){
-            Log.d(TAG, ""+idEventiCalendar.size());
-            mCallback.done(true, "");
+            mCallback.done(response);
         }
         else{
-            mCallback.done(false, "");
+            Toast.makeText(context, "Operazione non riuscita", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -108,20 +108,13 @@ public class DeleteEventsCalendarAT extends AsyncTask<Void, Void, Boolean> {
     protected void onCancelled() {
         if (mLastError != null) {
             if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
-                if(mCallback instanceof AddMeasurement)
-                    AppConstants.showGooglePlayServicesAvailabilityErrorDialog((Activity)context,
+                AppConstants.showGooglePlayServicesAvailabilityErrorDialog((Activity)context,
                         ((GooglePlayServicesAvailabilityIOException) mLastError)
                                 .getConnectionStatusCode());
-                else if (mCallback instanceof AddPrescription)
-                    AppConstants.showGooglePlayServicesAvailabilityErrorDialog((Activity)context,
-                            ((GooglePlayServicesAvailabilityIOException) mLastError)
-                                    .getConnectionStatusCode());
-                //ADD ALL ACTIVITIES THAT CALL ELIMINAEVENTICALENDAR
-
             } else if (mLastError instanceof UserRecoverableAuthIOException) {
                 ((Activity)context).startActivityForResult(
                         ((UserRecoverableAuthIOException) mLastError).getIntent(),
-                            AppConstants.REQUEST_AUTHORIZATION);
+                        AppConstants.REQUEST_AUTHORIZATION);
             } else {
                 Toast.makeText(context, "The following error occurred:\n"
                         + mLastError.getMessage(), Toast.LENGTH_SHORT).show();
@@ -131,5 +124,4 @@ public class DeleteEventsCalendarAT extends AsyncTask<Void, Void, Boolean> {
             Toast.makeText(context, "Request cancelled.", Toast.LENGTH_SHORT).show();
         }
     }
-
 }

@@ -3,6 +3,8 @@ package com.recipex.fragments;
 /**
  * Created by Sara on 24/04/2016.
  */
+import android.Manifest;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,6 +15,7 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -30,25 +33,38 @@ import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.appspot.recipex_1281.recipexServerApi.model.MainDefaultResponseMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserMainInfoMessage;
+import com.appspot.recipex_1281.recipexServerApi.model.MainUserRelationsMessage;
 import com.github.clans.fab.FloatingActionMenu;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.services.calendar.CalendarScopes;
 import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.activities.Home;
 import com.recipex.adapters.CaregiverAdapter;
 import com.recipex.adapters.PazienteFamiliareAdapter;
+import com.recipex.asynctasks.CheckUserRelationsAT;
 import com.recipex.asynctasks.GetUserAT;
+import com.recipex.asynctasks.RemoveCalendarAccess;
+import com.recipex.taskcallbacks.CalendarTC;
+import com.recipex.taskcallbacks.CheckUserRelationsTC;
 import com.recipex.taskcallbacks.GetUserTC;
 import com.recipex.taskcallbacks.UpdateRelationInfoTC;
 import com.recipex.utilities.ConnectionDetector;
 
 import java.sql.Connection;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
 
 /**
  * fragment holding patients' info (only for caregivers)
@@ -182,6 +198,7 @@ public class PazientiFragment extends Fragment implements GetUserTC, UpdateRelat
                     .make(getActivity().getWindow().getDecorView().getRootView(),
                             "Paziente rimosso con successo!", Snackbar.LENGTH_SHORT);
             snackbar.show();
+
         }
         else {
             Snackbar snackbar = Snackbar
@@ -212,4 +229,5 @@ public class PazientiFragment extends Fragment implements GetUserTC, UpdateRelat
         }
 
     }
+
 }

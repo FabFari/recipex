@@ -1,11 +1,13 @@
 package com.recipex.fragments;
 
+import android.Manifest;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -16,23 +18,39 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.appspot.recipex_1281.recipexServerApi.model.MainDefaultResponseMessage;
+import com.appspot.recipex_1281.recipexServerApi.model.MainUserInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserRequestsMessage;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.AclRule;
 import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.adapters.RequestsAdapter;
+import com.recipex.asynctasks.AddCalendarAccess;
 import com.recipex.asynctasks.AnswerRequestAT;
+import com.recipex.asynctasks.CheckUserRelationsAT;
+import com.recipex.asynctasks.GetUserAT;
 import com.recipex.asynctasks.GetUserRequestsAT;
+import com.recipex.asynctasks.RemoveCalendarAccess;
 import com.recipex.taskcallbacks.AnswerRequestTC;
+import com.recipex.taskcallbacks.CalendarTC;
 import com.recipex.taskcallbacks.GetUserRequestsTC;
+import com.recipex.taskcallbacks.GetUserTC;
 import com.recipex.utilities.ConnectionDetector;
+
+import java.util.Arrays;
+import java.util.List;
+
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
 
 /**
  * Created by Sara on 14/05/2016.
@@ -41,7 +59,7 @@ import com.recipex.utilities.ConnectionDetector;
 /**
  * fragment holding pending requests for the user
  */
-public class UserRequestFragment extends Fragment implements GetUserRequestsTC, AnswerRequestTC {
+public class UserRequestFragment extends Fragment implements GetUserRequestsTC, AnswerRequestTC, CalendarTC, EasyPermissions.PermissionCallbacks {
 
     private SharedPreferences settings;
     private SharedPreferences pref;
@@ -51,6 +69,12 @@ public class UserRequestFragment extends Fragment implements GetUserRequestsTC, 
 
     private final static String TAG = "USER_REQUESTS";
     private static final int REQUEST_ACCOUNT_PICKER = 2;
+
+    //for calendar
+    GoogleAccountCredential mCredential;
+    String emailadd;
+    static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
+    private static final String[] SCOPES = { CalendarScopes.CALENDAR };
 
     private CoordinatorLayout coordinator;
     private RecyclerView recycler;
@@ -152,9 +176,24 @@ public class UserRequestFragment extends Fragment implements GetUserRequestsTC, 
      * @param requestId
      * @param answer
      */
-    public void executeAsyncTask(Long requestId, Boolean answer) {
+    public void executeAsyncTask(Long requestId, String emailsender, String tipo, Boolean answer) {
+        Log.d(TAG, "tipo "+tipo);
         RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
-        if(AppConstants.checkNetwork(getActivity())) new AnswerRequestAT(this, this.getActivity(), coordinator, userId, requestId, answer, apiHandler).execute();
+        if(AppConstants.checkNetwork(getActivity())){
+            new AnswerRequestAT(this, this.getActivity(), coordinator, userId, requestId, answer, apiHandler).execute();
+            if(tipo!=null && tipo.equals(AppConstants.FAMILIARE) && answer){
+                //variable to contain the email of the relative i want to add to my calendar
+                Log.d(TAG, "email "+emailsender);
+                emailadd=emailsender;
+                if (AppConstants.checkNetwork(this.getActivity()) && !pref.getString("calendar", "").equals("")) {
+                    mCredential = GoogleAccountCredential.usingOAuth2(
+                            getActivity().getApplicationContext(), Arrays.asList(SCOPES))
+                            .setBackOff(new ExponentialBackOff());
+                    Log.d("CaregiverFragment", "Inizio calendario");
+                    getResultsFromApi();
+                }
+            }
+        }
     }
 
     @Override
@@ -236,5 +275,115 @@ public class UserRequestFragment extends Fragment implements GetUserRequestsTC, 
             }
         }
     }
+
+    /**
+     * add relative permission to see my calendar
+     */
+    public void getResultsFromApi() {
+        if (! AppConstants.isGooglePlayServicesAvailable(getActivity())) {
+            AppConstants.acquireGooglePlayServices(getActivity());
+        } else if (mCredential.getSelectedAccountName() == null) {
+            Log.d("CALENDARgetres", "account");
+            chooseAccount();
+        } else if (! AppConstants.isDeviceOnline(getActivity())) {
+            Toast.makeText(getActivity(), "No network connection available.", Toast.LENGTH_SHORT).show();
+        } else {
+            Log.d("CALENDARgetres", "task");
+            new AddCalendarAccess(mCredential, getActivity().getApplicationContext(), this,
+                    getActivity().getSharedPreferences("MyPref", Context.MODE_PRIVATE).getString("calendar",""), emailadd).execute();
+        }
+    }
+
+    /**
+     * Attempts to set the account used with the API credentials. If an account
+     * name was previously saved it will use that one; otherwise an account
+     * picker dialog will be shown to the user. Note that the setting the
+     * account to use with the credentials object requires the app to have the
+     * GET_ACCOUNTS permission, which is requested here if it is not already
+     * present. The AfterPermissionGranted annotation indicates that this
+     * function will be rerun automatically whenever the GET_ACCOUNTS permission
+     * is granted.
+     */
+    @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
+    private void chooseAccount() {
+        if (EasyPermissions.hasPermissions(
+                getActivity(), Manifest.permission.GET_ACCOUNTS)) {
+
+            if (accountName != null) {
+                Log.d("CALENDARcho", "account");
+
+                mCredential.setSelectedAccountName(accountName);
+                getResultsFromApi();
+            }
+        } else {
+            Log.d("CALENDARcho", "noperm");
+
+            // Request the GET_ACCOUNTS permission via a user dialog
+            EasyPermissions.requestPermissions(
+                    this,
+                    "This app needs to access your Google account (via Contacts).",
+                    REQUEST_PERMISSION_GET_ACCOUNTS,
+                    Manifest.permission.GET_ACCOUNTS);
+        }
+    }
+
+
+    /**
+     * Respond to requests for permissions at runtime for API 23 and above.
+     * @param requestCode The request code passed in
+     *     requestPermissions(android.app.Activity, String, int, String[])
+     * @param permissions The requested permissions. Never null.
+     * @param grantResults The grant results for the corresponding permissions
+     *     which is either PERMISSION_GRANTED or PERMISSION_DENIED. Never null.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        EasyPermissions.onRequestPermissionsResult(
+                requestCode, permissions, grantResults, this);
+    }
+
+    /**
+     * Callback for when a permission is granted using the EasyPermissions
+     * library.
+     * @param requestCode The request code associated with the requested
+     *         permission
+     * @param list The requested permission list. Never null.
+     */
+    @Override
+    public void onPermissionsGranted(int requestCode, List<String> list) {
+        // Do nothing.
+    }
+
+    /**
+     * Callback for when a permission is denied using the EasyPermissions
+     * library.
+     * @param requestCode The request code associated with the requested
+     *         permission
+     * @param list The requested permission list. Never null.
+     */
+    @Override
+    public void onPermissionsDenied(int requestCode, List<String> list) {
+        // Do nothing.
+    }
+
+    /**
+     * callback from AddCalendarAccess
+     * @param b
+     */
+    public void done(boolean b){
+        if(b){
+            Log.d("CaregiverFragment", "DONE_TASKCALLBACK_CALENDAR");
+        }
+        else{
+            Snackbar snackbar = Snackbar
+                    .make(getActivity().getWindow().getDecorView().getRootView(),
+                            "Errore nell'aggiunta dell'accesso al calendario", Snackbar.LENGTH_SHORT);
+            snackbar.show();
+        }
+    }
+
 
 }

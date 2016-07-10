@@ -1,5 +1,7 @@
 package com.recipex.activities;
 
+import android.accounts.AccountManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -25,10 +27,15 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.github.clans.fab.FloatingActionMenu;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.recipex.AppConstants;
 import com.recipex.CircleTransform;
 import com.recipex.R;
+import com.recipex.asynctasks.CheckUserRelationsAT;
+import com.recipex.asynctasks.GetUserAT;
 import com.recipex.fragments.CaregiversFragment;
 import com.recipex.fragments.FamiliariFragment;
 import com.recipex.fragments.MisurazioniFragment;
@@ -346,6 +353,19 @@ public class Home extends AppCompatActivity
         a.recycle();
 
         return color;
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case AppConstants.REQUEST_AUTHORIZATION:
+                if (resultCode == RESULT_OK) {
+                    new CaregiversFragment().getResultsFromApi();
+                }
+                break;
+        }
     }
 
 }

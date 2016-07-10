@@ -76,7 +76,6 @@ public class AnswerRequestAT extends AsyncTask<Void, Void, MainDefaultResponseMe
 
     @Override
     protected void onPostExecute(MainDefaultResponseMessage response) {
-        Log.d(TAG, response.getCode());
         if(response != null && response.getCode().equals(AppConstants.OK)) {
             taskCallback.done(true, response);
         }
