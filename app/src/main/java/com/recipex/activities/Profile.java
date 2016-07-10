@@ -172,6 +172,7 @@ public class Profile extends AppCompatActivity
     private String user_city;
     private String user_address;
     private String user_phone;
+    private String idCalendar;
     // CAREGIVER
     // Required
     private String crgv_field;
@@ -477,7 +478,6 @@ public class Profile extends AppCompatActivity
      */
     @Override
     public void done(boolean res, final MainUserInfoMessage message) {
-
         // USER
         // Required
         if(res) {
@@ -526,6 +526,10 @@ public class Profile extends AppCompatActivity
                 } else {
                     personal_num_lbl.setVisibility(View.GONE);
                     personal_num.setVisibility(View.GONE);
+                }
+                if(message.getCalendarId()!=null && !message.getCalendarId().equals("")){
+                    idCalendar=message.getCalendarId();
+                    Log.d(TAG, idCalendar);
                 }
                 userCard.setVisibility(View.VISIBLE);
                 // CAREGIVER
@@ -853,6 +857,7 @@ public class Profile extends AppCompatActivity
             case R.id.profile_add_therapy:
                 Intent addTerapyIntent = new Intent(Profile.this, AddPrescription.class);
                 addTerapyIntent.putExtra("caregiverId", user_id);
+                if(idCalendar!=null && !idCalendar.equals("")) addTerapyIntent.putExtra("idProfileCalendar", idCalendar);
                 addTerapyIntent.putExtra("patientId", profile_id);
                 this.startActivityForResult(addTerapyIntent, ADD_THERAPY);
                 break;

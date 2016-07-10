@@ -108,6 +108,7 @@ public class AddPrescription extends AppCompatActivity implements EasyPermission
 
     private CoordinatorLayout coordinatorLayout;
     private Long caregiverId, patientId;
+    private String idPatientCalendar;
 
     private Toolbar toolbar;
 
@@ -155,6 +156,10 @@ public class AddPrescription extends AppCompatActivity implements EasyPermission
         Intent intent = getIntent();
         caregiverId = intent.getLongExtra("caregiverId", 0L);
         patientId = intent.getLongExtra("patientId", 0L);
+        if(intent.getStringExtra("idProfileCalendar")!=null){
+            idPatientCalendar=intent.getStringExtra("idProfileCalendar");
+            Log.d(TAG, idPatientCalendar);
+        }
 
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.lay_aggiungiterapia);
         Spinner numerocadenza=(Spinner)findViewById(R.id.numerocadenzaspin);
@@ -307,7 +312,11 @@ public class AddPrescription extends AppCompatActivity implements EasyPermission
             Toast.makeText(AddPrescription.this, "No network connection available.", Toast.LENGTH_SHORT).show();
         } else {
             Log.d("CALENDARgetres", "task");
-            new AggiungiTerapiaCalendar(mCredential, getApplicationContext(), this, nome, numerocadenza, cadenza,
+            SharedPreferences pref=getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+            if(idPatientCalendar!=null && !idPatientCalendar.equals(""))
+                new AggiungiTerapiaCalendar(mCredential, getApplicationContext(), idPatientCalendar, this, nome, numerocadenza, cadenza,
+                        inizio).execute();
+            else new AggiungiTerapiaCalendar(mCredential, getApplicationContext(), pref.getString("calendar", ""), this, nome, numerocadenza, cadenza,
                     inizio).execute();
         }
     }
@@ -372,8 +381,11 @@ public class AddPrescription extends AppCompatActivity implements EasyPermission
                 if(!idEventi.isEmpty())
                     reg.setCalendarIds(idEventi);
 
-                if(caregiverId != null)
+                if(caregiverId != 0){
+                    Log.d(TAG, ""+caregiverId);
                     reg.setCaregiver(caregiverId);
+                }
+
 
                 Long id;
                 if(patientId != 0)
@@ -743,6 +755,7 @@ public class AddPrescription extends AppCompatActivity implements EasyPermission
         private String numerocadenza;
         private String cadenza;
         private String inizio;
+        private String idCalendar;
 
         //insert here the ids of the events I create
         private ArrayList<String> idEventiCalendar;
@@ -750,7 +763,7 @@ public class AddPrescription extends AppCompatActivity implements EasyPermission
         private com.google.api.services.calendar.Calendar mService = null;
         private Exception mLastError = null;
 
-        public AggiungiTerapiaCalendar(GoogleAccountCredential credential, Context context, CalendarAddTC c,
+        public AggiungiTerapiaCalendar(GoogleAccountCredential credential, Context context, String idCalendar, CalendarAddTC c,
                                        String nome, String numerocadenza, String cadenza, String inizio) {
             HttpTransport transport = AndroidHttp.newCompatibleTransport();
             JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
@@ -758,6 +771,7 @@ public class AddPrescription extends AppCompatActivity implements EasyPermission
                     transport, jsonFactory, credential)
                     .setApplicationName("RecipeX")
                     .build();
+            this.idCalendar=idCalendar;
             this.context=context;
             this.mCallback=c;
             this.nome=nome;
@@ -776,7 +790,7 @@ public class AddPrescription extends AppCompatActivity implements EasyPermission
             SharedPreferences pref=context.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
 
             try {
-                String idCalendar=pref.getString("calendar", "");
+                //String idCalendar=pref.getString("calendar", "");
                 //create a calendar if there is not
                 if(idCalendar.equals("")) {
                     Log.d("CALENDAR", "creo nuovo calendario");
