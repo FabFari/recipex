@@ -136,7 +136,7 @@ public class RequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 public void onClick(View view) {
                     progressView.startAnimation();
                     progressView.setVisibility(View.VISIBLE);
-                    fragment.executeAsyncTask(requests.get(pos).getId(), true);
+                    fragment.executeAsyncTask(requests.get(pos).getId(), requests.get(pos).getSenderMail(), requests.get(pos).getKind(), true);
                 }
             });
             requestViewHolder.requestDecline.setOnClickListener(new View.OnClickListener() {
@@ -144,7 +144,7 @@ public class RequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 public void onClick(View view) {
                     progressView.startAnimation();
                     progressView.setVisibility(View.VISIBLE);
-                    fragment.executeAsyncTask(requests.get(pos).getId(), false);
+                    fragment.executeAsyncTask(requests.get(pos).getId(), null, null, false);
                 }
             });
 

@@ -2,6 +2,7 @@ package com.recipex;
 
 import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
@@ -136,6 +137,44 @@ public class AppConstants extends AppCompatActivity{
             return 0;
         } else {
             return accounts.length;
+        }
+    }
+
+    /**
+     * Checks whether the device currently has a network connection.
+     * @return true if the device has a network connection, false otherwise.
+     */
+    public static boolean isDeviceOnline(Activity a) {
+        ConnectivityManager connMgr =
+                (ConnectivityManager) a.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        return (networkInfo != null && networkInfo.isConnected());
+    }
+
+    /**
+     * Check that Google Play services APK is installed and up to date.
+     * @return true if Google Play Services is available and up to
+     *     date on this device; false otherwise.
+     */
+    public static boolean isGooglePlayServicesAvailable(Activity a) {
+        GoogleApiAvailability apiAvailability =
+                GoogleApiAvailability.getInstance();
+        final int connectionStatusCode =
+                apiAvailability.isGooglePlayServicesAvailable(a);
+        return connectionStatusCode == ConnectionResult.SUCCESS;
+    }
+
+    /**
+     * Attempt to resolve a missing, out-of-date, invalid or disabled Google
+     * Play Services installation via a user dialog, if possible.
+     */
+    public static void acquireGooglePlayServices(Activity a) {
+        GoogleApiAvailability apiAvailability =
+                GoogleApiAvailability.getInstance();
+        final int connectionStatusCode =
+                apiAvailability.isGooglePlayServicesAvailable(a);
+        if (apiAvailability.isUserResolvableError(connectionStatusCode)) {
+            AppConstants.showGooglePlayServicesAvailabilityErrorDialog(a,connectionStatusCode);
         }
     }
 

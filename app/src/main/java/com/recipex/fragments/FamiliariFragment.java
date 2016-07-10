@@ -1,5 +1,7 @@
 package com.recipex.fragments;
 
+import android.Manifest;
+import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,6 +12,7 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -27,25 +30,39 @@ import com.appspot.recipex_1281.recipexServerApi.RecipexServerApi;
 import com.appspot.recipex_1281.recipexServerApi.model.MainDefaultResponseMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserInfoMessage;
 import com.appspot.recipex_1281.recipexServerApi.model.MainUserMainInfoMessage;
+import com.appspot.recipex_1281.recipexServerApi.model.MainUserRelationsMessage;
 import com.github.clans.fab.FloatingActionMenu;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.services.calendar.CalendarScopes;
 import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.activities.Home;
 import com.recipex.adapters.PazienteFamiliareAdapter;
+import com.recipex.asynctasks.CheckUserRelationsAT;
 import com.recipex.asynctasks.GetUserAT;
+import com.recipex.asynctasks.GetUserRequestsAT;
+import com.recipex.asynctasks.RemoveCalendarAccess;
+import com.recipex.taskcallbacks.CalendarTC;
+import com.recipex.taskcallbacks.CheckUserRelationsTC;
 import com.recipex.taskcallbacks.GetUserTC;
 import com.recipex.taskcallbacks.UpdateRelationInfoTC;
 import com.recipex.utilities.ConnectionDetector;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
 
 /**
  * Created by Sara on 14/05/2016.
  */
-public class FamiliariFragment extends Fragment implements GetUserTC, UpdateRelationInfoTC {
+public class FamiliariFragment extends Fragment implements GetUserTC, UpdateRelationInfoTC, CheckUserRelationsTC, CalendarTC, EasyPermissions.PermissionCallbacks {
     static RecyclerView curRecView;
 
     private SharedPreferences settings;
@@ -54,6 +71,13 @@ public class FamiliariFragment extends Fragment implements GetUserTC, UpdateRela
     private String accountName;
 
     RecipexServerApi apiHandler;
+
+    //for calendar
+    GoogleAccountCredential mCredential;
+    String emailremove;
+    static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
+    static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
+    private static final String[] SCOPES = { CalendarScopes.CALENDAR };
 
     private static final int REQUEST_ACCOUNT_PICKER = 2;
 
@@ -117,7 +141,11 @@ public class FamiliariFragment extends Fragment implements GetUserTC, UpdateRela
         }
     }
 
-    //callback from GetUser
+    /**
+     * callback from GetUser
+     * @param res
+     * @param message
+     */
     public void done(boolean res, final MainUserInfoMessage message) {
 
         //uso lo stesso adapter dei pazienti perchè ha tutti i campi che mi interessano
@@ -147,13 +175,27 @@ public class FamiliariFragment extends Fragment implements GetUserTC, UpdateRela
         this.accountName = accountName;
     }*/
 
+    /**
+     * callback from UpdateUserRelationsAT
+     * @param resp
+     * @param response
+     */
     @Override
-    public void done(boolean resp, MainDefaultResponseMessage response) {
+    public void done(boolean resp, MainDefaultResponseMessage response ) {
         if(resp) {
             Snackbar snackbar = Snackbar
                     .make(getActivity().getWindow().getDecorView().getRootView(),
                             "Familiare rimosso con successo!", Snackbar.LENGTH_SHORT);
             snackbar.show();
+
+            //check user relations with that caregiver, to see if I have to remove the access to the calendar
+            Long familiareId= Long.parseLong(response.getPayload());
+
+            RecipexServerApi apiHandler = AppConstants.getApiServiceHandle(credential);
+            Log.d("Familiari", pref.getString("calendar", ""));
+            if (AppConstants.checkNetwork(this.getActivity()) && !pref.getString("calendar", "").equals("")) {
+                new CheckUserRelationsAT(this, this.getActivity(), getActivity().getWindow().getDecorView().getRootView(), id, familiareId, apiHandler).execute();
+            }
         }
         else {
             Snackbar snackbar = Snackbar
@@ -182,6 +224,169 @@ public class FamiliariFragment extends Fragment implements GetUserTC, UpdateRela
             }
         }
 
+    }
+
+    /**
+     * callback from CheckUserRelationsAT
+     * @param b
+     * @param response
+     */
+    public void done(boolean b, MainUserRelationsMessage response){
+        if(response!=null){
+            if(b){
+                Log.d("FamiliariFragment", "RESPONSE: " + response);
+
+                if(!response.getIsCaregiver() && !response.getIsPcPhysician() && !response.getIsRelative() && !response.getIsVisitingNurse()){
+                    Log.d("FamiliariFragment", "arrivo quaa" );
+                    emailremove = response.getProfileMail();
+
+                    mCredential = GoogleAccountCredential.usingOAuth2(
+                            getActivity().getApplicationContext(), Arrays.asList(SCOPES))
+                            .setBackOff(new ExponentialBackOff());
+                    getResultsFromApi();
+                    /*if(!response.getIsPatient()) {
+                        //remove access to both calendars
+
+                        Log.d("CaregiverFragment", "Inizio calendario");
+                        getResultsFromApi();
+                        getResultsFromApiReverse();
+                    }
+                    else getResultsFromApi();*/
+                }
+                /*else if(response.getIsCaregiver() || response.getIsVisitingNurse() || response.getIsPcPhysician()){
+                    if(!response.getIsPatient()) {
+                        //remove access to both calendars
+                        emailremove = response.getProfileMail();
+                        calIdRemove=response.getProfileCalId();
+
+                        mCredential = GoogleAccountCredential.usingOAuth2(
+                                getActivity().getApplicationContext(), Arrays.asList(SCOPES))
+                                .setBackOff(new ExponentialBackOff());
+                        Log.d("CaregiverFragment", "Inizio calendario");
+                        getResultsFromApiReverse();
+                    }
+                }*/
+            }
+        }
+        else{
+            Snackbar snackbar = Snackbar
+                    .make(getActivity().getWindow().getDecorView().getRootView(),
+                            "Errore nella rimozione dell'accesso al calendario", Snackbar.LENGTH_SHORT);
+            snackbar.show();
+        }
+    }
+
+    /**
+     * remove relative permission to see my calendar
+     */
+    public void getResultsFromApi() {
+        if (! AppConstants.isGooglePlayServicesAvailable(getActivity())) {
+            AppConstants.acquireGooglePlayServices(getActivity());
+        } else if (mCredential.getSelectedAccountName() == null) {
+            Log.d("CALENDARgetres", "account");
+            chooseAccount(true);
+        } else if (! AppConstants.isDeviceOnline(getActivity())) {
+            Toast.makeText(getActivity(), "No network connection available.", Toast.LENGTH_SHORT).show();
+        } else {
+            Log.d("CALENDARgetres", "task");
+            new RemoveCalendarAccess(mCredential, getActivity().getApplicationContext(), this,
+                    getActivity().getSharedPreferences("MyPref", Context.MODE_PRIVATE).getString("calendar",""), emailremove).execute();
+        }
+    }
+
+
+
+    /**
+     * Attempts to set the account used with the API credentials. If an account
+     * name was previously saved it will use that one; otherwise an account
+     * picker dialog will be shown to the user. Note that the setting the
+     * account to use with the credentials object requires the app to have the
+     * GET_ACCOUNTS permission, which is requested here if it is not already
+     * present. The AfterPermissionGranted annotation indicates that this
+     * function will be rerun automatically whenever the GET_ACCOUNTS permission
+     * is granted.
+     */
+    @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
+    private void chooseAccount(boolean b) {
+        if (EasyPermissions.hasPermissions(
+                getActivity(), Manifest.permission.GET_ACCOUNTS)) {
+
+            if (accountName != null) {
+                Log.d("CALENDARcho", "account");
+
+                mCredential.setSelectedAccountName(accountName);
+                /*if(b)*/ getResultsFromApi();
+                //else getResultsFromApiReverse();
+            }
+        } else {
+            Log.d("CALENDARcho", "noperm");
+
+            // Request the GET_ACCOUNTS permission via a user dialog
+            EasyPermissions.requestPermissions(
+                    this,
+                    "This app needs to access your Google account (via Contacts).",
+                    REQUEST_PERMISSION_GET_ACCOUNTS,
+                    Manifest.permission.GET_ACCOUNTS);
+        }
+    }
+
+    /**
+     * Respond to requests for permissions at runtime for API 23 and above.
+     * @param requestCode The request code passed in
+     *     requestPermissions(android.app.Activity, String, int, String[])
+     * @param permissions The requested permissions. Never null.
+     * @param grantResults The grant results for the corresponding permissions
+     *     which is either PERMISSION_GRANTED or PERMISSION_DENIED. Never null.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        EasyPermissions.onRequestPermissionsResult(
+                requestCode, permissions, grantResults, this);
+    }
+
+    /**
+     * Callback for when a permission is granted using the EasyPermissions
+     * library.
+     * @param requestCode The request code associated with the requested
+     *         permission
+     * @param list The requested permission list. Never null.
+     */
+    @Override
+    public void onPermissionsGranted(int requestCode, List<String> list) {
+        // Do nothing.
+    }
+
+    /**
+     * Callback for when a permission is denied using the EasyPermissions
+     * library.
+     * @param requestCode The request code associated with the requested
+     *         permission
+     * @param list The requested permission list. Never null.
+     */
+    @Override
+    public void onPermissionsDenied(int requestCode, List<String> list) {
+        // Do nothing.
+    }
+
+
+
+    /**
+     * callback from RemoveCalendarAccess
+     * @param b
+     */
+    public void done(boolean b){
+        if(b){
+            Log.d("CaregiverFragment", "DONE_TASKCALLBACK_CALENDAR");
+        }
+        else{
+            Snackbar snackbar = Snackbar
+                    .make(getActivity().getWindow().getDecorView().getRootView(),
+                            "Errore nella rimozione dell'accesso al calendario", Snackbar.LENGTH_SHORT);
+            snackbar.show();
+        }
     }
 }
 

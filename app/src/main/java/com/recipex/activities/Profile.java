@@ -22,6 +22,7 @@ import com.google.api.services.calendar.model.AclRule;
 import com.recipex.AppConstants;
 import com.recipex.R;
 import com.recipex.adapters.ContactAdapter;
+import com.recipex.asynctasks.AddCalendarAccess;
 import com.recipex.asynctasks.CheckUserRelationsAT;
 import com.recipex.asynctasks.GetUserAT;
 import com.recipex.asynctasks.SendRequestAT;
@@ -773,6 +774,7 @@ public class Profile extends AppCompatActivity
                             getApplicationContext(), Arrays.asList(SCOPES))
                             .setBackOff(new ExponentialBackOff());
                     Log.d(TAG, "Inizio calendario");
+                    if(mCredential.getSelectedAccountName()!=null) Log.d("Calendar account done", mCredential.getSelectedAccountName());
                     getResultsFromApi();
                 }
             } else {
@@ -867,16 +869,17 @@ public class Profile extends AppCompatActivity
      * gives caregiver permission to see my calendar
      */
     private void getResultsFromApi() {
-        if (! isGooglePlayServicesAvailable()) {
-            acquireGooglePlayServices();
+        if (! AppConstants.isGooglePlayServicesAvailable(this)) {
+            AppConstants.acquireGooglePlayServices(this);
         } else if (mCredential.getSelectedAccountName() == null) {
             Log.d("CALENDARgetres", "account");
             chooseAccount();
-        } else if (! isDeviceOnline()) {
+        } else if (! AppConstants.isDeviceOnline(this)) {
             Toast.makeText(Profile.this, "No network connection available.", Toast.LENGTH_SHORT).show();
         } else {
             Log.d("CALENDARgetres", "task");
-            new AggiungiCaregiverCalendar(mCredential, getApplicationContext(), this,
+            Log.d("CALENDARgetres", getSharedPreferences("MyPref", MODE_PRIVATE).getString("calendar",""));
+            new AddCalendarAccess(mCredential, getApplicationContext(), this,
                     getSharedPreferences("MyPref", MODE_PRIVATE).getString("calendar",""), email.getText().toString()).execute();
         }
     }
@@ -896,11 +899,11 @@ public class Profile extends AppCompatActivity
         if (EasyPermissions.hasPermissions(
                 this, Manifest.permission.GET_ACCOUNTS)) {
 
-            String accountName = getPreferences(Context.MODE_PRIVATE)
-                    .getString(PREF_ACCOUNT_NAME, null);
+            String accountName = getSharedPreferences(AppConstants.PREFS_NAME,Context.MODE_PRIVATE)
+                    .getString(AppConstants.DEFAULT_ACCOUNT, null);
             if (accountName != null) {
                 Log.d("CALENDARcho", "account");
-
+                Log.d("Calendar account", accountName);
                 mCredential.setSelectedAccountName(accountName);
                 getResultsFromApi();
             } else {
@@ -923,48 +926,6 @@ public class Profile extends AppCompatActivity
         }
     }
 
-    /**
-     * Check that Google Play services APK is installed and up to date.
-     * @return true if Google Play Services is available and up to
-     *     date on this device; false otherwise.
-     */
-    private boolean isGooglePlayServicesAvailable() {
-        GoogleApiAvailability apiAvailability =
-                GoogleApiAvailability.getInstance();
-        final int connectionStatusCode =
-                apiAvailability.isGooglePlayServicesAvailable(this);
-        return connectionStatusCode == ConnectionResult.SUCCESS;
-    }
-
-    /**
-     * Attempt to resolve a missing, out-of-date, invalid or disabled Google
-     * Play Services installation via a user dialog, if possible.
-     */
-    private void acquireGooglePlayServices() {
-        GoogleApiAvailability apiAvailability =
-                GoogleApiAvailability.getInstance();
-        final int connectionStatusCode =
-                apiAvailability.isGooglePlayServicesAvailable(this);
-        if (apiAvailability.isUserResolvableError(connectionStatusCode)) {
-            showGooglePlayServicesAvailabilityErrorDialog(connectionStatusCode);
-        }
-    }
-
-    /**
-     * Display an error dialog showing that Google Play Services is missing
-     * or out of date.
-     * @param connectionStatusCode code describing the presence (or lack of)
-     *     Google Play Services on this device.
-     */
-    public void showGooglePlayServicesAvailabilityErrorDialog(
-            final int connectionStatusCode) {
-        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
-        Dialog dialog = apiAvailability.getErrorDialog(
-                Profile.this,
-                connectionStatusCode,
-                REQUEST_GOOGLE_PLAY_SERVICES);
-        dialog.show();
-    }
     /**
      * Respond to requests for permissions at runtime for API 23 and above.
      * @param requestCode The request code passed in
@@ -1006,16 +967,6 @@ public class Profile extends AppCompatActivity
         // Do nothing.
     }
 
-    /**
-     * Checks whether the device currently has a network connection.
-     * @return true if the device has a network connection, false otherwise.
-     */
-    private boolean isDeviceOnline() {
-        ConnectivityManager connMgr =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        return (networkInfo != null && networkInfo.isConnected());
-    }
 
     /**
      * callback from AggiungiCaregiverCalendar
@@ -1025,95 +976,11 @@ public class Profile extends AppCompatActivity
         if(b){
             Log.d(TAG, "DONE_TASKCALLBACK_CALENDAR");
         }
-    }
-
-
-    /**
-     * Async task to give caregiver permission to see my calendar
-     */
-    private class AggiungiCaregiverCalendar extends AsyncTask<Void, Void, Boolean> {
-
-        private Context context;
-        private CalendarTC mCallback;
-        private String idCalendar;
-        private String emailCaregiver;
-
-        private com.google.api.services.calendar.Calendar mService = null;
-        private Exception mLastError = null;
-
-        public AggiungiCaregiverCalendar(GoogleAccountCredential credential, Context context, CalendarTC c,
-                                         String id, String e) {
-            HttpTransport transport = AndroidHttp.newCompatibleTransport();
-            JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-            mService = new com.google.api.services.calendar.Calendar.Builder(
-                    transport, jsonFactory, credential)
-                    .setApplicationName("RecipeX")
-                    .build();
-            this.context=context;
-            this.mCallback=c;
-            this.idCalendar=id;
-            this.emailCaregiver=e;
-        }
-
-        /**
-         * Background task to call Google Calendar API.
-         * @param params no parameters needed for this task.
-         */
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            SharedPreferences pref=context.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
-
-            try {
-                Log.d(TAG, idCalendar);
-                // Create access rule with associated scope
-                AclRule rule = new AclRule();
-                AclRule.Scope scope = new AclRule.Scope();
-                scope.setType("user").setValue(emailCaregiver);
-                rule.setScope(scope).setRole("writer");
-
-                // Insert new access rule
-                AclRule createdRule = mService.acl().insert(idCalendar, rule).execute();
-                System.out.println(createdRule.getId());
-                return true;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                mLastError = e;
-                cancel(true);
-                return false;
-            }
-        }
-
-
-        @Override
-        protected void onPostExecute(Boolean response) {
-            if(response){
-                mCallback.done(response);
-            }
-            else{
-                Toast.makeText(context, "Operazione non riuscita", Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            if (mLastError != null) {
-                if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
-                    showGooglePlayServicesAvailabilityErrorDialog(
-                            ((GooglePlayServicesAvailabilityIOException) mLastError)
-                                    .getConnectionStatusCode());
-                } else if (mLastError instanceof UserRecoverableAuthIOException) {
-                    startActivityForResult(
-                            ((UserRecoverableAuthIOException) mLastError).getIntent(),
-                            AppConstants.REQUEST_AUTHORIZATION);
-                } else {
-                    Toast.makeText(context, "The following error occurred:\n"
-                            + mLastError.getMessage(), Toast.LENGTH_SHORT).show();
-                    Log.d("ERRORE CALENDAR", mLastError.getMessage());
-                }
-            } else {
-                Toast.makeText(context, "Request cancelled.", Toast.LENGTH_SHORT).show();
-            }
+        else{
+            Snackbar snackbar = Snackbar
+                    .make(this.getWindow().getDecorView().getRootView(),
+                            "Errore nell'aggiunta dell'accesso al calendario", Snackbar.LENGTH_SHORT);
+            snackbar.show();
         }
     }
 }
