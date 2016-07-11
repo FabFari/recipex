@@ -149,7 +149,7 @@ public class AddPrescription extends AppCompatActivity implements EasyPermission
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_aggiungi_terapia);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Aggiungi Prescription");
+        toolbar.setTitle("Aggiungi Terapia");
 
         setSupportActionBar(toolbar);
 

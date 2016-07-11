@@ -277,7 +277,7 @@ public class TerapieFragment extends Fragment implements GetPrescriptionsTC, Del
         if(res) {
             Snackbar snackbar = Snackbar
                     .make(getActivity().getWindow().getDecorView().getRootView(),
-                            "Prescription rimossa con successo!", Snackbar.LENGTH_SHORT);
+                            "Terapia rimossa con successo!", Snackbar.LENGTH_SHORT);
             snackbar.show();
 
             if(!ids.isEmpty()) {
