@@ -9,6 +9,7 @@ Recipex
 =======
 .. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/logo_wide.jpg
    :align: center
+   
 Your personal caregiver and lifestyle makeover.
 
 RecipeX is an android application that has two main goals:
