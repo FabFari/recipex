@@ -83,6 +83,7 @@ Additional info about the project
 ---------------------------------
 
 Team:
+
 - `Fabrizio Farinacci <https://it.linkedin.com/in/fabrizio-farinacci-496679116/>`_
 - `Sara Veterini <https://it.linkedin.com/in/sara-veterini-667684116/>`_
 
