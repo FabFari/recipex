@@ -22,7 +22,7 @@ Main functionalities
 The main functionalities offered by the application are:
 
 - Record vital signs and nursing prescriptions, keeping track of your progress within long term treatments
-- Manage a shared Google Calendar with your caregiver (and all those you would like to monitor your health), with all your current treatments and performed measurements
+- Manage a shared Google Calendar with your caregiver (and all those you would like to monitor your health progresses), with all your current treatments and performed measurements
 - Send mail notifications through Google calendar, to remind you about your therapeutic requirements
 - The possibility to contact, directly from the application, your caregivers and family members
 
@@ -40,8 +40,9 @@ Google + API, to register the user
 Google Calendar API, to store the history of measurement and therapies and to notify the user about its therapeutical requirements.
 
 Screenshot
-----------
-These are the screenshot of the most important application sections
+==========
+
+In this section, the screenshots of the most important applications sections are shown.
 
 Home
 ----
@@ -93,6 +94,7 @@ at University of Rome "La Sapienza". Informations about the course are available
 http://ichatz.me/index.php/Site/PervasiveSystems2016.
 
 Additional informations about the project can be found in the following Slideshare presentations:
-http://www.slideshare.net/FabrizioFarinacci1/recipex-your-personal-caregiver-and-lifestyle-makeover
-http://www.slideshare.net/FabrizioFarinacci1/recipex-your-personal-caregiver-and-lifestyle-makeover-62091050
+
+- http://www.slideshare.net/FabrizioFarinacci1/recipex-your-personal-caregiver-and-lifestyle-makeover
+- http://www.slideshare.net/FabrizioFarinacci1/recipex-your-personal-caregiver-and-lifestyle-makeover-62091050
 
