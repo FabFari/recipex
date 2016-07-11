@@ -18,7 +18,8 @@ RecipeX is an android application that has two main goals:
 - Giving health care assistants a simple and useful tool to keep track of the therapies of their assisted
 
 Main functionalities
---------------------
+====================
+
 The main functionalities offered by the application are:
 
 - Record vital signs and nursing prescriptions, keeping track of your progress within long term treatments
@@ -27,7 +28,7 @@ The main functionalities offered by the application are:
 - The possibility to contact, directly from the application, your caregivers and family members
 
 Architecture
-------------
+============
 
 .. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/architecture.png
    :align: center
