@@ -81,8 +81,8 @@ Therapies
 | .. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/therapies_mock.jpg | .. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/add_therapy_mock.jpg | 
 +---------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+
    
-Additional info about the project
----------------------------------
+Info & Contacts
+===============
 
 **Team**:
 
