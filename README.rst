@@ -1,7 +1,15 @@
+.. line-block::
+
+	**University of Rome "La Sapienza"**
+	*Master of Science in Engineering in Computer Science*
+	*Pervasive Systems, a.y. 2015-16*
+	Pervasive Systems Group Project by Fabrizio Farinacci and Sara Veterini
+
 Recipex
 =======
 .. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/logo_wide.jpg
    :align: center
+   
 Your personal caregiver and lifestyle makeover.
 
 RecipeX is an android application that has two main goals:
@@ -10,16 +18,17 @@ RecipeX is an android application that has two main goals:
 - Giving health care assistants a simple and useful tool to keep track of the therapies of their assisted
 
 Main functionalities
---------------------
+====================
+
 The main functionalities offered by the application are:
 
 - Record vital signs and nursing prescriptions, keeping track of your progress within long term treatments
-- Manage a shared Google Calendar with your caregiver (and all those you would like to monitor your health), with all your current treatments and performed measurements
+- Manage a shared Google Calendar with your caregiver (and all those you would like to monitor your health progresses), with all your current treatments and performed measurements
 - Send mail notifications through Google calendar, to remind you about your therapeutic requirements
 - The possibility to contact, directly from the application, your caregivers and family members
 
 Architecture
-------------
+============
 
 .. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/architecture.png
    :align: center
@@ -39,62 +48,61 @@ https://www.youtube.com/watch?v=LHL-k30ffdg
 
 
 Screenshot
-----------
-These are the screenshot of the most important application sections
+==========
+
+In this section, the screenshots of the most important applications sections are shown.
 
 Home
 ----
 
-.. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/home.jpg
-   :align: left
-   
-.. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/drawer.jpg
-   :align: right
-   
++----------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------+
+|                                   User Measurements                                    |                                          Drawer                                          |
++========================================================================================+==========================================================================================+
+| .. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/home_mock.jpg | .. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/drawer_mock.jpg |
++----------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------+
+  
 Profile
 -------
 
-.. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/profile_pic.jpg
-   :align: left
-   
-.. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/profile_open.jpg
-   :align: center
++-----------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------+
+|                                         Collapsed                                             |                                             Expanded                                           |                                          Relations                                               |
++===============================================================================================+================================================================================================+==================================================================================================+
+| .. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/profile_pic_mock.jpg | .. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/profile_open_mock.jpg | .. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/profile_button_mock.jpg |
++-----------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------+
 
-.. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/profile_button.jpg
-   :align: right
+Measurements
+------------
 
-Add measurement
----------------
++-----------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+
+|                                     Measurement Types                                         |                                          Add Measurement                                          |
++===============================================================================================+===================================================================================================+
+| .. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/home_button_mock.jpg | .. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/add_measurement_mock.jpg |
++-----------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+
+   
+Therapies
+---------
 
-.. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/home_button.jpg
-   :align: left
++---------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+
+|                                      User Therapies                                         |                                        Add Measurement                                        |
++=============================================================================================+===============================================================================================+
+| .. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/therapies_mock.jpg | .. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/add_therapy_mock.jpg | 
++---------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+
    
-.. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/add_measurement.jpg
-   :align: right
-   
-Therapies and add new therapy
------------------------------
+Info & Contacts
+===============
 
-.. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/therapies.jpg
-   :align: left
-   
-.. image:: https://github.com/FabFari/recipex/blob/master/app/screenshot/add_therapy.jpg
-   :align: right
-   
-Additional info about the project
----------------------------------
+**Team**:
 
-You can find personal information about us at:
-https://it.linkedin.com/in/fabrizio-farinacci-496679116
-https://it.linkedin.com/in/sara-veterini-667684116
+- `Fabrizio Farinacci <https://it.linkedin.com/in/fabrizio-farinacci-496679116/>`_
+- `Sara Veterini <https://it.linkedin.com/in/sara-veterini-667684116/>`_
 
 The project was developed and has been presented within the course of "Pervasive Systems", 
 held by Prof. Ioannis Chatzigiannakis within the Master of Science in Computer Science (MSE-CS),
-at University if Rome "La Sapienza". Informations about the course are available in the following page:
+at University of Rome "La Sapienza". Informations about the course are available in the following page:
 http://ichatz.me/index.php/Site/PervasiveSystems2016.
 
 Additional informations about the project can be found in the following Slideshare presentations:
-http://www.slideshare.net/FabrizioFarinacci1/recipex-your-personal-caregiver-and-lifestyle-makeover.
 
-http://www.slideshare.net/FabrizioFarinacci1/recipex-your-personal-caregiver-and-lifestyle-makeover-62091050
+- http://www.slideshare.net/FabrizioFarinacci1/recipex-your-personal-caregiver-and-lifestyle-makeover
+- http://www.slideshare.net/FabrizioFarinacci1/recipex-your-personal-caregiver-and-lifestyle-makeover-62091050
 
