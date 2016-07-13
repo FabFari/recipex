@@ -31,6 +31,13 @@ Through the GAE backend, the app access to:
 Google + API, to register the user
 Google Calendar API, to store the history of measurement and therapies and to notify the user about its therapeutical requirements.
 
+Demo
+----
+
+Here you can find a demo of the application:
+https://www.youtube.com/watch?v=LHL-k30ffdg
+
+
 Screenshot
 ----------
 These are the screenshot of the most important application sections
