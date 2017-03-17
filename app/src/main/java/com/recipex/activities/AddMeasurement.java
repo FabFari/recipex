@@ -972,7 +972,7 @@ public class AddMeasurement extends AppCompatActivity
                 int mYear = c.get(java.util.Calendar.YEAR);
                 int mMonth = c.get(java.util.Calendar.MONTH);
                 String month=Integer.toString(mMonth+1);
-                if(mMonth<=9)
+                if(mMonth < 9)
                     month="0"+month;
 
                 int mDay = c.get(java.util.Calendar.DAY_OF_MONTH);

@@ -966,7 +966,7 @@ public class AddPrescription extends AppCompatActivity implements EasyPermission
                                     dayOfMonthStr = "" + dayOfMonth;
 
                                 String monthOfYearStr = null;
-                                if(monthOfYear < 10)
+                                if(monthOfYear < 9)
                                     monthOfYearStr = "0" + (monthOfYear + 1);
                                 else
                                     monthOfYearStr = "" + (monthOfYear + 1);
